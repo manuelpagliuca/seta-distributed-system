@@ -1,40 +1,27 @@
 package REST;
 
-import com.sun.jersey.api.container.httpserver.HttpServerFactory;
-import com.sun.net.httpserver.HttpServer;
+import REST.ServerServices.Init;
+import org.glassfish.grizzly.http.server.HttpServer;
+import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
+import org.glassfish.jersey.server.ResourceConfig;
 
 import java.io.IOException;
+import java.net.URI;
 
 public class AdministratorServer {
-
     private static final String HOST = "localhost";
-    private static final int PORT = 1337;
-
+    private static final int PORT = 9001;
 
     public static void main(String[] args) throws IOException {
-        HttpServer server = HttpServerFactory.create("http://" + HOST + ":" + PORT + "/");
-        server.start();
+        ResourceConfig config = new ResourceConfig();
+        config.register(Init.class);
+        String serverAddress = "http://" + HOST + ":" + PORT;
+        HttpServer server = GrizzlyHttpServerFactory.createHttpServer(URI.create(serverAddress), config);
 
-        System.out.println("Server running!");
-        System.out.println("Server started on: http://" + HOST + ":" + PORT);
-
-        System.out.println("Hit return to stop...");
-        System.in.read();
-        System.out.println("Stopping server");
-        server.stop(0);
-        System.out.println("Server stopped");
+        try {
+            server.start();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
-
-/*
-        ServerSocket welcomeSocket = new ServerSocket(6789);
-
-        System.out.println("Listening...");
-        while (true) {
-            Socket connectionSocket = welcomeSocket.accept();
-
-            ServerThread theThread = new ServerThread(connectionSocket);
-
-            theThread.start();
-        }
-*/

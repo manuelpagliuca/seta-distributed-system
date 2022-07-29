@@ -12,48 +12,27 @@ repositories {
 }
 
 dependencies {
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.0'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
 
-    implementation 'com.google.code.gson:gson:2.7'
-
-
-    // REST Dependencies
-    // https://mvnrepository.com/artifact/org.codehaus.jackson/jackson-core-asl
-    implementation group: 'org.codehaus.jackson', name: 'jackson-core-asl', version: '1.9.2'
-    // https://mvnrepository.com/artifact/org.codehaus.jackson/jackson-jaxrs
-    implementation group: 'org.codehaus.jackson', name: 'jackson-jaxrs', version: '1.9.2'
-    // https://mvnrepository.com/artifact/org.codehaus.jackson/jackson-mapper-asl
-    implementation group: 'org.codehaus.jackson', name: 'jackson-mapper-asl', version: '1.9.2'
-    // https://mvnrepository.com/artifact/org.codehaus.jackson/jackson-xc
-    implementation group: 'org.codehaus.jackson', name: 'jackson-xc', version: '1.9.2'
-    // https://mvnrepository.com/artifact/com.sun.jersey/jersey-client
-    implementation group: 'com.sun.jersey', name: 'jersey-client', version: '1.19.1'
-    // https://mvnrepository.com/artifact/com.sun.jersey/jersey-core
-    implementation group: 'com.sun.jersey', name: 'jersey-core', version: '1.19.1'
-    // https://mvnrepository.com/artifact/com.sun.jersey/jersey-json
-    implementation group: 'com.sun.jersey', name: 'jersey-json', version: '1.19.1'
-    // https://mvnrepository.com/artifact/com.sun.jersey/jersey-server
-    implementation group: 'com.sun.jersey', name: 'jersey-server', version: '1.19.1'
-    // https://mvnrepository.com/artifact/com.sun.jersey/jersey-servlet
-    implementation group: 'com.sun.jersey', name: 'jersey-servlet', version: '1.19.1'
-    // https://mvnrepository.com/artifact/org.codehaus.jettison/jettison
-    implementation group: 'org.codehaus.jettison', name: 'jettison', version: '1.1'
-    // https://mvnrepository.com/artifact/javax.ws.rs/jsr311-api
-    implementation group: 'javax.ws.rs', name: 'jsr311-api', version: '1.1.1'
-    // https://mvnrepository.com/artifact/com.sun.jersey/jersey-server
-    implementation group: 'com.sun.jersey', name: 'jersey-server', version: '1.2'
-
-    // MQTT Dependencies
-    // https://mvnrepository.com/artifact/org.eclipse.paho/org.eclipse.paho.client.mqttv3
+    // Json
+    implementation 'com.google.code.gson:gson:2.9.0'
+    // Servlet Jersey
+    implementation 'org.glassfish.jersey.containers:jersey-container-servlet:3.0.4'
+    // Jersey Injection manager
+    implementation 'org.glassfish.jersey.inject:jersey-hk2:3.0.4'
+    // Grizzly Http Server
+    implementation group: 'org.glassfish.grizzly', name: 'grizzly-http-server', version: '4.0.0'
+    // Grizzly 2 HTTP Container for Jersey
+    implementation group: 'org.glassfish.jersey.containers', name: 'jersey-container-grizzly2-http', version: '3.1.0-M3'
+    // MQTT
     implementation group: 'org.eclipse.paho', name: 'org.eclipse.paho.client.mqttv3', version: '1.2.5'
-
-    // GRPC Dependencies
-    // https://mvnrepository.com/artifact/com.google.protobuf/protobuf-java
-    implementation group: 'com.google.protobuf', name: 'protobuf-java', version: '4.0.0-rc-2'
-    // https://mvnrepository.com/artifact/io.grpc/grpc-all
-    implementation group: 'io.grpc', name: 'grpc-all', version: '1.46.0'
 }
+
+test {
+    useJUnitPlatform()
+}
+
 
 //start GRPC
 sourceSets {
@@ -83,7 +62,3 @@ protobuf {
     }
 }
 //end GRPC
-
-test {
-    useJUnitPlatform()
-}
