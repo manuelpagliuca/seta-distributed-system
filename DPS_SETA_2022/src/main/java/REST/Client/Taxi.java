@@ -1,14 +1,13 @@
 package REST.Client;
 
-import REST.JSONClass.TaxiInitInfos;
+import REST.JSONClass.TaxiInitInfo;
 import com.google.gson.Gson;
 import jakarta.ws.rs.client.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
 import java.io.Serializable;
-import java.util.Collections;
-import java.util.List;
+import java.util.HashMap;
 import java.util.Random;
 
 // Taxis are considered as single processes and not as threads
@@ -19,38 +18,60 @@ public class Taxi implements Serializable {
     private static float battery = 100.f;
     private static int grpcPort = 3005;
     private static int id = -1;
-    private static List<Taxi> taxis = Collections.emptyList();
+    private static int district = -1;
+    private static int[] position = new int[2];
 
-    public Taxi(int id, List<Taxi> taxis, int grpcPort) {
+
+    private static Client client = ClientBuilder.newClient();
+    private static HashMap<Integer, Taxi> taxis = new HashMap<>();
+
+    private static Gson gson = new Gson();
+
+    public Taxi(int id, HashMap<Integer, Taxi> taxis, int grpcPort) {
         this.id = id;
         this.taxis = taxis;
         this.grpcPort = grpcPort;
     }
 
     public static void main(String[] args) throws Exception {
-        Client client = ClientBuilder.newClient();
-        Response clientResponse = null;
-
-        // GET REQUEST
-        //String initPath = "/init";
-        //clientResponse = getRequest(client, adminServerUrl + initPath);
-        // System.out.println(clientResponse.getEntity().toString());
-
-        // POST REQUEST
-        String initPost = "/new_taxi";
-        Random random = new Random();
-        id = random.nextInt(1, 101);
-        TaxiInitInfos taxiInitInfos = new TaxiInitInfos(id, grpcPort, ADMIN_SERVER_ADDR);
-        System.out.println(taxiInitInfos.toString());
-        Gson gson = new Gson();
-        String body = gson.toJson(taxiInitInfos);
-        clientResponse = postRequest(client, ADMIN_SERVER_URL + initPost, body);
-
-        while (true) {
-        }
+        postInit();
+        // TODO: Inizia l'acquisizione dei dati dal sensore
+        // TODO: Iscrizione al topic MQTT del proprio distretto
     }
 
-    public static Response postRequest(Client client, String url, String body) {
+    /*
+        Initialization of the Taxi through the administrator server.
+        The taxi sends his sensible data to the administrator server, in this
+        data there is the proposal of an ID. This will be checked from the server side
+        if it is available or already taken, in the second case the server will return
+        a valid ID.
+
+        The server answer will contain the initial position of the taxi which is one of the
+        four recharge stations in the smart city, this will depend from the random assignment
+        of the district. */
+    private static void postInit() {
+        // Send the taxi initialization request with a tentative random ID
+        final String INIT_PATH = "/taxi-init";
+        id = generateRndID();
+        TaxiInitInfo initInfo = new TaxiInitInfo(id, grpcPort, ADMIN_SERVER_ADDR);
+        // Receive the initialization data from the server: valid ID, position, list of other taxis
+        String serverInitInfos = postRequest(client, ADMIN_SERVER_URL + INIT_PATH, gson.toJson(initInfo));
+        initInfo = gson.fromJson(serverInitInfos, TaxiInitInfo.class);
+        // Update the information of this taxi
+        id = initInfo.getId();
+        position = initInfo.getPosition();
+        taxis = initInfo.getTaxis();
+        district = initInfo.getDistrict();
+
+        printTaxi();
+    }
+
+    private static int generateRndID() {
+        Random random = new Random();
+        return random.nextInt(1, 101);
+    }
+
+    public static String postRequest(Client client, String url, String body) {
         WebTarget webTarget = client.target(url);
 
         Invocation.Builder builder = webTarget.request(MediaType.APPLICATION_JSON_TYPE);
@@ -60,16 +81,11 @@ public class Taxi implements Serializable {
         String responseJson = null;
         try {
             responseJson = response.readEntity(String.class);
-            //     System.out.println(responseJson);
         } catch (Exception ex) {
             ex.printStackTrace();
         }
+        return responseJson;
 
-        Gson gson = new Gson();
-        TaxiInitInfos dis = gson.fromJson(responseJson, TaxiInitInfos.class);
-        System.out.println("R" + dis.toString());
-
-        return response;
     }
 
     public static Response getRequest(Client client, String url) {
@@ -88,10 +104,17 @@ public class Taxi implements Serializable {
         }
 
         Gson gson = new Gson();
-        TaxiInitInfos dis = gson.fromJson(responseJson, TaxiInitInfos.class);
+        TaxiInitInfo dis = gson.fromJson(responseJson, TaxiInitInfo.class);
         System.out.println("R" + dis.toString());
 
         return response;
+    }
+
+    // Utility
+    public static void printTaxi() {
+        System.out.println("ID: " + id + " Position: " + position[0] +
+                "," + position[1] + "\nOther Taxis: " + taxis.toString() +
+                "\nDistrict: " + district);
     }
 
     // Getters & Setters
@@ -123,16 +146,16 @@ public class Taxi implements Serializable {
         Taxi.id = id;
     }
 
-    public static List<Taxi> getTaxis() {
+    public static HashMap<Integer, Taxi> getTaxis() {
         return taxis;
     }
 
-    public static void setTaxis(List<Taxi> taxis) {
+    public static void setTaxis(HashMap<Integer, Taxi> taxis) {
         Taxi.taxis = taxis;
     }
 
     @Override
     public String toString() {
-        return "Taxi ID: " + id + " listening on grpcPort: " + grpcPort;
+        return "Taxi ID: " + id;
     }
 }

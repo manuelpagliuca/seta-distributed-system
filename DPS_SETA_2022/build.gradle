@@ -21,6 +21,12 @@ dependencies {
     implementation 'org.glassfish.jersey.containers:jersey-container-servlet:3.0.4'
     // Jersey Injection manager
     implementation 'org.glassfish.jersey.inject:jersey-hk2:3.0.4'
+
+// https://mvnrepository.com/artifact/jakarta.activation/jakarta.activation-api
+    implementation group: 'jakarta.activation', name: 'jakarta.activation-api', version: '2.1.0'
+// https://mvnrepository.com/artifact/org.glassfish.jaxb/jaxb-runtime
+    implementation group: 'org.glassfish.jaxb', name: 'jaxb-runtime', version: '4.0.0'
+
     // Grizzly Http Server
     implementation group: 'org.glassfish.grizzly', name: 'grizzly-http-server', version: '4.0.0'
     // Grizzly 2 HTTP Container for Jersey

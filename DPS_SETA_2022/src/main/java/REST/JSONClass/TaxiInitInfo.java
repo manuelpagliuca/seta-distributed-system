@@ -3,26 +3,26 @@ package REST.JSONClass;
 import REST.Client.Taxi;
 
 import java.io.Serializable;
-import java.util.Collections;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 
-public class TaxiInitInfos implements Serializable {
+public class TaxiInitInfo implements Serializable {
     private int id = -1;
 
     private int grpcPort = -1;
     private int district = -1;
     private int[] position = new int[2];
-    private List<Taxi> taxis = Collections.emptyList();
+    private HashMap<Integer, Taxi> taxis = new HashMap<>();
     private String administratorServerAddr = null;
 
-    public TaxiInitInfos(int id, int grpcPort, String admServer) {
+    public TaxiInitInfo(int id, int grpcPort, String admServer) {
         this.id = id;
         this.grpcPort = grpcPort;
         this.administratorServerAddr = admServer;
     }
 
-    public TaxiInitInfos(int district, int[] position, List<Taxi> taxis) {
+    public TaxiInitInfo(int district, int[] position, HashMap<Integer, Taxi> taxis) {
         this.district = id;
         this.position = position;
         this.taxis = taxis;
@@ -32,13 +32,17 @@ public class TaxiInitInfos implements Serializable {
     public String toString() {
         String infos =
                 String.format("District [id=%d, grpc-port=%d, district=%s, position=(%d,%d), taxis=",
-                id, grpcPort, district, position[0], position[1]);
+                        id, grpcPort, district, position[0], position[1]);
         infos += "[";
         if (!taxis.isEmpty()) {
-            for (Taxi taxi : taxis) {
-                infos += "id=" + taxi.getID() + " ";
-            }
+            for (Map.Entry<Integer, Taxi> e : taxis.entrySet())
+                infos += "id=" + e.getKey() + ",";
         }
+
+        if (infos.endsWith(",")) {
+            infos = infos.substring(0, infos.length() - 1);
+        }
+
         infos += "]]";
 
         return infos;
@@ -76,11 +80,11 @@ public class TaxiInitInfos implements Serializable {
         this.position = position;
     }
 
-    public List<Taxi> getTaxis() {
+    public HashMap<Integer, Taxi> getTaxis() {
         return taxis;
     }
 
-    public void setTaxis(List<Taxi> taxis) {
+    public void setTaxis(HashMap<Integer, Taxi> taxis) {
         this.taxis = taxis;
     }
 
