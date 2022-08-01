@@ -1,42 +1,62 @@
+/* Project for the course of "Distributed and Pervasive Systems"
+ * Mat. Number 975169
+ * Manuel Pagliuca
+ * M.Sc. of Computer Science @UNIMI A.Y. 2021/2022 */
 package REST.JSONClass;
 
-import REST.Client.Taxi;
-
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
 
-
-public class TaxiInitInfo implements Serializable {
+public class TaxiInfo implements Serializable {
     private int id = -1;
-
     private int grpcPort = -1;
     private int district = -1;
     private int[] position = new int[2];
-    private HashMap<Integer, Taxi> taxis = new HashMap<>();
+    private ArrayList<TaxiInfo> taxis = new ArrayList<>();
     private String administratorServerAddr = null;
 
-    public TaxiInitInfo(int id, int grpcPort, String admServer) {
+    public TaxiInfo(TaxiInfo info) {
+        this.id = info.id;
+        this.district = info.district;
+        this.position = info.position;
+        this.taxis = info.taxis;
+        this.grpcPort = info.grpcPort;
+        this.administratorServerAddr = info.administratorServerAddr;
+    }
+
+    public TaxiInfo(int id) {
+        this.id = id;
+    }
+
+    public TaxiInfo(int id, int grpcPort, String admServer) {
         this.id = id;
         this.grpcPort = grpcPort;
         this.administratorServerAddr = admServer;
     }
 
-    public TaxiInitInfo(int district, int[] position, HashMap<Integer, Taxi> taxis) {
-        this.district = id;
+    public TaxiInfo(int id, int district, int[] position, ArrayList<TaxiInfo> taxis, int grpcPort,
+                    String administratorServerAddr) {
+        this.id = id;
+        this.district = district;
         this.position = position;
         this.taxis = taxis;
+        this.grpcPort = grpcPort;
+        this.administratorServerAddr = administratorServerAddr;
+    }
+
+    public TaxiInfo() {
+
     }
 
     @Override
     public String toString() {
         String infos =
-                String.format("District [id=%d, grpc-port=%d, district=%s, position=(%d,%d), taxis=",
+                String.format("[id=%d, grpc-port=%d, district=%s, position=(%d,%d), taxis=",
                         id, grpcPort, district, position[0], position[1]);
         infos += "[";
         if (!taxis.isEmpty()) {
-            for (Map.Entry<Integer, Taxi> e : taxis.entrySet())
-                infos += "id=" + e.getKey() + ",";
+            for (TaxiInfo e : taxis)
+                infos += "id=" + e.getId() + ",";
         }
 
         if (infos.endsWith(",")) {
@@ -80,11 +100,11 @@ public class TaxiInitInfo implements Serializable {
         this.position = position;
     }
 
-    public HashMap<Integer, Taxi> getTaxis() {
+    public ArrayList<TaxiInfo> getTaxis() {
         return taxis;
     }
 
-    public void setTaxis(HashMap<Integer, Taxi> taxis) {
+    public void setTaxis(ArrayList<TaxiInfo> taxis) {
         this.taxis = taxis;
     }
 

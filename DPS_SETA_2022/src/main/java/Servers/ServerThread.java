@@ -30,7 +30,7 @@ public class ServerThread extends Thread {
             taxiId = inFromClient.readLine();
             if (!taxiId.isEmpty()) {
                 int number = Integer.parseInt(taxiId);
-                if (number > 0 && number < Long.MAX_VALUE) {
+                if (number > 0 && number < Integer.MAX_VALUE) {
                     System.out.println(taxiId);
                     Random rand = new Random();
                     int district = rand.nextInt(numberOfDistricts - lowerBound) + lowerBound;
