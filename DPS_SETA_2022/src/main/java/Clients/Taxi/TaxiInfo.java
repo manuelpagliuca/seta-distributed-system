@@ -2,7 +2,7 @@
  * Mat. Number 975169
  * Manuel Pagliuca
  * M.Sc. of Computer Science @UNIMI A.Y. 2021/2022 */
-package REST.JSONClass;
+package Clients.Taxi;
 
 import java.io.Serializable;
 import java.util.ArrayList;

@@ -2,9 +2,8 @@
  * Mat. Number 975169
  * Manuel Pagliuca
  * M.Sc. of Computer Science @UNIMI A.Y. 2021/2022 */
-package REST.Client;
+package Clients.Taxi;
 
-import REST.JSONClass.TaxiInfo;
 import com.google.gson.Gson;
 import jakarta.ws.rs.client.*;
 import jakarta.ws.rs.core.MediaType;
@@ -19,26 +18,21 @@ public class Taxi {
     private final static int ADMIN_SERVER_PORT = 9001;
     private final static String ADMIN_SERVER_URL = "http://" + ADMIN_SERVER_ADDR + ":" + ADMIN_SERVER_PORT;
     private final static Gson gson = new Gson();
-    private static ArrayList<TaxiInfo> taxis = new ArrayList<>();
-    private static int grpcPort = 3005;
-
-    public Taxi(ArrayList<TaxiInfo> taxis, int grpcPort) {
-        Taxi.taxis = taxis;
-        Taxi.grpcPort = grpcPort;
-    }
 
     public static void main(String[] args) throws Exception {
-        float battery = 100.f;
-        TaxiInfo info = postInit();
+        Client client = ClientBuilder.newClient();
+        int grpcPort = 3005;
+
+        TaxiInfo thisTaxi = postInit(client, grpcPort);
+        thisTaxi.getAdministratorServerAddr();
+
         while (true) {
-            Thread.sleep(7000);
-            printInfo(info);
+            Thread.sleep(1000);
+            //updateTaxiList(client, thisTaxi);
+            formatInfos(thisTaxi);
         }
-
-        // TODO: Inizia l'acquisizione dei dati dal sensore
         // TODO: Iscrizione al topic MQTT del proprio distretto
-        // TODO: Acquire information from the server in order to update taxi list.
-
+        // TODO: Inizia l'acquisizione dei dati dal sensore
     }
 
     /*  Initialization of the Taxi through the administrator server.
@@ -50,26 +44,34 @@ public class Taxi {
         The server answer will contain the initial position of the taxi which is one of the
         four recharge stations in the smart city, this will depend from the random assignment
         of the district. */
-
-    private static TaxiInfo postInit() {
+    private static TaxiInfo postInit(Client client, int grpcPort) {
         // Send the taxi initialization request with a tentative random ID
         final String INIT_PATH = "/taxi-init";
 
         TaxiInfo initInfo = new TaxiInfo(generateRndID(), grpcPort, ADMIN_SERVER_ADDR);
         // Receive the initialization data from the server: valid ID, position, list of other taxis
-        Client client = ClientBuilder.newClient();
         String serverInitInfos = postRequest(client, ADMIN_SERVER_URL + INIT_PATH, gson.toJson(initInfo));
 
         TaxiInfo info = gson.fromJson(serverInitInfos, TaxiInfo.class);
         return info;
     }
 
+    private static ArrayList<TaxiInfo> getTaxisOnServer(Client client, TaxiInfo thisTaxi) {
+        final String GET_PATH = "/get-taxis";
 
-    private static int generateRndID() {
-        Random random = new Random();
-        return random.nextInt(1, 101);
+        String serverResponse = postRequest(client, ADMIN_SERVER_URL + GET_PATH, gson.toJson(thisTaxi));
+        TaxiInfo ans = gson.fromJson(serverResponse, TaxiInfo.class);
+
+        ArrayList<TaxiInfo> taxis = ans.getTaxis();
+
+        return taxis;
     }
 
+    private static void updateTaxiList(Client client, TaxiInfo thisTaxi) {
+        thisTaxi.setTaxis(getTaxisOnServer(client, thisTaxi));
+    }
+
+    // Utility
     public static String postRequest(Client client, String url, String body) {
         WebTarget webTarget = client.target(url);
 
@@ -84,10 +86,9 @@ public class Taxi {
             ex.printStackTrace();
         }
         return responseJson;
-
     }
 
-    public static Response getRequest(Client client, String url) {
+    public static String getRequest(Client client, String url) {
         WebTarget webTarget = client.target(url);
 
         Invocation.Builder builder = webTarget.request(MediaType.APPLICATION_JSON_TYPE);
@@ -97,22 +98,36 @@ public class Taxi {
         String responseJson = null;
         try {
             responseJson = response.readEntity(String.class);
-            System.out.println(responseJson);
         } catch (Exception ex) {
             ex.printStackTrace();
         }
+        return responseJson;
+    }
 
-        Gson gson = new Gson();
-        TaxiInfo dis = gson.fromJson(responseJson, TaxiInfo.class);
-        System.out.println("R" + dis.toString());
+    private static int generateRndID() {
+        Random random = new Random();
+        return random.nextInt(1, 101);
+    }
 
-        return response;
+    private static String formatInfos(int id, int district, int[] position,
+                                      float battery, ArrayList<TaxiInfo> taxis) {
+        String infos = String.format("ID: " + id + ", District: " + district +
+                ", Position: " + position[0] + ", " + position[1] +
+                "Battery: " + battery + ", Other taxis: [");
+
+        for (TaxiInfo t : taxis) {
+            infos += t.getId() + ", ";
+        }
+
+        if (infos.endsWith(",")) {
+            infos = infos.substring(0, infos.length() - 1);
+        }
+        return infos;
+    }
+
+    private static void formatInfos(TaxiInfo initInfo) {
+        System.out.println(initInfo.toString());
     }
 
     // Getters & Setters
-
-    // Utility
-    private static void printInfo(TaxiInfo initInfo) {
-        System.out.println(initInfo.toString());
-    }
 }

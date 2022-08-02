@@ -2,13 +2,15 @@
  * Mat. Number 975169
  * Manuel Pagliuca
  * M.Sc. of Computer Science @UNIMI A.Y. 2021/2022 */
-package REST.Services;
+package Server.Services;
 
-import REST.AdministratorServer;
-import REST.JSONClass.TaxiInfo;
+import Server.AdministratorServer;
+import Clients.Taxi.TaxiInfo;
 import com.google.gson.*;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
+
+import java.util.ArrayList;
 
 @Path("/")
 public class AdministratorServerServices {
@@ -22,22 +24,68 @@ public class AdministratorServerServices {
         if (json.isEmpty()) {
             return Response.status(400, "Bad request or wrong formatting").build();
         }
+
         TaxiInfo inputInfo, outputInfo;
         Gson gson = new Gson();
 
         try {
             inputInfo = gson.fromJson(json, TaxiInfo.class);
         } catch (JsonParseException e) {
+            e.printStackTrace();
             return Response.status(400, "Bad request or wrong formatting").build();
         }
 
         try {
             outputInfo = administratorServer.addTaxi(inputInfo);
         } catch (JsonParseException e) {
+            e.printStackTrace();
             return Response.status(400, "Bad request or wrong formatting").build();
         }
 
-        return Response.ok(gson.toJson(outputInfo, TaxiInfo.class)).build();
+        String outputInfoJson;
+        try {
+            outputInfoJson = gson.toJson(outputInfo, TaxiInfo.class);
+        } catch (JsonParseException e) {
+            e.printStackTrace();
+            return Response.status(400, "Bad request or wrong formatting").build();
+        }
+
+        try {
+            return Response.ok(outputInfoJson).build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Response.status(400, "something wrong").build();
+        }
+    }
+
+    @POST
+    @Path("get-taxis")
+    @Consumes("application/json")
+    @Produces("application/json")
+    public Response getTaxis(String applicantTaxiJson) {
+        if (applicantTaxiJson.isEmpty()) {
+            return Response.status(400, "Bad request or wrong formatting").build();
+        }
+
+        Gson gson = new Gson();
+        TaxiInfo applicantTaxi = gson.fromJson(applicantTaxiJson, TaxiInfo.class);
+
+        //if(administratorServer.getTaxis())
+
+        ArrayList<TaxiInfo> taxis = (ArrayList<TaxiInfo>) administratorServer.getTaxis().clone();
+        taxis.removeIf(t -> t.getId() == applicantTaxi.getId());
+
+        applicantTaxi.setTaxis(taxis);
+        String outputInfo;
+        try {
+            outputInfo = gson.toJson(applicantTaxi, TaxiInfo.class);
+            return Response.ok(outputInfo).build();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        //TODO: Sensed error code
+        return Response.status(400).build();
     }
 
     @GET

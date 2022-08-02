@@ -2,10 +2,10 @@
  * Mat. Number 975169
  * Manuel Pagliuca
  * M.Sc. of Computer Science @UNIMI A.Y. 2021/2022 */
-package REST;
+package Server;
 
-import REST.JSONClass.TaxiInfo;
-import REST.Services.AdministratorServerServices;
+import Clients.Taxi.TaxiInfo;
+import Server.Services.AdministratorServerServices;
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
@@ -28,6 +28,7 @@ class SomeThread implements Runnable {
     public void run() {
         while (true) {
             try {
+                AdministratorServer.getInstance().updateTaxiLists();
                 AdministratorServer.getInstance().printAllTaxis();
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
@@ -41,7 +42,7 @@ public class AdministratorServer {
     private static final String HOST = "localhost";
     private static final int PORT = 9001;
     private static AdministratorServer instance = null;
-    private static ArrayList<TaxiInfo> taxis = new ArrayList<>();
+    private static ArrayList<TaxiInfo> taxis = new ArrayList<>(10);
     private static int[][] smartCity = new int[10][10];
 
     public AdministratorServer() {
@@ -126,9 +127,14 @@ public class AdministratorServer {
         Random random = new Random();
         int newID = random.nextInt(1, 100);
 
-        while (taxis.contains(newID)) {
-            newID = random.nextInt(1, 100);
+        for (int i = 0; i < taxis.size(); ++i) {
+            TaxiInfo t = taxis.get(i);
+            if (t.getId() == newID) {
+                newID = random.nextInt(1, 100);
+                i = 0;
+            }
         }
+
         return newID;
     }
 
@@ -180,5 +186,13 @@ public class AdministratorServer {
 
     public static void setTaxis(ArrayList<TaxiInfo> taxis) {
         AdministratorServer.taxis = taxis;
+    }
+
+    public void updateTaxiLists() {
+        for (TaxiInfo t : taxis) {
+            ArrayList<TaxiInfo> tTaxiListView = (ArrayList<TaxiInfo>) taxis.clone();
+            tTaxiListView.removeIf(taxi -> taxi == t);
+            t.setTaxis(tTaxiListView);
+        }
     }
 }
