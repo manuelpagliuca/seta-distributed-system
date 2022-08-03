@@ -4,6 +4,7 @@
  * M.Sc. of Computer Science @UNIMI A.Y. 2021/2022 */
 package Server.Services;
 
+import Schemes.TaxiSchema;
 import Server.AdministratorServer;
 import Clients.Taxi.TaxiInfo;
 import com.google.gson.*;
@@ -15,6 +16,7 @@ import java.util.ArrayList;
 @Path("/")
 public class AdministratorServerServices {
     private AdministratorServer administratorServer = AdministratorServer.getInstance();
+    private Gson gson = new Gson();
 
     @POST
     @Path("taxi-init")
@@ -25,37 +27,22 @@ public class AdministratorServerServices {
             return Response.status(400, "Bad request or wrong formatting").build();
         }
 
-        TaxiInfo inputInfo, outputInfo;
-        Gson gson = new Gson();
-
+        TaxiInfo inputTaxiInfo;
         try {
-            inputInfo = gson.fromJson(json, TaxiInfo.class);
+            inputTaxiInfo = gson.fromJson(json, TaxiInfo.class);
         } catch (JsonParseException e) {
             e.printStackTrace();
             return Response.status(400, "Bad request or wrong formatting").build();
         }
-
-        try {
-            outputInfo = administratorServer.addTaxi(inputInfo);
-        } catch (JsonParseException e) {
-            e.printStackTrace();
-            return Response.status(400, "Bad request or wrong formatting").build();
-        }
-
+        /* Set taxis before adding the new taxi, in this way it will better approximate the correct
+           amount of taxis in the smartcity.*/
         String outputInfoJson;
-        try {
-            outputInfoJson = gson.toJson(outputInfo, TaxiInfo.class);
-        } catch (JsonParseException e) {
-            e.printStackTrace();
-            return Response.status(400, "Bad request or wrong formatting").build();
-        }
+        TaxiSchema taxiSchema = new TaxiSchema();
+        taxiSchema.setTaxis((ArrayList<TaxiInfo>) AdministratorServer.getTaxis().clone());
+        taxiSchema.setTaxiInfo(administratorServer.addTaxi(inputTaxiInfo));
 
-        try {
-            return Response.ok(outputInfoJson).build();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return Response.status(400, "something wrong").build();
-        }
+        outputInfoJson = gson.toJson(taxiSchema, TaxiSchema.class);
+        return Response.ok(outputInfoJson).build();
     }
 
     @POST
@@ -67,18 +54,21 @@ public class AdministratorServerServices {
             return Response.status(400, "Bad request or wrong formatting").build();
         }
 
-        Gson gson = new Gson();
         TaxiInfo applicantTaxi = gson.fromJson(applicantTaxiJson, TaxiInfo.class);
 
+        // TODO: something here
         //if(administratorServer.getTaxis())
 
         ArrayList<TaxiInfo> taxis = (ArrayList<TaxiInfo>) administratorServer.getTaxis().clone();
         taxis.removeIf(t -> t.getId() == applicantTaxi.getId());
 
-        applicantTaxi.setTaxis(taxis);
+        TaxiSchema outputTaxi = new TaxiSchema();
+        outputTaxi.setTaxis(taxis);
+        outputTaxi.setTaxiInfo(applicantTaxi);
+
         String outputInfo;
         try {
-            outputInfo = gson.toJson(applicantTaxi, TaxiInfo.class);
+            outputInfo = gson.toJson(outputTaxi, TaxiSchema.class);
             return Response.ok(outputInfo).build();
         } catch (Exception e) {
             e.printStackTrace();

@@ -57,16 +57,13 @@ public class SETA {
 
             // Ride generation
             for (int i = 0; i < 5; ++i) {
-                //String payload = "Positions = (1234,m1234), Client connected at time: " + new Timestamp(System.currentTimeMillis()).toString();
                 RideInfo ride = generateRide();
                 Gson gson = new Gson();
 
                 MqttMessage message = new MqttMessage(gson.toJson(ride).getBytes());
                 message.setQos(pubQos);
 
-
-                //System.out.println(clientId + " Publishing message: " + payload + " ...");
-                client.publish(pubTopics[0], message);
+                client.publish(pubTopics[ride.getStartingDistrict()-1], message);
                 System.out.println(clientId + " Message published - Thread PID: " + Thread.currentThread().getId());
             }
 

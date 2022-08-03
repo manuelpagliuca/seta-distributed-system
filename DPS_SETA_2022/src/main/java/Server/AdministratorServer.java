@@ -42,7 +42,7 @@ public class AdministratorServer {
     private static final String HOST = "localhost";
     private static final int PORT = 9001;
     private static AdministratorServer instance = null;
-    private static ArrayList<TaxiInfo> taxis = new ArrayList<>(10);
+    private static HashMap<TaxiInfo, ArrayList<TaxiInfo>> taxis = new HashMap<>();
     private static int[][] smartCity = new int[10][10];
 
     public AdministratorServer() {
@@ -71,7 +71,7 @@ public class AdministratorServer {
         assert (info != null);
         TaxiInfo newTaxi = new TaxiInfo();
 
-        if (taxis.contains(info.getId())) {
+        if (taxis.containsValue(info.getId())) {
             int validID = genValidID();
             newTaxi.setId(validID);
         } else {
@@ -80,11 +80,13 @@ public class AdministratorServer {
 
         newTaxi.setDistrict(randomDistrict());
         newTaxi.setPosition(genStartPosition(newTaxi.getDistrict()));
-        newTaxi.setTaxis((ArrayList<TaxiInfo>) taxis.clone());
         newTaxi.setGrpcPort(info.getGrpcPort());
         newTaxi.setAdministratorServerAddr(info.getAdministratorServerAddr());
 
-        taxis.add(newTaxi);
+        // TODO: Aggiungere nuovo taxi all'hashmap
+        ArrayList<TaxiInfo> otherTaxis = (ArrayList<TaxiInfo>) getTaxis().clone();
+        otherTaxis.removeIf(taxi -> taxi == newTaxi);
+        taxis.put(newTaxi, otherTaxis);
         return newTaxi;
     }
 
@@ -106,9 +108,8 @@ public class AdministratorServer {
 
     // Utility
     public void printAllTaxis() {
-        for (TaxiInfo i : taxis) {
-            System.out.println(i.toString());
-
+        for (Map.Entry<TaxiInfo, ArrayList<TaxiInfo>> e : taxis.entrySet()) {
+            System.out.println("id= " + e.getKey().getId() + ", taxis = " + e.getValue());
         }
         System.out.println("---");
     }
@@ -127,14 +128,14 @@ public class AdministratorServer {
         Random random = new Random();
         int newID = random.nextInt(1, 100);
 
-        for (int i = 0; i < taxis.size(); ++i) {
-            TaxiInfo t = taxis.get(i);
-            if (t.getId() == newID) {
-                newID = random.nextInt(1, 100);
-                i = 0;
-            }
+        ArrayList<Integer> ids = new ArrayList<>();
+        for (Map.Entry<TaxiInfo, ArrayList<TaxiInfo>> e : taxis.entrySet()) {
+            ids.add(e.getKey().getId());
         }
 
+        while (ids.contains(newID)) {
+            newID = random.nextInt(1, 100);
+        }
         return newID;
     }
 
@@ -181,18 +182,19 @@ public class AdministratorServer {
     }
 
     public static ArrayList<TaxiInfo> getTaxis() {
-        return taxis;
+        Set<TaxiInfo> taxiInfos = taxis.keySet();
+        return new ArrayList<>(taxiInfos);
     }
 
-    public static void setTaxis(ArrayList<TaxiInfo> taxis) {
+    public static void setTaxis(HashMap<TaxiInfo, ArrayList<TaxiInfo>> taxis) {
         AdministratorServer.taxis = taxis;
     }
 
     public void updateTaxiLists() {
-        for (TaxiInfo t : taxis) {
-            ArrayList<TaxiInfo> tTaxiListView = (ArrayList<TaxiInfo>) taxis.clone();
-            tTaxiListView.removeIf(taxi -> taxi == t);
-            t.setTaxis(tTaxiListView);
+        for (Map.Entry<TaxiInfo, ArrayList<TaxiInfo>> e : taxis.entrySet()) {
+            ArrayList<TaxiInfo> allTaxis = (ArrayList<TaxiInfo>) getTaxis().clone();
+            allTaxis.removeIf(taxi -> taxi == e.getKey());
+            e.setValue(allTaxis);
         }
     }
 }

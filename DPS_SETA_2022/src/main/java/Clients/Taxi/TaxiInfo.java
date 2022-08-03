@@ -4,22 +4,18 @@
  * M.Sc. of Computer Science @UNIMI A.Y. 2021/2022 */
 package Clients.Taxi;
 
-import java.io.Serializable;
-import java.util.ArrayList;
 
-public class TaxiInfo implements Serializable {
+public class TaxiInfo {
     private int id = -1;
     private int grpcPort = -1;
     private int district = -1;
     private int[] position = new int[2];
-    private ArrayList<TaxiInfo> taxis = new ArrayList<>();
     private String administratorServerAddr = null;
 
     public TaxiInfo(TaxiInfo info) {
         this.id = info.id;
         this.district = info.district;
         this.position = info.position;
-        this.taxis = info.taxis;
         this.grpcPort = info.grpcPort;
         this.administratorServerAddr = info.administratorServerAddr;
     }
@@ -34,12 +30,10 @@ public class TaxiInfo implements Serializable {
         this.administratorServerAddr = admServer;
     }
 
-    public TaxiInfo(int id, int district, int[] position, ArrayList<TaxiInfo> taxis, int grpcPort,
-                    String administratorServerAddr) {
+    public TaxiInfo(int id, int district, int[] position, int grpcPort, String administratorServerAddr) {
         this.id = id;
         this.district = district;
         this.position = position;
-        this.taxis = taxis;
         this.grpcPort = grpcPort;
         this.administratorServerAddr = administratorServerAddr;
     }
@@ -51,19 +45,8 @@ public class TaxiInfo implements Serializable {
     @Override
     public String toString() {
         String infos =
-                String.format("[id=%d, grpc-port=%d, district=%s, position=(%d,%d), taxis=",
+                String.format("id=%d, grpc-port=%d, district=%s, position=(%d,%d)",
                         id, grpcPort, district, position[0], position[1]);
-        infos += "[";
-        if (!taxis.isEmpty()) {
-            for (TaxiInfo e : taxis)
-                infos += "id=" + e.getId() + ",";
-        }
-
-        if (infos.endsWith(",")) {
-            infos = infos.substring(0, infos.length() - 1);
-        }
-
-        infos += "]]";
 
         return infos;
     }
@@ -98,14 +81,6 @@ public class TaxiInfo implements Serializable {
 
     public void setPosition(int[] position) {
         this.position = position;
-    }
-
-    public ArrayList<TaxiInfo> getTaxis() {
-        return taxis;
-    }
-
-    public void setTaxis(ArrayList<TaxiInfo> taxis) {
-        this.taxis = taxis;
     }
 
     public String getAdministratorServerAddr() {

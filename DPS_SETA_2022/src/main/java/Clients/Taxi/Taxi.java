@@ -4,6 +4,7 @@
  * M.Sc. of Computer Science @UNIMI A.Y. 2021/2022 */
 package Clients.Taxi;
 
+import Schemes.TaxiSchema;
 import com.google.gson.Gson;
 import jakarta.ws.rs.client.*;
 import jakarta.ws.rs.core.MediaType;
@@ -23,13 +24,15 @@ public class Taxi {
         Client client = ClientBuilder.newClient();
         int grpcPort = 3005;
 
-        TaxiInfo thisTaxi = postInit(client, grpcPort);
-        thisTaxi.getAdministratorServerAddr();
+        TaxiSchema taxiSchema = postInit(client, grpcPort);
+
+        TaxiInfo thisTaxi = taxiSchema.getTaxiInfo();
+        ArrayList<TaxiInfo> taxis = taxiSchema.getTaxis();
 
         while (true) {
+            printFormattedInfos(thisTaxi, taxis);
             Thread.sleep(1000);
-            //updateTaxiList(client, thisTaxi);
-            formatInfos(thisTaxi);
+            taxis = getTaxisOnServer(client, thisTaxi);
         }
         // TODO: Iscrizione al topic MQTT del proprio distretto
         // TODO: Inizia l'acquisizione dei dati dal sensore
@@ -44,7 +47,7 @@ public class Taxi {
         The server answer will contain the initial position of the taxi which is one of the
         four recharge stations in the smart city, this will depend from the random assignment
         of the district. */
-    private static TaxiInfo postInit(Client client, int grpcPort) {
+    private static TaxiSchema postInit(Client client, int grpcPort) {
         // Send the taxi initialization request with a tentative random ID
         final String INIT_PATH = "/taxi-init";
 
@@ -52,7 +55,7 @@ public class Taxi {
         // Receive the initialization data from the server: valid ID, position, list of other taxis
         String serverInitInfos = postRequest(client, ADMIN_SERVER_URL + INIT_PATH, gson.toJson(initInfo));
 
-        TaxiInfo info = gson.fromJson(serverInitInfos, TaxiInfo.class);
+        TaxiSchema info = gson.fromJson(serverInitInfos, TaxiSchema.class);
         return info;
     }
 
@@ -60,15 +63,11 @@ public class Taxi {
         final String GET_PATH = "/get-taxis";
 
         String serverResponse = postRequest(client, ADMIN_SERVER_URL + GET_PATH, gson.toJson(thisTaxi));
-        TaxiInfo ans = gson.fromJson(serverResponse, TaxiInfo.class);
+        TaxiSchema ans = gson.fromJson(serverResponse, TaxiSchema.class);
 
         ArrayList<TaxiInfo> taxis = ans.getTaxis();
 
         return taxis;
-    }
-
-    private static void updateTaxiList(Client client, TaxiInfo thisTaxi) {
-        thisTaxi.setTaxis(getTaxisOnServer(client, thisTaxi));
     }
 
     // Utility
@@ -109,8 +108,8 @@ public class Taxi {
         return random.nextInt(1, 101);
     }
 
-    private static String formatInfos(int id, int district, int[] position,
-                                      float battery, ArrayList<TaxiInfo> taxis) {
+    private static String printFormattedInfos(int id, int district, int[] position,
+                                              float battery, ArrayList<TaxiInfo> taxis) {
         String infos = String.format("ID: " + id + ", District: " + district +
                 ", Position: " + position[0] + ", " + position[1] +
                 "Battery: " + battery + ", Other taxis: [");
@@ -125,8 +124,21 @@ public class Taxi {
         return infos;
     }
 
-    private static void formatInfos(TaxiInfo initInfo) {
-        System.out.println(initInfo.toString());
+    private static void printFormattedInfos(TaxiInfo initInfo, ArrayList<TaxiInfo> taxis) {
+        String infos = "[" + initInfo.toString() + ", taxis=[";
+
+        infos += "[";
+        if (!taxis.isEmpty()) {
+            for (TaxiInfo e : taxis)
+                infos += "id=" + e.getId() + ",";
+        }
+
+        if (infos.endsWith(",")) {
+            infos = infos.substring(0, infos.length() - 1);
+        }
+        infos += "]]";
+
+        System.out.println(infos);
     }
 
     // Getters & Setters
