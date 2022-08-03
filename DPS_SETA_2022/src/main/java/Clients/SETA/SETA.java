@@ -66,16 +66,13 @@ public class SETA {
                 message.setQos(pubQos);
 
                 client.publish(pubTopics[ride1.getStartingDistrict() - 1], message);
-                System.out.println(clientId + " Message published - Thread PID: " + Thread.currentThread().getId());
+                System.out.println(pubTopics[ride1.getStartingDistrict() - 1] + ", " + message);
 
                 MqttMessage message2 = new MqttMessage(gson.toJson(ride2).getBytes());
                 message2.setQos(pubQos);
 
                 client.publish(pubTopics[ride2.getStartingDistrict() - 1], message2);
-                System.out.println(clientId
-                        + " Message published - Thread PID: "
-                        + Thread.currentThread().getId()
-                        + ", ");
+                System.out.println(pubTopics[ride2.getStartingDistrict() - 1] + ", " + message2);
                 Thread.sleep(5000);
             }
             // TODO: Insert some thread for handling the reading from console, so that it is possible to interact with the broker

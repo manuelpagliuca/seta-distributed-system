@@ -1,0 +1,6 @@
+message Taxi {
+  required int32 id = 1 ;
+  required float distance = 2;
+  repeated int32 position = 3;
+
+}
