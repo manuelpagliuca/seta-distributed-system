@@ -5,10 +5,10 @@ import org.eclipse.paho.client.mqttv3.*;
 
 import java.sql.Timestamp;
 import java.util.Random;
-import java.util.Scanner;
 
 public class SETA {
     private static int rideIds = -1;
+    private static Gson gson = new Gson();
 
     public static void main(String[] args) {
         org.eclipse.paho.client.mqttv3.MqttClient client;
@@ -22,7 +22,8 @@ public class SETA {
         int pubQos = 2;
 
         try {
-            client = new MqttClient(broker, clientId);
+            // New client with no persistence of the messages
+            client = new MqttClient(broker, clientId, null);
             MqttConnectOptions connectOptions = new MqttConnectOptions();
             connectOptions.setCleanSession(true);
 
@@ -50,29 +51,39 @@ public class SETA {
 
                 public void deliveryComplete(IMqttDeliveryToken token) {
                     if (token.isComplete()) {
-                        System.out.println(clientId + " Message delivered - Thread PID: " + Thread.currentThread().getId());
+                        System.out.println("Client ID: " + clientId + ", Message delivered - Thread PID: " + Thread.currentThread().getId());
                     }
                 }
             });
 
             // Ride generation
-            for (int i = 0; i < 5; ++i) {
-                RideInfo ride = generateRide();
-                Gson gson = new Gson();
+            // TODO: Possibly remove the true condition there
+            while (true) {
+                RideInfo ride1 = generateRide();
+                RideInfo ride2 = generateRide();
 
-                MqttMessage message = new MqttMessage(gson.toJson(ride).getBytes());
+                MqttMessage message = new MqttMessage(gson.toJson(ride1).getBytes());
                 message.setQos(pubQos);
 
-                client.publish(pubTopics[ride.getStartingDistrict()-1], message);
+                client.publish(pubTopics[ride1.getStartingDistrict() - 1], message);
                 System.out.println(clientId + " Message published - Thread PID: " + Thread.currentThread().getId());
+
+                MqttMessage message2 = new MqttMessage(gson.toJson(ride2).getBytes());
+                message2.setQos(pubQos);
+
+                client.publish(pubTopics[ride2.getStartingDistrict() - 1], message2);
+                System.out.println(clientId
+                        + " Message published - Thread PID: "
+                        + Thread.currentThread().getId()
+                        + ", ");
+                Thread.sleep(5000);
             }
-
-
-            System.out.println("\n ***  Press a random key to exit *** \n");
+            // TODO: Insert some thread for handling the reading from console, so that it is possible to interact with the broker
+            /*System.out.println("\n ***  Press a random key to exit *** \n");
             Scanner command = new Scanner(System.in);
             command.nextLine();
 
-            client.disconnect();
+            client.disconnect();*/
 
         } catch (MqttException me) {
             System.out.println("reason " + me.getReasonCode());
@@ -81,6 +92,12 @@ public class SETA {
             System.out.println("cause " + me.getCause());
             System.out.println("excep " + me);
             me.printStackTrace();
+        } catch (InterruptedException me) {
+            System.out.println("msg " + me.getMessage());
+            System.out.println("loc " + me.getLocalizedMessage());
+            System.out.println("cause " + me.getCause());
+            System.out.println("excep " + me);
+            throw new RuntimeException(me);
         }
     }
 
