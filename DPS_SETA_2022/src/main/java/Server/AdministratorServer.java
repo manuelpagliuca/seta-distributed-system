@@ -6,8 +6,7 @@ package Server;
 
 import Clients.Taxi.TaxiInfo;
 import Server.Services.AdministratorServerServices;
-import io.grpc.Server;
-import io.grpc.ServerBuilder;
+
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
@@ -16,64 +15,21 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.*;
 
-class ServerTaxisUpdater implements Runnable {
-    private Thread t;
-
-    public void start() {
-        if (t == null) {
-            t = new Thread(this);
-            t.start();
-        }
-    }
-
-    @Override
-    public void run() {
-        while (true) {
-            try {
-                AdministratorServer.getInstance().updateTaxiLists();
-                AdministratorServer.getInstance().printAllTaxis();
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-        }
-    }
-}
-
-class GrpcThread implements Runnable {
-    private Thread t;
-
-    public void start() {
-        if (t == null) {
-            t = new Thread(this);
-            t.start();
-        }
-    }
-
-    @Override
-    public void run() {
-        try {
-            // TODO: 3005 should be get through server
-            int grpcPort = 3005;
-            Server server = ServerBuilder
-                    .forPort(grpcPort)
-                    .addService(new Clients.Taxi.BidirectionalServiceImpl())
-                    .build();
-            server.start();
-            System.out.println("GRPC Server started on port: " + grpcPort);
-            server.awaitTermination();
-        } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
-}
-
+/*
+ * The administrator server class manages the taxis (clients)
+ * ----------------------------------------------------------
+ * The class is defined as a singleton so that it guarantees
+ * a easier and global scope access to the same instance inside
+ * the project.
+ *
+ * It allows to:
+ * TODO: [WIP] I will add infos at the end of the project
+ * */
 public class AdministratorServer {
     private static final String HOST = "localhost";
     private static final int PORT = 9001;
     private static AdministratorServer instance = null;
     private static HashMap<TaxiInfo, ArrayList<TaxiInfo>> taxis = new HashMap<>();
-    private static int[][] smartCity = new int[10][10];
 
     public AdministratorServer() {
     }
@@ -85,15 +41,15 @@ public class AdministratorServer {
         return instance;
     }
 
-    /* Add taxi process information inside the server and return updated infos.
-     *
+    /* Add taxi process information inside the server and return updated infos
+     * ------------------------------------------------------------------------
      * Given the Clients.Taxi.Taxi information parsed from a JSON file it will add the taxi
      * information inside the static taxi list of the server.
      *
      * The ID of the taxi list if already present will be randomly generated again
      * until a valid one will be available, that will be used.
      *
-     * Also the district with the relative starting position of the taxi will both
+     * Also, the district with the relative starting position of the taxi will both
      * be generated here and added to a TaxiInfo object that will be returned to the
      * client. In this way the client will know the valid ID, the district and the
      * position inside the smart city. */
@@ -101,15 +57,15 @@ public class AdministratorServer {
         assert (info != null);
         TaxiInfo newTaxi = new TaxiInfo();
 
-        if (taxis.containsValue(info.getId())) {
+        if (!taxis.containsValue(info.getId())) {
+            newTaxi.setId(info.getId());
+        } else {
             int validID = genValidID();
             newTaxi.setId(validID);
-        } else {
-            newTaxi.setId(info.getId());
         }
 
-        newTaxi.setDistrict(randomDistrict());
-        newTaxi.setPosition(genStartPosition(newTaxi.getDistrict()));
+        newTaxi.setDistrict(genRandomDistrict());
+        newTaxi.setPosition(genTaxiInitialPosition(newTaxi.getDistrict()));
         newTaxi.setGrpcPort(info.getGrpcPort());
         newTaxi.setAdministratorServerAddr(info.getAdministratorServerAddr());
 
@@ -139,7 +95,9 @@ public class AdministratorServer {
     }
 
 
-    // Utility
+    /// Utility
+
+    // Print all the taxis ID each one with the list of the other taxis on the smart city (debug)
     public void printAllTaxis() {
         for (Map.Entry<TaxiInfo, ArrayList<TaxiInfo>> e : taxis.entrySet()) {
             System.out.println("id= " + e.getKey().getId() + ", taxis = " + e.getValue());
@@ -147,20 +105,28 @@ public class AdministratorServer {
         System.out.println("---");
     }
 
-    private int randomDistrict() {
+    // Generate a random district inside the integer range [1,4]
+    private int genRandomDistrict() {
         Random rnd = new Random();
         final int lowerBound = 1;
         final int upperBound = 4;
 
         int district = rnd.nextInt(lowerBound, upperBound + 1);
 
-        return 2;
-        //return district;
+        //return 2; // for testing gRPC
+        return district;
     }
 
+    /*
+     * Generate a valid ID (not taken/available) for a taxi in the smart city
+     * ----------------------------------------------------------------------
+     * Generate randomly a taxi ID from the integer range [1,100], then it checks inside the
+     * hashmap of the registered taxis if the generated ID is already present, and it will
+     * continuously generate a new id until the new ID is not taken.
+     */
     private int genValidID() {
         Random random = new Random();
-        int newID = random.nextInt(1, 100);
+        int newID = random.nextInt(1, 100 + 1);
 
         ArrayList<Integer> ids = new ArrayList<>();
         for (Map.Entry<TaxiInfo, ArrayList<TaxiInfo>> e : taxis.entrySet()) {
@@ -168,12 +134,19 @@ public class AdministratorServer {
         }
 
         while (ids.contains(newID)) {
-            newID = random.nextInt(1, 100);
+            newID = random.nextInt(1, 100 + 1);
         }
+
         return newID;
     }
 
-    private int[] genStartPosition(int district) {
+    /*
+     * Generate the taxi initial position
+     * ----------------------------------------------------------------------
+     * Given the district the function will generate the taxi coordinate of
+     * the relative recharge station (assignment requirement).
+     */
+    private int[] genTaxiInitialPosition(int district) {
         int[] position = new int[2];
 
         switch (district) {
@@ -197,22 +170,27 @@ public class AdministratorServer {
         return position;
     }
 
-    // Getters & Setters
+    /*
+     * Update the list of taxis of each taxi on the administrator server
+     * ----------------------------------------------------------------------
+     * This function makes each taxi (in the administrator server) aware of
+     * the presence of other taxis in the smart city.
+     */
+    public void updateTaxiLists() {
+        for (Map.Entry<TaxiInfo, ArrayList<TaxiInfo>> e : taxis.entrySet()) {
+            ArrayList<TaxiInfo> allTaxis = (ArrayList<TaxiInfo>) getTaxis().clone();
+            allTaxis.removeIf(taxi -> taxi == e.getKey());
+            e.setValue(allTaxis);
+        }
+    }
+
+    /// Getters & Setters
     public int getPort() {
         return PORT;
     }
 
     public static void setInstance(AdministratorServer instance) {
         AdministratorServer.instance = instance;
-    }
-
-
-    public int[][] getSmartCity() {
-        return smartCity;
-    }
-
-    public void setSmartCity(int[][] smartCity) {
-        this.smartCity = smartCity;
     }
 
     public static ArrayList<TaxiInfo> getTaxis() {
@@ -224,11 +202,4 @@ public class AdministratorServer {
         AdministratorServer.taxis = taxis;
     }
 
-    public void updateTaxiLists() {
-        for (Map.Entry<TaxiInfo, ArrayList<TaxiInfo>> e : taxis.entrySet()) {
-            ArrayList<TaxiInfo> allTaxis = (ArrayList<TaxiInfo>) getTaxis().clone();
-            allTaxis.removeIf(taxi -> taxi == e.getKey());
-            e.setValue(allTaxis);
-        }
-    }
 }

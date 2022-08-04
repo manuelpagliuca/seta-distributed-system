@@ -13,11 +13,28 @@ import jakarta.ws.rs.core.Response;
 
 import java.util.ArrayList;
 
+/// REST Services exposed from the administrator server for the taxis
 @Path("/")
 public class AdministratorServerServices {
-    private AdministratorServer administratorServer = AdministratorServer.getInstance();
-    private Gson gson = new Gson();
+    private final AdministratorServer administratorServer = AdministratorServer.getInstance();
+    private final Gson gson = new Gson();
 
+    /*
+     * HTTP POST Request at "/taxi-init" for initializing a taxi client
+     * ------------------------------------------------------------------
+     * This method will receive the buffered information of a new taxi
+     * process and add it through the 'addTaxi()' method exposed from the
+     * administrator server.
+     *
+     * The input information regarding the taxi will contain a tentative
+     * ID which could be used only if retained valid from the administrator
+     * server (it will handle the checking), otherwise it will use an
+     * arbitrary generated one.
+     *
+     * In both case the same or the new ID (contained in the TaxiInfo class)
+     * will be returned to the client with the list of other taxis present
+     * on the server. This will happen through a wrapper class "TaxiSchema".
+     * */
     @POST
     @Path("taxi-init")
     @Consumes("application/json")
@@ -34,32 +51,40 @@ public class AdministratorServerServices {
             e.printStackTrace();
             return Response.status(400, "Bad request or wrong formatting").build();
         }
-        /* Set taxis before adding the new taxi, in this way it will better approximate the correct
-           amount of taxis in the smartcity.*/
+
         String outputInfoJson;
         TaxiSchema taxiSchema = new TaxiSchema();
+        // Saving the taxi list of the server first, in this way it will better approximate the correct amount of taxis
         taxiSchema.setTaxis((ArrayList<TaxiInfo>) AdministratorServer.getTaxis().clone());
+        // The addTaxi method will return a TaxiInfo with the possible corrected ID
         taxiSchema.setTaxiInfo(administratorServer.addTaxi(inputTaxiInfo));
 
         outputInfoJson = gson.toJson(taxiSchema, TaxiSchema.class);
+
         return Response.ok(outputInfoJson).build();
     }
 
+    /*
+     * HTTP POST Request at "/get-taxis" for getting list of other taxis.
+     * ------------------------------------------------------------------
+     * Given the buffered information of the taxi which is requesting this
+     * method, it will return the view of the other taxis on the server.
+     *
+     * In essence, it will return the list of the taxis which are present
+     * on the administrator without the requesting taxi.
+     * */
     @POST
     @Path("get-taxis")
     @Consumes("application/json")
     @Produces("application/json")
-    public Response getTaxis(String applicantTaxiJson) {
+    public Response getOtherTaxis(String applicantTaxiJson) {
         if (applicantTaxiJson.isEmpty()) {
             return Response.status(400, "Bad request or wrong formatting").build();
         }
 
         TaxiInfo applicantTaxi = gson.fromJson(applicantTaxiJson, TaxiInfo.class);
 
-        // TODO: something here
-        //if(administratorServer.getTaxis())
-
-        ArrayList<TaxiInfo> taxis = (ArrayList<TaxiInfo>) administratorServer.getTaxis().clone();
+        ArrayList<TaxiInfo> taxis = (ArrayList<TaxiInfo>) AdministratorServer.getTaxis().clone();
         taxis.removeIf(t -> t.getId() == applicantTaxi.getId());
 
         TaxiSchema outputTaxi = new TaxiSchema();
@@ -78,33 +103,4 @@ public class AdministratorServerServices {
         return Response.status(400).build();
     }
 
-    @GET
-    @Produces("text/plain")
-    public String helloWorld() {
-        return "Hello world!";
-    }
-
-    @GET
-    @Path("{name}")
-    @Produces({"text/plain"})
-    public String helloWorldName(@PathParam("name") String name) {
-
-        return "Hello, " + name + "!";
-
-    }
-
-    @GET
-    @Produces("application/json")
-    public String helloWorld2() {
-        return "{\"message\": \"helloWorld\"}";
-
-    }
-
-    @Path("inner")
-    @GET
-    @Produces("text/plain")
-    public String innerHello() {
-
-        return "Inner Hello!";
-    }
 }

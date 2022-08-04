@@ -3,7 +3,6 @@ package Clients.Taxi;/* Project for the course of "Distributed and Pervasive Sys
  * Manuel Pagliuca
  * M.Sc. of Computer Science @UNIMI A.Y. 2021/2022 */
 
-
 import Clients.SETA.RideInfo;
 import Schemes.TaxiSchema;
 import com.google.gson.Gson;
@@ -16,11 +15,13 @@ import jakarta.ws.rs.client.*;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+
 import org.eclipse.paho.client.mqttv3.*;
 import org.example.grpc.BidirectionalServiceGrpc;
 import org.example.grpc.BidirectionalServiceOuterClass;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -31,16 +32,17 @@ public class Taxi {
     private final static int ADMIN_SERVER_PORT = 9001;
     private final static String ADMIN_SERVER_URL = "http://" + ADMIN_SERVER_ADDR + ":" + ADMIN_SERVER_PORT;
     private final static Gson gson = new Gson();
-
     private final static String broker = "tcp://localhost:1883";
 
     public static void main(String[] args) throws MqttException {
         Client client = ClientBuilder.newClient();
+
         int grpcPort = 3005;
 
         TaxiSchema taxiSchema = postInit(client, grpcPort);
 
         TaxiInfo thisTaxi = taxiSchema.getTaxiInfo();
+        thisTaxi.setBattery(100.0);
         AtomicReference<ArrayList<TaxiInfo>> taxis = new AtomicReference<>(taxiSchema.getTaxis());
 
         updatesTaxisFromAdminServer(client, thisTaxi, taxis);
@@ -60,6 +62,7 @@ public class Taxi {
         // Debug
         while (true) {
             try {
+                printFormattedInfos(thisTaxi, taxis.get());
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
@@ -158,11 +161,12 @@ public class Taxi {
         System.out.println("Taxi che si prenderà la corsa: " + ans.toString());
 
         if (ans.getTaxiId() == thisTaxi.getId()) {
-
-            try {
-                executeRide(thisTaxi, ride);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
+            if (!thisTaxi.isRecharging() && !thisTaxi.isRiding()) {
+                try {
+                    executeRide(thisTaxi, ride);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
             }
         }
 
@@ -177,11 +181,25 @@ public class Taxi {
     // TODO: al completamento della corsa aggiornare il distretto dell'oggetto this taxi in maniera che si
     // metta in ascolto su topic corretto.
     private static void executeRide(TaxiInfo thisTaxi, RideInfo rideInfo) throws InterruptedException {
-        // TODO: Ricordarsi il consumo di batteria dei taxi
-
-        // Requirement from the assignment paper
+        // TODO: Ricordarsi il consumo di batteria dei taxi - Requirement from the assignment paper
         final int DELIVERY_TIME = 5000;
+        thisTaxi.setRiding(true);
+
+        System.out.println("The taxi " + thisTaxi.getId()
+                + " is moving from " + Arrays.toString(thisTaxi.getPosition())
+                + " to " + Arrays.toString(rideInfo.getStartPosition()) + ", then to "
+                + Arrays.toString(rideInfo.getDestinationPosition()));
         Thread.sleep(DELIVERY_TIME);
+
+        double fromTaxiToStart = euclideanDistance(thisTaxi.getPosition(), rideInfo.getStartPosition());
+        double fromStartToEnd = euclideanDistance(rideInfo.getStartPosition(), rideInfo.getDestinationPosition());
+        double totalKm = fromTaxiToStart + fromStartToEnd;
+        thisTaxi.setBattery(thisTaxi.getBattery() - totalKm);
+
+        thisTaxi.setDistrict(rideInfo.getDestinationDistrict());
+        thisTaxi.setPosition(rideInfo.getDestinationPosition());
+
+        thisTaxi.setRiding(false);
     }
 
     private static void updatesTaxisFromAdminServer(Client client, TaxiInfo thisTaxi, AtomicReference<ArrayList<TaxiInfo>> taxis) {
@@ -226,12 +244,20 @@ public class Taxi {
         return taxis;
     }
 
-    // Utility
-    public static String postRequest(Client client, String url, String body) {
+    /// Utility
+    // Calculate the Euclidean distance between two points
+    public static double euclideanDistance(int[] start, int[] end) {
+        double xOffset = Math.pow((end[0] - start[1]), 2);
+        double yOffset = Math.pow((end[1] - start[0]), 2);
+        return Math.sqrt(xOffset + yOffset);
+    }
+
+    // Perform an HTTP POST request given the url and the body as json
+    public static String postRequest(Client client, String url, String jsonBody) {
         WebTarget webTarget = client.target(url);
 
         Invocation.Builder builder = webTarget.request(MediaType.APPLICATION_JSON_TYPE);
-        Response response = builder.post(Entity.json(body));
+        Response response = builder.post(Entity.json(jsonBody));
         response.bufferEntity();
 
         String responseJson = null;
@@ -243,6 +269,7 @@ public class Taxi {
         return responseJson;
     }
 
+    // Perform an HTTP GET request given the url and the body as json
     public static String getRequest(Client client, String url) {
         WebTarget webTarget = client.target(url);
 
@@ -259,33 +286,20 @@ public class Taxi {
         return responseJson;
     }
 
+    // Close the MQTT connection of this client toward the broker
     private static void closingMqttConnection(MqttClient mqttClient) throws MqttException {
         if (false) {
             mqttClient.disconnect();
         }
     }
 
+    // Generate a random ID for the taxi process
     private static int generateRndID() {
         Random random = new Random();
-        return random.nextInt(1, 101);
+        return random.nextInt(1, 100 + 1);
     }
 
-    private static String printFormattedInfos(int id, int district, int[] position,
-                                              float battery, ArrayList<TaxiInfo> taxis) {
-        String infos = String.format("ID: " + id + ", District: " + district +
-                ", Position: " + position[0] + ", " + position[1] +
-                "Battery: " + battery + ", Other taxis: [");
-
-        for (TaxiInfo t : taxis) {
-            infos += t.getId() + ", ";
-        }
-
-        if (infos.endsWith(",")) {
-            infos = infos.substring(0, infos.length() - 1);
-        }
-        return infos;
-    }
-
+    // Print the given information of the taxi
     private static void printFormattedInfos(TaxiInfo initInfo, ArrayList<TaxiInfo> taxis) {
         String infos = "[" + initInfo.toString() + ", taxis=[";
 
@@ -303,5 +317,4 @@ public class Taxi {
         System.out.println(infos);
     }
 
-    // Getters & Setters
 }

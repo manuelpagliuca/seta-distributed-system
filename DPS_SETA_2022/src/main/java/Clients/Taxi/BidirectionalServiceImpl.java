@@ -8,8 +8,6 @@ import org.example.grpc.BidirectionalServiceOuterClass;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Map;
-
 
 public class BidirectionalServiceImpl extends BidirectionalServiceGrpc.BidirectionalServiceImplBase {
     private HashMap<Integer, ArrayList<RideRequest>> distancesForRides = new HashMap<>();

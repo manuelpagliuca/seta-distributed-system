@@ -6,9 +6,9 @@ import org.eclipse.paho.client.mqttv3.*;
 import java.sql.Timestamp;
 import java.util.Random;
 
-public class SETA {
+public class RidesGenerator {
     private static int rideIds = -1;
-    private static Gson gson = new Gson();
+    private static final Gson gson = new Gson();
 
     public static void main(String[] args) {
         org.eclipse.paho.client.mqttv3.MqttClient client;
@@ -19,6 +19,7 @@ public class SETA {
                 "seta/smartcity/rides/district2",
                 "seta/smartcity/rides/district3",
                 "seta/smartcity/rides/district4"};
+
         int pubQos = 2;
 
         try {

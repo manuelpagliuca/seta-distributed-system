@@ -23,7 +23,6 @@ dependencies {
     // gRPC
     implementation group: 'io.grpc', name: 'grpc-all', version: '1.25.0'
 
-
     // Json
     implementation 'com.google.code.gson:gson:2.9.0'
     // Servlet Jersey

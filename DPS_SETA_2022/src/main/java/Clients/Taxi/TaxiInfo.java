@@ -4,26 +4,29 @@
  * M.Sc. of Computer Science @UNIMI A.Y. 2021/2022 */
 package Clients.Taxi;
 
-
 import java.io.Serializable;
 
+// Class for buffering data regarding Taxi processes
 public class TaxiInfo implements Serializable {
     private int id = -1;
     private int grpcPort = -1;
     private int district = -1;
     private int[] position = new int[2];
     private String administratorServerAddr = null;
+    private boolean isRecharging = false;
+    private boolean isRiding = false;
+
+    private double battery = -1;
 
     public TaxiInfo(TaxiInfo info) {
         this.id = info.id;
         this.district = info.district;
         this.position = info.position;
         this.grpcPort = info.grpcPort;
+        this.isRecharging = info.isRecharging;
+        this.isRiding = info.isRiding;
+        this.battery = info.battery;
         this.administratorServerAddr = info.administratorServerAddr;
-    }
-
-    public TaxiInfo(int id) {
-        this.id = id;
     }
 
     public TaxiInfo(int id, int grpcPort, String admServer) {
@@ -32,25 +35,22 @@ public class TaxiInfo implements Serializable {
         this.administratorServerAddr = admServer;
     }
 
-    public TaxiInfo(int id, int district, int[] position, int grpcPort, String administratorServerAddr) {
-        this.id = id;
-        this.district = district;
-        this.position = position;
-        this.grpcPort = grpcPort;
-        this.administratorServerAddr = administratorServerAddr;
-    }
-
     public TaxiInfo() {
 
     }
 
     @Override
     public String toString() {
-        String infos =
-                String.format("id=%d, grpc-port=%d, district=%s, position=(%d,%d)",
-                        id, grpcPort, district, position[0], position[1]);
+        return String.format("id=%d, grpc-port=%d, district=%s, position=(%d,%d)",
+                id, grpcPort, district, position[0], position[1]);
+    }
 
-        return infos;
+    public double getBattery() {
+        return battery;
+    }
+
+    public void setBattery(double battery) {
+        this.battery = battery;
     }
 
     public int getId() {
@@ -91,5 +91,21 @@ public class TaxiInfo implements Serializable {
 
     public void setAdministratorServerAddr(String administratorServerAddr) {
         this.administratorServerAddr = administratorServerAddr;
+    }
+
+    public boolean isRecharging() {
+        return isRecharging;
+    }
+
+    public void setRecharging(boolean recharging) {
+        isRecharging = recharging;
+    }
+
+    public boolean isRiding() {
+        return isRiding;
+    }
+
+    public void setRiding(boolean riding) {
+        isRiding = riding;
     }
 }
