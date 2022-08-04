@@ -5,7 +5,9 @@
 package Clients.Taxi;
 
 
-public class TaxiInfo {
+import java.io.Serializable;
+
+public class TaxiInfo implements Serializable {
     private int id = -1;
     private int grpcPort = -1;
     private int district = -1;

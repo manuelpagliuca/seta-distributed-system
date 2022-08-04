@@ -1,19 +1,28 @@
-/* Project for the course of "Distributed and Pervasive Systems"
+package Clients.Taxi;/* Project for the course of "Distributed and Pervasive Systems"
  * Mat. Number 975169
  * Manuel Pagliuca
  * M.Sc. of Computer Science @UNIMI A.Y. 2021/2022 */
-package Clients.Taxi;
+
 
 import Clients.SETA.RideInfo;
 import Schemes.TaxiSchema;
 import com.google.gson.Gson;
+
+import io.grpc.ManagedChannel;
+import io.grpc.ManagedChannelBuilder;
+import io.grpc.stub.StreamObserver;
+
 import jakarta.ws.rs.client.*;
+import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.eclipse.paho.client.mqttv3.*;
+import org.example.grpc.BidirectionalServiceGrpc;
+import org.example.grpc.BidirectionalServiceOuterClass;
 
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 // Taxis are considered as single processes and not as threads
@@ -36,17 +45,20 @@ public class Taxi {
 
         updatesTaxisFromAdminServer(client, thisTaxi, taxis);
 
+        printFormattedInfos(thisTaxi, taxis.get());
+
         // TODO: Iscrizione al topic MQTT del proprio distretto
         String clientId = MqttClient.generateClientId();
         MqttClient mqttClient = new MqttClient(broker, clientId, null);
 
+
         seekingRides(mqttClient, thisTaxi);
 
-        //closingMqttConnection(mqttClient); // Utility function will be helpful when from console i want to quit the taxi
+        // closingMqttConnection(mqttClient); // Utility function will be helpful when from console i want to quit the taxi
+
 
         // Debug
         while (true) {
-            //printFormattedInfos(thisTaxi, taxis.get());
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
@@ -64,7 +76,7 @@ public class Taxi {
         String topic = "seta/smartcity/rides/district" + thisTaxi.getDistrict();
         int qos = 2;
         System.out.println("Listening on topic: " + topic);
-        
+
         MqttConnectOptions connectOptions = new MqttConnectOptions();
         connectOptions.setCleanSession(true);
         mqttClient.connect(connectOptions);
@@ -77,23 +89,23 @@ public class Taxi {
 
             @Override
             public void messageArrived(String topic, MqttMessage message) throws Exception {
-                String msg = new String(message.getPayload());
-                System.out.println(msg);
-                RideInfo rideInfo = gson.fromJson(message.getPayload().toString(), RideInfo.class);
+                String ride = new String(message.getPayload());
+                //System.out.println(ride);
+                RideInfo rideInfo = gson.fromJson(ride, RideInfo.class);
 
-                // TODO: Algoritmo decentralizzato da accordare attraverso le gRPC
+                //TODO: Algoritmo decentralizzato da accordare attraverso le gRPC
 
                 // You enter this scope only if this taxi got the priority for taking the ride
-                {
-                    // TODO: al completamento della corsa aggiornare il distretto dell'oggetto this taxi in maniera che si
-                    // metta in ascolto su topic corretto.
-                    ride(rideInfo);
-                }
+                grpcRidesHandling(thisTaxi, rideInfo);
             }
 
             @Override
             public void deliveryComplete(IMqttDeliveryToken token) {
-
+                try {
+                    System.out.println(token.getMessage());
+                } catch (MqttException e) {
+                    throw new RuntimeException(e);
+                }
             }
         });
 
@@ -102,16 +114,75 @@ public class Taxi {
         return mqttClient;
     }
 
-    private static void ride(RideInfo rideInfo) throws InterruptedException {
+    private static void grpcRidesHandling(TaxiInfo thisTaxi, RideInfo ride) {
+        final ManagedChannel channel = ManagedChannelBuilder
+                .forTarget(ADMIN_SERVER_ADDR + ":" + thisTaxi.getGrpcPort())
+                .usePlaintext().build();
+
+        //creating the asynchronous stub
+        BidirectionalServiceGrpc.BidirectionalServiceStub stub = BidirectionalServiceGrpc.newStub(channel);
+
+        //the stub returns a stream to communicate with the server.
+        //the argument is the stream of messages which are transmitted by the server.
+        StreamObserver<BidirectionalServiceOuterClass.ClientRequest> serverStream =
+                stub.bidirectional(new StreamObserver<>() {
+                    //remember: all the methods here are CALLBACKS which are handled in an asynchronous manner.
+                    //we define what to do when a message from the server arrives (just print the message)
+                    public void onNext(BidirectionalServiceOuterClass.ServerResponse serverResponse) {
+                        System.out.println("[FROM SERVER] " + serverResponse.getStringResponse());
+                    }
+
+                    public void onError(Throwable throwable) {
+                    }
+
+                    public void onCompleted() {
+                    }
+                });
+
+        int[] taxiPosition = thisTaxi.getPosition();
+        int[] passengerPosition = ride.getStartPosition();
+        double xOffset = Math.pow((passengerPosition[0] - taxiPosition[1]), 2);
+        double yOffset = Math.pow((passengerPosition[1] - taxiPosition[0]), 2);
+        double euclideanDistance = Math.sqrt(xOffset + yOffset);
+
+        RideRequest rideRequest = new RideRequest(thisTaxi.getId(), ride.getId(), euclideanDistance);
+
+        String body = gson.toJson(rideRequest);
+
+        System.out.println("Sending the message '" + body + "' to the server...");
+        BidirectionalServiceOuterClass.ClientRequest.Builder build = BidirectionalServiceOuterClass.ClientRequest.newBuilder();
+        serverStream.onNext(build.setStringRequest(body).build());
+
+        RideRequest ans = gson.fromJson(build.getStringRequest(), RideRequest.class);
+
+        System.out.println("Taxi che si prenderà la corsa: " + ans.toString());
+
+        if (ans.getTaxiId() == thisTaxi.getId()) {
+
+            try {
+                executeRide(thisTaxi, ride);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        try {
+            //you need this. otherwise the method will terminate before that answers from the server are received
+            channel.awaitTermination(10, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // TODO: al completamento della corsa aggiornare il distretto dell'oggetto this taxi in maniera che si
+    // metta in ascolto su topic corretto.
+    private static void executeRide(TaxiInfo thisTaxi, RideInfo rideInfo) throws InterruptedException {
         // TODO: Ricordarsi il consumo di batteria dei taxi
 
         // Requirement from the assignment paper
         final int DELIVERY_TIME = 5000;
         Thread.sleep(DELIVERY_TIME);
-
-
     }
-
 
     private static void updatesTaxisFromAdminServer(Client client, TaxiInfo thisTaxi, AtomicReference<ArrayList<TaxiInfo>> taxis) {
         Thread updatesFromServer = new Thread(() -> {
@@ -122,7 +193,7 @@ public class Taxi {
         updatesFromServer.start();
     }
 
-    /*  Initialization of the Taxi through the administrator server.
+    /*  Initialization of the Clients.Taxi.Taxi through the administrator server.
         The taxi sends his sensible data to the administrator server, in this
         data there is the proposal of an ID. This will be checked from the server side
         if it is available or already taken, in the second case the server will return

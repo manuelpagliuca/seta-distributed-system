@@ -5,10 +5,7 @@
     <option name="importPathEntries">
       <list>
         <ImportPathEntry>
-          <option name="location" value="file://$PROJECT_DIR$/src/test/java" />
-        </ImportPathEntry>
-        <ImportPathEntry>
-          <option name="location" value="file://$PROJECT_DIR$/src/test/resources" />
+          <option name="location" value="file://$PROJECT_DIR$/../../DSP_Lab/Lab3/ProtocolBuffers/ProtocolBuffers/build/generated" />
         </ImportPathEntry>
         <ImportPathEntry>
           <option name="location" value="file://$PROJECT_DIR$/src/main/resources" />
@@ -18,6 +15,9 @@
         </ImportPathEntry>
         <ImportPathEntry>
           <option name="location" value="file://$USER_HOME$/AppData/Local/JetBrains/IntelliJIdea2022.1/protoeditor" />
+        </ImportPathEntry>
+        <ImportPathEntry>
+          <option name="location" value="file://$PROJECT_DIR$/build/generated" />
         </ImportPathEntry>
       </list>
     </option>

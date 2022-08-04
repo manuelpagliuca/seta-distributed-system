@@ -51,7 +51,7 @@ public class SETA {
 
                 public void deliveryComplete(IMqttDeliveryToken token) {
                     if (token.isComplete()) {
-                        System.out.println("Client ID: " + clientId + ", Message delivered - Thread PID: " + Thread.currentThread().getId());
+                        //System.out.println("Client ID: " + clientId + ", Message delivered - Thread PID: " + Thread.currentThread().getId());
                     }
                 }
             });

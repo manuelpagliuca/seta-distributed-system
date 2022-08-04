@@ -6,6 +6,8 @@ package Server;
 
 import Clients.Taxi.TaxiInfo;
 import Server.Services.AdministratorServerServices;
+import io.grpc.Server;
+import io.grpc.ServerBuilder;
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
@@ -14,7 +16,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.*;
 
-class SomeThread implements Runnable {
+class ServerTaxisUpdater implements Runnable {
     private Thread t;
 
     public void start() {
@@ -38,6 +40,34 @@ class SomeThread implements Runnable {
     }
 }
 
+class GrpcThread implements Runnable {
+    private Thread t;
+
+    public void start() {
+        if (t == null) {
+            t = new Thread(this);
+            t.start();
+        }
+    }
+
+    @Override
+    public void run() {
+        try {
+            // TODO: 3005 should be get through server
+            int grpcPort = 3005;
+            Server server = ServerBuilder
+                    .forPort(grpcPort)
+                    .addService(new Clients.Taxi.BidirectionalServiceImpl())
+                    .build();
+            server.start();
+            System.out.println("GRPC Server started on port: " + grpcPort);
+            server.awaitTermination();
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+}
+
 public class AdministratorServer {
     private static final String HOST = "localhost";
     private static final int PORT = 9001;
@@ -57,7 +87,7 @@ public class AdministratorServer {
 
     /* Add taxi process information inside the server and return updated infos.
      *
-     * Given the Taxi information parsed from a JSON file it will add the taxi
+     * Given the Clients.Taxi.Taxi information parsed from a JSON file it will add the taxi
      * information inside the static taxi list of the server.
      *
      * The ID of the taxi list if already present will be randomly generated again
@@ -94,12 +124,15 @@ public class AdministratorServer {
         ResourceConfig config = new ResourceConfig();
         config.register(AdministratorServerServices.class);
         String serverAddress = "http://" + HOST + ":" + PORT;
-        HttpServer server = GrizzlyHttpServerFactory.createHttpServer(URI.create(serverAddress), config);
+        HttpServer restServer = GrizzlyHttpServerFactory.createHttpServer(URI.create(serverAddress), config);
 
-        SomeThread t = new SomeThread();
+        ServerTaxisUpdater taxiListsUpdater = new ServerTaxisUpdater();
+        GrpcThread grpcServerThread = new GrpcThread();
+
         try {
-            t.start();
-            server.start();
+            taxiListsUpdater.start();
+            restServer.start();
+            grpcServerThread.start();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -121,7 +154,8 @@ public class AdministratorServer {
 
         int district = rnd.nextInt(lowerBound, upperBound + 1);
 
-        return district;
+        return 2;
+        //return district;
     }
 
     private int genValidID() {

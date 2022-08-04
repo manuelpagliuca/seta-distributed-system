@@ -1,21 +1,26 @@
+import Clients.Taxi.BidirectionalServiceImpl;
+import io.grpc.ServerBuilder;
 
 import java.io.IOException;
-import java.net.ServerSocket;
-import java.net.Socket;
 
 public class Server {
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
+        try {
 
-        System.out.println("The server is running...\n");
+            BidirectionalServiceImpl service =
+                    new BidirectionalServiceImpl();
 
-        ServerSocket serverSocket = new ServerSocket(9999);
-
-        Socket s = serverSocket.accept();
-
-        ActorOuterClass.Actor actor = ActorOuterClass.Actor.parseFrom(s.getInputStream());
-
-        System.out.println(actor);
+            io.grpc.Server server =
+                    ServerBuilder.forPort(3005)
+                            .addService(service)
+                            .build();
+            server.start();
+            System.out.println("Server started!\n");
+            server.awaitTermination();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
-
-
 }
