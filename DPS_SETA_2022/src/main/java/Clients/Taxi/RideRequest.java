@@ -3,14 +3,26 @@ package Clients.Taxi;
 import java.io.Serializable;
 
 public class RideRequest implements Serializable {
-    private int taxiId;
     private int rideId;
+    private int taxiId;
+    private int district;
     private double euclideanDistance;
+    private double battery;
 
-    public RideRequest(int taxiId, int rideId, double euclideanDistance) {
-        this.taxiId = taxiId;
+    public RideRequest(int taxiId, int rideId, int district, double euclideanDistance, double battery) {
         this.rideId = rideId;
+        this.taxiId = taxiId;
+        this.district = district;
         this.euclideanDistance = euclideanDistance;
+        this.battery = battery;
+    }
+
+    public int getDistrict() {
+        return district;
+    }
+
+    public void setDistrict(int district) {
+        this.district = district;
     }
 
     public int getTaxiId() {
@@ -27,6 +39,14 @@ public class RideRequest implements Serializable {
 
     public void setRideId(int rideId) {
         this.rideId = rideId;
+    }
+
+    public double getBattery() {
+        return battery;
+    }
+
+    public void setBattery(double battery) {
+        this.battery = battery;
     }
 
     public double getEuclideanDistance() {

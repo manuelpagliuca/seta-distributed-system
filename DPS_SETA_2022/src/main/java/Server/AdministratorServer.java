@@ -4,6 +4,8 @@
  * M.Sc. of Computer Science @UNIMI A.Y. 2021/2022 */
 package Server;
 
+import Clients.Taxi.RideRequest;
+import Clients.Taxi.Taxi;
 import Clients.Taxi.TaxiInfo;
 import Server.Services.AdministratorServerServices;
 
@@ -24,7 +26,7 @@ import java.util.*;
  *
  * It allows to:
  * TODO: [WIP] I will add infos at the end of the project
- * */
+ */
 public class AdministratorServer {
     private static final String HOST = "localhost";
     private static final int PORT = 9001;
@@ -41,7 +43,8 @@ public class AdministratorServer {
         return instance;
     }
 
-    /* Add taxi process information inside the server and return updated infos
+    /*
+     * Add taxi process information inside the server and return updated infos
      * ------------------------------------------------------------------------
      * Given the Clients.Taxi.Taxi information parsed from a JSON file it will add the taxi
      * information inside the static taxi list of the server.
@@ -52,7 +55,8 @@ public class AdministratorServer {
      * Also, the district with the relative starting position of the taxi will both
      * be generated here and added to a TaxiInfo object that will be returned to the
      * client. In this way the client will know the valid ID, the district and the
-     * position inside the smart city. */
+     * position inside the smart city.
+     */
     public TaxiInfo addTaxi(TaxiInfo info) {
         assert (info != null);
         TaxiInfo newTaxi = new TaxiInfo();
@@ -94,8 +98,70 @@ public class AdministratorServer {
         }
     }
 
-
     /// Utility
+
+    // Single thread used from gRPC side
+    public synchronized RideRequest assignRide(HashMap<Integer, ArrayList<RideRequest>> distancesForRides,
+                                  int rideID, int rideDistrict) {
+        ArrayList<RideRequest> pool = distancesForRides.get(rideID);
+        int minID = -1;
+        double minDistance = -1.0;
+        double minBatteryLevel = -1.0;
+
+        // Discriminate by distance (min)
+        minDistance = pool.get(0).getEuclideanDistance();
+        for (RideRequest r : pool) {
+            if (r.getEuclideanDistance() < minDistance) {
+                minDistance = r.getEuclideanDistance();
+            }
+        }
+
+        double finalMinDistance = minDistance;
+        pool.removeIf(r -> r.getEuclideanDistance() != finalMinDistance);
+
+        if (pool.size() > 1) {
+            // Discriminate by battery level
+            minBatteryLevel = pool.get(0).getBattery();
+            for (RideRequest r : pool) {
+                if (r.getBattery() > minBatteryLevel)
+                    minBatteryLevel = r.getBattery();
+            }
+
+            double finalMinBatteryLevel = minBatteryLevel;
+            pool.removeIf(r -> r.getBattery() != finalMinBatteryLevel);
+
+            if (pool.size() > 1) {
+                // Discriminate by taxi ID
+                minID = pool.get(0).getTaxiId();
+
+                for (RideRequest r : pool) {
+                    if (r.getTaxiId() < minID)
+                        minID = r.getTaxiId();
+                }
+
+                int finalMinID = minID;
+                pool.removeIf(r -> r.getTaxiId() != finalMinID);
+            }
+        }
+
+        pool.trimToSize();
+        minID = pool.get(0).getTaxiId();
+        minBatteryLevel = pool.get(0).getBattery();
+        minDistance = pool.get(0).getEuclideanDistance();
+
+        return new RideRequest(minID, rideID, rideDistrict, minDistance, minBatteryLevel);
+    }
+
+    // Return the number of taxis in a given district
+    public int getNumberOfTaxisInDistrict(int district) {
+        int numberOfTaxis = 0;
+        for (Map.Entry<TaxiInfo, ArrayList<TaxiInfo>> e : taxis.entrySet()) {
+            if (e.getKey().getDistrict() == district) {
+                numberOfTaxis++;
+            }
+        }
+        return numberOfTaxis;
+    }
 
     // Print all the taxis ID each one with the list of the other taxis on the smart city (debug)
     public void printAllTaxis() {
@@ -113,8 +179,8 @@ public class AdministratorServer {
 
         int district = rnd.nextInt(lowerBound, upperBound + 1);
 
-        //return 2; // for testing gRPC
-        return district;
+        return 2; // for testing gRPC
+        //return district;
     }
 
     /*

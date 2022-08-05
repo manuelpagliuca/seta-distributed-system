@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package org.example.grpc;
+
+message ClientRequest {
+  string stringRequest = 1;
+}
+
+message ServerResponse {
+  string stringResponse = 1;
+}
+
+service BidirectionalMsgService {
+  rpc rideProposal(ClientRequest) returns (ServerResponse);
+  rpc streamRideProposal(ClientRequest) returns (stream ServerResponse);
+}
