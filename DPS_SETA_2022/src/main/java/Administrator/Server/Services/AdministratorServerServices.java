@@ -1,7 +1,7 @@
 /* Project for the course of "Distributed and Pervasive Systems"
  * Mat. Number 975169
  * Manuel Pagliuca
- * M.Sc. of Computer Science @UNIMI A.Y. 2021/2022 */
+ * M.Sc. in Computer Science @UNIMI A.Y. 2021/2022 */
 package Administrator.Server.Services;
 
 import Schemes.TaxiSchema;
@@ -77,7 +77,7 @@ public class AdministratorServerServices {
     @Path("get-taxis/{id}")
     @Consumes("application/json")
     @Produces("application/json")
-    public synchronized Response getOtherTaxis(@PathParam("id") int taxiID) {
+    public Response getOtherTaxis(@PathParam("id") int taxiID) {
         ArrayList<TaxiInfo> taxis = (ArrayList<TaxiInfo>) AdministratorServer.getTaxis().clone();
         if (taxis.removeIf(t -> t.getId() == taxiID)) {
             String outputInfo;

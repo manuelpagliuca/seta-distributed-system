@@ -1,7 +1,9 @@
-package Clients.Taxi;/* Project for the course of "Distributed and Pervasive Systems"
+/* Project for the course of "Distributed and Pervasive Systems"
  * Mat. Number 975169
  * Manuel Pagliuca
  * M.Sc. of Computer Science @UNIMI A.Y. 2021/2022 */
+
+package Clients.Taxi;
 
 import Clients.SETA.RideInfo;
 import Schemes.TaxiSchema;
@@ -17,10 +19,10 @@ import jakarta.ws.rs.core.Response;
 
 import org.eclipse.paho.client.mqttv3.*;
 
-import java.nio.file.FileSystemNotFoundException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
+import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -42,6 +44,10 @@ public class Taxi {
         TaxiInfo thisTaxi = taxiSchema.getTaxiInfo();
         thisTaxi.setBattery(100.0);
         AtomicReference<ArrayList<TaxiInfo>> taxis = new AtomicReference<>(taxiSchema.getTaxis());
+
+        // Standard input for console commands
+        commandLineInterface(client, thisTaxi.getId());
+
         // Keep updating the taxi list through a thread performing POSTs
         updatesTaxisFromAdminServer(client, thisTaxi.getId(), taxis);
         // Print the initial information of the taxi process
@@ -66,6 +72,22 @@ public class Taxi {
         }*/
 
         // TODO: Inizia l'acquisizione dei dati dal sensore
+    }
+
+    private static void commandLineInterface(Client client, int taxiID) {
+        Scanner scanner = new Scanner(System.in);
+        Thread cli = new Thread(() -> {
+            String userInput = null;
+            while (!Thread.currentThread().isInterrupted()) {
+                userInput = scanner.nextLine();
+                if (userInput.equals("quit")) {
+                    System.out.println("Terminating the execution");
+                    removeTaxi(client, taxiID);
+                    System.exit(0);
+                }
+            }
+        });
+        cli.start();
     }
 
 
@@ -295,6 +317,16 @@ public class Taxi {
         return otherTaxis;
     }
 
+    /*
+     * Delete this taxi from the administrator server
+     */
+
+    private static void removeTaxi(Client client, int taxiID) {
+        final String INIT_PATH = "/del-taxi/" + taxiID;
+        String serverInitInfos = delRequest(client, ADMIN_SERVER_URL + INIT_PATH);
+        System.out.println(serverInitInfos);
+    }
+
     /// Utility
     // Calculate the Euclidean distance between two points
     public static double euclideanDistance(int[] start, int[] end) {
@@ -328,6 +360,23 @@ public class Taxi {
         Response response = builder.get();
 
         return response;
+    }
+
+    private static String delRequest(Client client, String url) {
+        WebTarget webTarget = client.target(url);
+
+        Invocation.Builder builder = webTarget.request(MediaType.APPLICATION_JSON_TYPE);
+        Response response = builder.delete();
+
+        response.bufferEntity();
+
+        String responseJson = null;
+        try {
+            responseJson = response.readEntity(String.class);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        return responseJson;
     }
 
     // Close the MQTT connection of this client toward the broker

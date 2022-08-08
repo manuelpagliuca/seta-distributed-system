@@ -47,7 +47,7 @@ public class AdministratorClient {
         System.out.println(serverInitInfos);
     }
 
-    public static String delRequest(Client client, String url) {
+    private static String delRequest(Client client, String url) {
         WebTarget webTarget = client.target(url);
 
         Invocation.Builder builder = webTarget.request(MediaType.APPLICATION_JSON_TYPE);
