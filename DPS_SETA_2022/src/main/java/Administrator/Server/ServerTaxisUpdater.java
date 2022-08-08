@@ -1,4 +1,4 @@
-package Server;
+package Administrator.Server;
 
 public class ServerTaxisUpdater implements Runnable {
     private Thread t;
@@ -16,7 +16,7 @@ public class ServerTaxisUpdater implements Runnable {
             try {
                 AdministratorServer.getInstance().updateTaxiLists();
                 // Debug
-                //AdministratorServer.getInstance().printAllTaxis();
+                AdministratorServer.getInstance().printAllTaxis();
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);

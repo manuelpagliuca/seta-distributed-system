@@ -9,7 +9,6 @@ import com.google.gson.Gson;
 
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
-import io.grpc.stub.StreamObserver;
 
 import jakarta.ws.rs.client.*;
 import jakarta.ws.rs.client.Client;
@@ -17,9 +16,8 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
 import org.eclipse.paho.client.mqttv3.*;
-import org.example.grpc.BidirectionalMsgServiceGrpc;
-import org.example.grpc.BidirectionalMsgServiceOuterClass;
 
+import java.nio.file.FileSystemNotFoundException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
@@ -45,7 +43,7 @@ public class Taxi {
         thisTaxi.setBattery(100.0);
         AtomicReference<ArrayList<TaxiInfo>> taxis = new AtomicReference<>(taxiSchema.getTaxis());
         // Keep updating the taxi list through a thread performing POSTs
-        updatesTaxisFromAdminServer(client, thisTaxi, taxis);
+        updatesTaxisFromAdminServer(client, thisTaxi.getId(), taxis);
         // Print the initial information of the taxi process
         printFormattedInfos(thisTaxi, taxis.get());
 
@@ -53,7 +51,7 @@ public class Taxi {
         String clientId = MqttClient.generateClientId();
         MqttClient mqttClient = new MqttClient(broker, clientId, null);
         // Using the MQTT client for seeking rides on the relative assigned district of the taxi
-        seekingRides(mqttClient, thisTaxi);
+        //seekingRides(mqttClient, thisTaxi);
 
         // closingMqttConnection(mqttClient); // Utility function will be helpful when from console i want to quit the taxi
 
@@ -92,8 +90,7 @@ public class Taxi {
                 .usePlaintext().build();
 
         //creating the synchronous blocking stub
-        BidirectionalMsgServiceGrpc.BidirectionalMsgServiceBlockingStub stub =
-                BidirectionalMsgServiceGrpc.newBlockingStub(channel);
+        //BidirectionalMsgServiceGrpc.BidirectionalMsgServiceBlockingStub stub = BidirectionalMsgServiceGrpc.newBlockingStub(channel);
 
         MqttConnectOptions connectOptions = new MqttConnectOptions();
         connectOptions.setCleanSession(true);
@@ -115,7 +112,7 @@ public class Taxi {
                 //TODO: Algoritmo decentralizzato da accordare attraverso le gRPC
 
                 // You enter this scope only if this taxi got the priority for taking the ride
-                taxiRidesOwnership(mqttClient, channel, stub, thisTaxi, rideInfo);
+                //taxiRidesOwnership(mqttClient, channel, /*stub,*/ thisTaxi, rideInfo);
             }
 
             @Override
@@ -139,7 +136,7 @@ public class Taxi {
      *
      */
     private static void taxiRidesOwnership(MqttClient mqttClient, ManagedChannel channel,
-                                           BidirectionalMsgServiceGrpc.BidirectionalMsgServiceBlockingStub stub,
+            /*BidirectionalMsgServiceGrpc.BidirectionalMsgServiceBlockingStub stub,*/
                                            TaxiInfo thisTaxi, RideInfo ride) {
         //the stub returns a stream to communicate with the server.
         //the argument is the stream of messages which are transmitted by the server.
@@ -150,24 +147,24 @@ public class Taxi {
 
         String body = gson.toJson(rideRequest);
 
-        BidirectionalMsgServiceOuterClass.ClientRequest clientRequest =
-                BidirectionalMsgServiceOuterClass.ClientRequest.newBuilder().setStringRequest(body).build();
+
+        //BidirectionalMsgServiceOuterClass.ClientRequest clientRequest =                BidirectionalMsgServiceOuterClass.ClientRequest.newBuilder().setStringRequest(body).build();
 
         // Ask for taking the ride only if the taxi is not recharging or already in charge of a ride
         boolean notRechargingAndRiding = !thisTaxi.isRecharging() && !thisTaxi.isRiding();
         if (notRechargingAndRiding) {
             // Synchronous call
-            BidirectionalMsgServiceOuterClass.ServerResponse serverResponse = stub.rideProposal(clientRequest);
+            //BidirectionalMsgServiceOuterClass.ServerResponse serverResponse = stub.rideProposal(clientRequest);
             channel.shutdown();
 
-            RideRequest ans = gson.fromJson(serverResponse.getStringResponse(), RideRequest.class);
+            // RideRequest ans = gson.fromJson(serverResponse.getStringResponse(), RideRequest.class);
 
-            System.out.println("[Server Response]: " + serverResponse.getStringResponse());
-            System.out.println("The taxi which will take charge of the ride " + ans.getRideId()
-                    + "will be the  " + ans.getTaxiId());
+            //System.out.println("[Server Response]: " + serverResponse.getStringResponse());
+            //System.out.println("The taxi which will take charge of the ride " + ans.getRideId()
+            //        + "will be the  " + ans.getTaxiId());
 
-            boolean isThisTaxi = (ans.getTaxiId() == thisTaxi.getId());
-
+            //boolean isThisTaxi = (ans.getTaxiId() == thisTaxi.getId());
+/*
             if (isThisTaxi) {
                 try {
                     System.out.println("This taxi took the ride " + ride.getId());
@@ -182,19 +179,21 @@ public class Taxi {
         } else {
             System.out.println("This taxi is recharging or in charge of a ride.");
         }
+*/
+            try {
+                //you need this. otherwise the method will terminate before that answers from the server are received
+                channel.awaitTermination(10, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
 
-        try {
-            //you need this. otherwise the method will terminate before that answers from the server are received
-            channel.awaitTermination(10, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
         }
-
     }
 
     // TODO: al completamento della corsa aggiornare il distretto dell'oggetto this taxi in maniera che si
     // metta in ascolto su topic corretto.
-    private static void executeRide(MqttClient mqttClient, TaxiInfo thisTaxi, RideInfo rideInfo) throws InterruptedException, MqttException {
+    private static void executeRide(MqttClient mqttClient, TaxiInfo thisTaxi, RideInfo rideInfo) throws
+            InterruptedException, MqttException {
         // TODO: Ricordarsi il consumo di batteria dei taxi - Requirement from the assignment paper
         final int DELIVERY_TIME = 5000;
         thisTaxi.setRiding(true);
@@ -232,10 +231,12 @@ public class Taxi {
      * Generate a thread that will keep asking for the list of other taxis on the
      * administrator server through an HTTP POST request.
      */
-    private static void updatesTaxisFromAdminServer(Client client, TaxiInfo thisTaxi, AtomicReference<ArrayList<TaxiInfo>> taxis) {
+    private static void updatesTaxisFromAdminServer(Client client,
+                                                    int taxiID,
+                                                    AtomicReference<ArrayList<TaxiInfo>> taxis) {
         Thread updatesFromServer = new Thread(() -> {
             while (true) {
-                taxis.set(getTaxisOnServer(client, thisTaxi));
+                taxis.set(getTaxisOnServer(client, taxiID));
             }
         });
         updatesFromServer.start();
@@ -272,15 +273,26 @@ public class Taxi {
      * return the list of all the other taxis present on the administrator server minus the taxi
      * which is making the request ('thisTaxi' variable).
      */
-    private static ArrayList<TaxiInfo> getTaxisOnServer(Client client, TaxiInfo thisTaxi) {
-        final String GET_PATH = "/get-taxis";
+    private static ArrayList<TaxiInfo> getTaxisOnServer(Client client, int taxiID) {
+        final String GET_PATH = "/get-taxis/" + taxiID;
 
-        String serverResponse = postRequest(client, ADMIN_SERVER_URL + GET_PATH, gson.toJson(thisTaxi));
-        TaxiSchema ans = gson.fromJson(serverResponse, TaxiSchema.class);
+        Response response = getRequest(client, ADMIN_SERVER_URL + GET_PATH);
 
-        ArrayList<TaxiInfo> taxis = ans.getTaxis();
+        if (response.getStatus() == Response.Status.GONE.getStatusCode()) {
+            System.out.println(response.readEntity(String.class));
+            System.exit(0);
 
-        return taxis;
+        }
+
+        String responseJson = null;
+        try {
+            responseJson = response.readEntity(String.class);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
+        ArrayList<TaxiInfo> otherTaxis = gson.fromJson(responseJson, ArrayList.class);
+        return otherTaxis;
     }
 
     /// Utility
@@ -309,20 +321,13 @@ public class Taxi {
     }
 
     // Perform an HTTP GET request given the url and the body as json
-    public static String getRequest(Client client, String url) {
+    public static Response getRequest(Client client, String url) {
         WebTarget webTarget = client.target(url);
 
         Invocation.Builder builder = webTarget.request(MediaType.APPLICATION_JSON_TYPE);
         Response response = builder.get();
-        response.bufferEntity();
 
-        String responseJson = null;
-        try {
-            responseJson = response.readEntity(String.class);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-        return responseJson;
+        return response;
     }
 
     // Close the MQTT connection of this client toward the broker

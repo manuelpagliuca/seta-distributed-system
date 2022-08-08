@@ -1,9 +1,4 @@
-package Server;
-
-import io.grpc.Server;
-import io.grpc.ServerBuilder;
-
-import java.io.IOException;
+package Administrator.Server;
 
 class GrpcThread implements Runnable {
     private Thread t;
@@ -17,7 +12,7 @@ class GrpcThread implements Runnable {
 
     @Override
     public void run() {
-        try {
+        /*try {
             // TODO: 3005 should be get through server
             int grpcPort = 3005;
             Server server = ServerBuilder
@@ -29,6 +24,6 @@ class GrpcThread implements Runnable {
             server.awaitTermination();
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
-        }
+        }*/
     }
 }

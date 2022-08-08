@@ -2,10 +2,10 @@
  * Mat. Number 975169
  * Manuel Pagliuca
  * M.Sc. of Computer Science @UNIMI A.Y. 2021/2022 */
-package Server.Services;
+package Administrator.Server.Services;
 
 import Schemes.TaxiSchema;
-import Server.AdministratorServer;
+import Administrator.Server.AdministratorServer;
 import Clients.Taxi.TaxiInfo;
 import com.google.gson.*;
 import jakarta.ws.rs.*;
@@ -39,7 +39,7 @@ public class AdministratorServerServices {
     @Path("taxi-init")
     @Consumes("application/json")
     @Produces("application/json")
-    public Response newTaxi(String json) {
+    public synchronized Response newTaxi(String json) {
         if (json.isEmpty()) {
             return Response.status(400, "Bad request or wrong formatting").build();
         }
@@ -73,34 +73,49 @@ public class AdministratorServerServices {
      * In essence, it will return the list of the taxis which are present
      * on the administrator without the requesting taxi.
      * */
-    @POST
-    @Path("get-taxis")
+    @GET
+    @Path("get-taxis/{id}")
     @Consumes("application/json")
     @Produces("application/json")
-    public Response getOtherTaxis(String applicantTaxiJson) {
-        if (applicantTaxiJson.isEmpty()) {
-            return Response.status(400, "Bad request or wrong formatting").build();
-        }
-
-        TaxiInfo applicantTaxi = gson.fromJson(applicantTaxiJson, TaxiInfo.class);
-
+    public synchronized Response getOtherTaxis(@PathParam("id") int taxiID) {
         ArrayList<TaxiInfo> taxis = (ArrayList<TaxiInfo>) AdministratorServer.getTaxis().clone();
-        taxis.removeIf(t -> t.getId() == applicantTaxi.getId());
+        if (taxis.removeIf(t -> t.getId() == taxiID)) {
+            String outputInfo;
+            try {
+                outputInfo = gson.toJson(taxis, ArrayList.class);
+                return Response.ok(outputInfo).build();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
 
-        TaxiSchema outputTaxi = new TaxiSchema();
-        outputTaxi.setTaxis(taxis);
-        outputTaxi.setTaxiInfo(applicantTaxi);
-
-        String outputInfo;
-        try {
-            outputInfo = gson.toJson(outputTaxi, TaxiSchema.class);
-            return Response.ok(outputInfo).build();
-        } catch (Exception e) {
-            e.printStackTrace();
+        } else {
+            // If the taxi ID can't be removed, means that it has been already deleted
+            // So we must communicate to the client that it has to quit his execution.
+            return Response.status(Response.Status.GONE).entity("The ID of your taxi process is not anymore " +
+                    "present in the administrator server, quit your execution.").build();
         }
+        return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+    }
 
-        //TODO: Sensed error code
-        return Response.status(400).build();
+    /*
+     * Remove a single taxi given a taxi ID
+     * ----------------------------------------------------------------
+     * This function can be both called by the administrator client that
+     * by the taxi process itself (both from CLI).
+     */
+    @DELETE
+    @Path("del-taxi/{id}")
+    @Consumes("application/json")
+    public Response deleteTaxi(@PathParam("id") int taxiId) {
+        boolean ans = AdministratorServer.getInstance().removeTaxi(taxiId);
+
+        if (ans) {
+            return Response.ok("Deletion completed successfully.").build();
+        } else {
+            return Response
+                    .status(Response.Status.NOT_FOUND)
+                    .entity("The given ID was not found in the administrator server").build();
+        }
     }
 
 }

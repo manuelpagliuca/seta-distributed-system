@@ -13,7 +13,7 @@ public class RideRequest implements Serializable {
         this.rideId = rideId;
         this.taxiId = taxiId;
         this.district = district;
-        this.euclideanDistance = euclideanDistance;
+        
         this.battery = battery;
     }
 

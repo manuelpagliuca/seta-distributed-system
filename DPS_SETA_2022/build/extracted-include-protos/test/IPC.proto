@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package org.example.grpc;
+
+message Proposal {
+  string stringRequest = 1;
+}
+
+message Response {
+  string stringResponse = 1;
+}
+
+message Distance{
+  string distance = 1;
+}
+
+message Permission {
+  bool isDistanceBigger = 1;
+}
+
+service IPCService {
+  rpc rideProposal(Proposal) returns (Response);
+  rpc checkDistance(Distance) returns (Permission);
+}

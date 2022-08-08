@@ -2,12 +2,12 @@
  * Mat. Number 975169
  * Manuel Pagliuca
  * M.Sc. of Computer Science @UNIMI A.Y. 2021/2022 */
-package Server;
+package Administrator.Server;
 
 import Clients.Taxi.RideRequest;
 import Clients.Taxi.Taxi;
 import Clients.Taxi.TaxiInfo;
-import Server.Services.AdministratorServerServices;
+import Administrator.Server.Services.AdministratorServerServices;
 
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
@@ -43,43 +43,6 @@ public class AdministratorServer {
         return instance;
     }
 
-    /*
-     * Add taxi process information inside the server and return updated infos
-     * ------------------------------------------------------------------------
-     * Given the Clients.Taxi.Taxi information parsed from a JSON file it will add the taxi
-     * information inside the static taxi list of the server.
-     *
-     * The ID of the taxi list if already present will be randomly generated again
-     * until a valid one will be available, that will be used.
-     *
-     * Also, the district with the relative starting position of the taxi will both
-     * be generated here and added to a TaxiInfo object that will be returned to the
-     * client. In this way the client will know the valid ID, the district and the
-     * position inside the smart city.
-     */
-    public TaxiInfo addTaxi(TaxiInfo info) {
-        assert (info != null);
-        TaxiInfo newTaxi = new TaxiInfo();
-
-        if (!taxis.containsValue(info.getId())) {
-            newTaxi.setId(info.getId());
-        } else {
-            int validID = genValidID();
-            newTaxi.setId(validID);
-        }
-
-        newTaxi.setDistrict(genRandomDistrict());
-        newTaxi.setPosition(genTaxiInitialPosition(newTaxi.getDistrict()));
-        newTaxi.setGrpcPort(info.getGrpcPort());
-        newTaxi.setAdministratorServerAddr(info.getAdministratorServerAddr());
-
-        // TODO: Aggiungere nuovo taxi all'hashmap
-        ArrayList<TaxiInfo> otherTaxis = (ArrayList<TaxiInfo>) getTaxis().clone();
-        otherTaxis.removeIf(taxi -> taxi == newTaxi);
-        taxis.put(newTaxi, otherTaxis);
-        return newTaxi;
-    }
-
     public static void main(String[] args) throws IOException {
         ResourceConfig config = new ResourceConfig();
         config.register(AdministratorServerServices.class);
@@ -98,11 +61,73 @@ public class AdministratorServer {
         }
     }
 
+    /*
+     * Add taxi process information inside the server and return updated infos
+     * ------------------------------------------------------------------------
+     * Given the Clients.Taxi.Taxi information parsed from a JSON file it will add the taxi
+     * information inside the static taxi list of the server.
+     *
+     * The ID of the taxi list if already present will be randomly generated again
+     * until a valid one will be available, that will be used.
+     *
+     * Also, the district with the relative starting position of the taxi will both
+     * be generated here and added to a TaxiInfo object that will be returned to the
+     * client. In this way the client will know the valid ID, the district and the
+     * position inside the smart city.
+     */
+    public TaxiInfo addTaxi(TaxiInfo info) {
+        assert (info != null);
+        TaxiInfo newTaxi = new TaxiInfo();
+
+        synchronized (taxis) {
+            if (!taxis.containsValue(info.getId())) {
+                newTaxi.setId(info.getId());
+            } else {
+                int validID = genValidID();
+                newTaxi.setId(validID);
+            }
+        }
+        newTaxi.setDistrict(genRandomDistrict());
+        newTaxi.setPosition(genTaxiInitialPosition(newTaxi.getDistrict()));
+        newTaxi.setGrpcPort(info.getGrpcPort());
+        newTaxi.setAdministratorServerAddr(info.getAdministratorServerAddr());
+
+        // TODO: Aggiungere nuovo taxi all'hashmap
+        ArrayList<TaxiInfo> otherTaxis = (ArrayList<TaxiInfo>) getTaxis().clone();
+        otherTaxis.removeIf(taxi -> taxi == newTaxi);
+
+        synchronized (taxis) {
+            taxis.put(newTaxi, otherTaxis);
+        }
+
+        return newTaxi;
+    }
+
+    /* Remove Taxi
+     * ----------------------------------------------------------------------------
+     *
+     */
+    public synchronized boolean removeTaxi(int taxiID) {
+        HashMap<TaxiInfo, ArrayList<TaxiInfo>> newTaxiList = new HashMap<>();
+
+        for (Map.Entry<TaxiInfo, ArrayList<TaxiInfo>> e : taxis.entrySet()) {
+            if (e.getKey().getId() != taxiID) {
+                newTaxiList.put(e.getKey(), e.getValue());
+            }
+        }
+
+        if (taxis.size() > newTaxiList.size()) {
+            taxis = newTaxiList;
+            return true;
+        }
+
+        return false;
+    }
     /// Utility
 
     // Single thread used from gRPC side
     public synchronized RideRequest assignRide(HashMap<Integer, ArrayList<RideRequest>> distancesForRides,
-                                  int rideID, int rideDistrict) {
+                                               int rideID, int rideDistrict) {
         ArrayList<RideRequest> pool = distancesForRides.get(rideID);
         int minID = -1;
         double minDistance = -1.0;
