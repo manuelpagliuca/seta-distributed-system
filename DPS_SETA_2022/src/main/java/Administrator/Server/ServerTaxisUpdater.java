@@ -14,7 +14,7 @@ public class ServerTaxisUpdater implements Runnable {
     public void run() {
         while (true) {
             try {
-                AdministratorServer.getInstance().updateTaxiLists();
+                //AdministratorServer.getInstance().updateTaxiLists();
                 // Debug
                 AdministratorServer.getInstance().printAllTaxis();
                 Thread.sleep(1000);

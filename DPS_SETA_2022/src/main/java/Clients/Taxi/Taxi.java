@@ -9,16 +9,22 @@ import Clients.SETA.RideInfo;
 import Schemes.TaxiSchema;
 import com.google.gson.Gson;
 
+import grpcTest.IPCServiceImpl;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 
+import io.grpc.ServerBuilder;
+import io.grpc.stub.StreamObserver;
 import jakarta.ws.rs.client.*;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
 import org.eclipse.paho.client.mqttv3.*;
+import org.example.grpc.IPC;
+import org.example.grpc.IPCServiceGrpc;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
@@ -37,25 +43,34 @@ public class Taxi {
         Client client = ClientBuilder.newClient();
 
         // Port on which the gRPC communication between taxis will be performed
-        int grpcPort = 3005;
+        Random random = new Random();
+        int grpcPort = random.nextInt(0, 65535);
 
         // Initialize the taxi on the administrator server through POST, it will return the valid infos
         TaxiSchema taxiSchema = postInit(client, grpcPort);
         TaxiInfo thisTaxi = taxiSchema.getTaxiInfo();
         thisTaxi.setBattery(100.0);
-        AtomicReference<ArrayList<TaxiInfo>> taxis = new AtomicReference<>(taxiSchema.getTaxis());
+        ArrayList<TaxiInfo> taxis = taxiSchema.getTaxis();
 
         // Standard input for console commands
         commandLineInterface(client, thisTaxi.getId());
-
         // Keep updating the taxi list through a thread performing POSTs
-        updatesTaxisFromAdminServer(client, thisTaxi.getId(), taxis);
+        //updatesTaxisFromAdminServer(client, thisTaxi.getId(), taxis);
         // Print the initial information of the taxi process
-        printFormattedInfos(thisTaxi, taxis.get());
+        printFormattedInfos(thisTaxi, taxis);
 
         // Creating the client for the MQTT broker
-        String clientId = MqttClient.generateClientId();
-        MqttClient mqttClient = new MqttClient(broker, clientId, null);
+        //String clientId = MqttClient.generateClientId();
+        //MqttClient mqttClient = new MqttClient(broker, clientId, null);
+
+        // gRPC for the P2P communication between processes
+        startGrpcServer(grpcPort);
+        if (taxis.size() > 0) {
+            grpcPresentToOthers(thisTaxi, taxis);
+        }
+
+        //startGrpcClient(39568);
+
         // Using the MQTT client for seeking rides on the relative assigned district of the taxi
         //seekingRides(mqttClient, thisTaxi);
 
@@ -74,13 +89,94 @@ public class Taxi {
         // TODO: Inizia l'acquisizione dei dati dal sensore
     }
 
+    private static void grpcPresentToOthers(TaxiInfo thisTaxi, ArrayList<TaxiInfo> taxis) {
+        ManagedChannel channel;
+
+        IPC.Infos infos = IPC.Infos.newBuilder()
+                .setId(thisTaxi.getId())
+                .setDistrict(thisTaxi.getDistrict())
+                .setGrpcPort(thisTaxi.getGrpcPort())
+                .build();
+
+        for (TaxiInfo e : taxis) {
+            channel = ManagedChannelBuilder.forTarget(ADMIN_SERVER_ADDR + ":" + e.getGrpcPort()).build();
+            IPCServiceGrpc.IPCServiceStub stub = IPCServiceGrpc.newStub(channel);
+
+            //stub.present();
+
+
+            System.out.println();
+            //response.getStringResponse();
+        }
+
+
+    }
+
+    private static void startGrpcClient(int grpcPort) {
+        final ManagedChannel channel = ManagedChannelBuilder.forTarget(ADMIN_SERVER_ADDR + ":" + grpcPort).build();
+        IPCServiceGrpc.IPCServiceStub stub = IPCServiceGrpc.newStub(channel);
+        StreamObserver<IPC.Proposal> serverStream = stub.coordinate(new StreamObserver<>() {
+            @Override
+            public void onNext(IPC.Response value) {
+                System.out.println("[From taxi server] " + value.getStringResponse());
+            }
+
+            @Override
+            public void onError(Throwable t) {
+
+            }
+
+            @Override
+            public void onCompleted() {
+
+            }
+        });
+
+        serverStream.onNext(IPC.Proposal.newBuilder().setStringRequest("Message 1 to the taxi server").build());
+        serverStream.onNext(IPC.Proposal.newBuilder().setStringRequest("Message 2 to the taxi server").build());
+        serverStream.onNext(IPC.Proposal.newBuilder().setStringRequest("Message 3 to the taxi server").build());
+
+        try {
+            channel.awaitTermination(10, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void startGrpcServer(int grpcPort) {
+        Thread thread = new Thread(() -> {
+            try {
+                io.grpc.Server server =
+                        ServerBuilder.forPort(grpcPort)
+                                .addService(new IPCServiceImpl()).build();
+                server.start();
+                System.out.println("Server started!\n");
+                server.awaitTermination();
+                System.out.println("The server for gRPC communication has terminated");
+            } catch (IOException | InterruptedException e) {
+                e.printStackTrace();
+            }
+        });
+    }
+
+
+    /*
+     * Command Line Interface for receiving user commands
+     * --------------------------------------------------------------
+     * It is implemented through a thread and always in listening on the
+     * standard input for a command.
+     *
+     * quit: perform a DELETE request on the administrator server for the
+     * removal of this taxi, then quit the process.
+     */
     private static void commandLineInterface(Client client, int taxiID) {
         Scanner scanner = new Scanner(System.in);
         Thread cli = new Thread(() -> {
             String userInput = null;
-            while (!Thread.currentThread().isInterrupted()) {
+
+            while (scanner.hasNextLine() && !Thread.currentThread().isInterrupted()) {
                 userInput = scanner.nextLine();
-                if (userInput.equals("quit")) {
+                if (userInput.equalsIgnoreCase("quit")) {
                     System.out.println("Terminating the execution");
                     removeTaxi(client, taxiID);
                     System.exit(0);
@@ -89,7 +185,6 @@ public class Taxi {
         });
         cli.start();
     }
-
 
     /*
      * Seeking for rides on the relative district on which the taxi is assigned
@@ -117,7 +212,6 @@ public class Taxi {
         MqttConnectOptions connectOptions = new MqttConnectOptions();
         connectOptions.setCleanSession(true);
         mqttClient.connect(connectOptions);
-
 
         mqttClient.setCallback(new MqttCallback() {
             @Override

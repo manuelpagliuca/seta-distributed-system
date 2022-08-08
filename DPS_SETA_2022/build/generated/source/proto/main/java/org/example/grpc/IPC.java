@@ -19,12 +19,17 @@ public final class IPC {
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>string stringRequest = 1;</code>
+     * <code>required string stringRequest = 1;</code>
+     * @return Whether the stringRequest field is set.
+     */
+    boolean hasStringRequest();
+    /**
+     * <code>required string stringRequest = 1;</code>
      * @return The stringRequest.
      */
     java.lang.String getStringRequest();
     /**
-     * <code>string stringRequest = 1;</code>
+     * <code>required string stringRequest = 1;</code>
      * @return The bytes for stringRequest.
      */
     com.google.protobuf.ByteString
@@ -66,6 +71,7 @@ public final class IPC {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
+      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -77,9 +83,9 @@ public final class IPC {
               done = true;
               break;
             case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              stringRequest_ = s;
+              com.google.protobuf.ByteString bs = input.readBytes();
+              bitField0_ |= 0x00000001;
+              stringRequest_ = bs;
               break;
             }
             default: {
@@ -114,10 +120,18 @@ public final class IPC {
               org.example.grpc.IPC.Proposal.class, org.example.grpc.IPC.Proposal.Builder.class);
     }
 
+    private int bitField0_;
     public static final int STRINGREQUEST_FIELD_NUMBER = 1;
     private volatile java.lang.Object stringRequest_;
     /**
-     * <code>string stringRequest = 1;</code>
+     * <code>required string stringRequest = 1;</code>
+     * @return Whether the stringRequest field is set.
+     */
+    public boolean hasStringRequest() {
+      return ((bitField0_ & 0x00000001) != 0);
+    }
+    /**
+     * <code>required string stringRequest = 1;</code>
      * @return The stringRequest.
      */
     public java.lang.String getStringRequest() {
@@ -128,12 +142,14 @@ public final class IPC {
         com.google.protobuf.ByteString bs = 
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
-        stringRequest_ = s;
+        if (bs.isValidUtf8()) {
+          stringRequest_ = s;
+        }
         return s;
       }
     }
     /**
-     * <code>string stringRequest = 1;</code>
+     * <code>required string stringRequest = 1;</code>
      * @return The bytes for stringRequest.
      */
     public com.google.protobuf.ByteString
@@ -157,6 +173,10 @@ public final class IPC {
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
 
+      if (!hasStringRequest()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
       memoizedIsInitialized = 1;
       return true;
     }
@@ -164,7 +184,7 @@ public final class IPC {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getStringRequestBytes().isEmpty()) {
+      if (((bitField0_ & 0x00000001) != 0)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, stringRequest_);
       }
       unknownFields.writeTo(output);
@@ -176,7 +196,7 @@ public final class IPC {
       if (size != -1) return size;
 
       size = 0;
-      if (!getStringRequestBytes().isEmpty()) {
+      if (((bitField0_ & 0x00000001) != 0)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, stringRequest_);
       }
       size += unknownFields.getSerializedSize();
@@ -194,8 +214,11 @@ public final class IPC {
       }
       org.example.grpc.IPC.Proposal other = (org.example.grpc.IPC.Proposal) obj;
 
-      if (!getStringRequest()
-          .equals(other.getStringRequest())) return false;
+      if (hasStringRequest() != other.hasStringRequest()) return false;
+      if (hasStringRequest()) {
+        if (!getStringRequest()
+            .equals(other.getStringRequest())) return false;
+      }
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -207,8 +230,10 @@ public final class IPC {
       }
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
-      hash = (37 * hash) + STRINGREQUEST_FIELD_NUMBER;
-      hash = (53 * hash) + getStringRequest().hashCode();
+      if (hasStringRequest()) {
+        hash = (37 * hash) + STRINGREQUEST_FIELD_NUMBER;
+        hash = (53 * hash) + getStringRequest().hashCode();
+      }
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -343,7 +368,7 @@ public final class IPC {
       public Builder clear() {
         super.clear();
         stringRequest_ = "";
-
+        bitField0_ = (bitField0_ & ~0x00000001);
         return this;
       }
 
@@ -370,7 +395,13 @@ public final class IPC {
       @java.lang.Override
       public org.example.grpc.IPC.Proposal buildPartial() {
         org.example.grpc.IPC.Proposal result = new org.example.grpc.IPC.Proposal(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          to_bitField0_ |= 0x00000001;
+        }
         result.stringRequest_ = stringRequest_;
+        result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
       }
@@ -419,7 +450,8 @@ public final class IPC {
 
       public Builder mergeFrom(org.example.grpc.IPC.Proposal other) {
         if (other == org.example.grpc.IPC.Proposal.getDefaultInstance()) return this;
-        if (!other.getStringRequest().isEmpty()) {
+        if (other.hasStringRequest()) {
+          bitField0_ |= 0x00000001;
           stringRequest_ = other.stringRequest_;
           onChanged();
         }
@@ -430,6 +462,9 @@ public final class IPC {
 
       @java.lang.Override
       public final boolean isInitialized() {
+        if (!hasStringRequest()) {
+          return false;
+        }
         return true;
       }
 
@@ -451,10 +486,18 @@ public final class IPC {
         }
         return this;
       }
+      private int bitField0_;
 
       private java.lang.Object stringRequest_ = "";
       /**
-       * <code>string stringRequest = 1;</code>
+       * <code>required string stringRequest = 1;</code>
+       * @return Whether the stringRequest field is set.
+       */
+      public boolean hasStringRequest() {
+        return ((bitField0_ & 0x00000001) != 0);
+      }
+      /**
+       * <code>required string stringRequest = 1;</code>
        * @return The stringRequest.
        */
       public java.lang.String getStringRequest() {
@@ -463,14 +506,16 @@ public final class IPC {
           com.google.protobuf.ByteString bs =
               (com.google.protobuf.ByteString) ref;
           java.lang.String s = bs.toStringUtf8();
-          stringRequest_ = s;
+          if (bs.isValidUtf8()) {
+            stringRequest_ = s;
+          }
           return s;
         } else {
           return (java.lang.String) ref;
         }
       }
       /**
-       * <code>string stringRequest = 1;</code>
+       * <code>required string stringRequest = 1;</code>
        * @return The bytes for stringRequest.
        */
       public com.google.protobuf.ByteString
@@ -487,7 +532,7 @@ public final class IPC {
         }
       }
       /**
-       * <code>string stringRequest = 1;</code>
+       * <code>required string stringRequest = 1;</code>
        * @param value The stringRequest to set.
        * @return This builder for chaining.
        */
@@ -496,23 +541,23 @@ public final class IPC {
         if (value == null) {
     throw new NullPointerException();
   }
-  
+  bitField0_ |= 0x00000001;
         stringRequest_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>string stringRequest = 1;</code>
+       * <code>required string stringRequest = 1;</code>
        * @return This builder for chaining.
        */
       public Builder clearStringRequest() {
-        
+        bitField0_ = (bitField0_ & ~0x00000001);
         stringRequest_ = getDefaultInstance().getStringRequest();
         onChanged();
         return this;
       }
       /**
-       * <code>string stringRequest = 1;</code>
+       * <code>required string stringRequest = 1;</code>
        * @param value The bytes for stringRequest to set.
        * @return This builder for chaining.
        */
@@ -521,8 +566,7 @@ public final class IPC {
         if (value == null) {
     throw new NullPointerException();
   }
-  checkByteStringIsUtf8(value);
-        
+  bitField0_ |= 0x00000001;
         stringRequest_ = value;
         onChanged();
         return this;
@@ -553,7 +597,7 @@ public final class IPC {
       return DEFAULT_INSTANCE;
     }
 
-    private static final com.google.protobuf.Parser<Proposal>
+    @java.lang.Deprecated public static final com.google.protobuf.Parser<Proposal>
         PARSER = new com.google.protobuf.AbstractParser<Proposal>() {
       @java.lang.Override
       public Proposal parsePartialFrom(
@@ -585,12 +629,17 @@ public final class IPC {
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>string stringResponse = 1;</code>
+     * <code>required string stringResponse = 1;</code>
+     * @return Whether the stringResponse field is set.
+     */
+    boolean hasStringResponse();
+    /**
+     * <code>required string stringResponse = 1;</code>
      * @return The stringResponse.
      */
     java.lang.String getStringResponse();
     /**
-     * <code>string stringResponse = 1;</code>
+     * <code>required string stringResponse = 1;</code>
      * @return The bytes for stringResponse.
      */
     com.google.protobuf.ByteString
@@ -632,6 +681,7 @@ public final class IPC {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
+      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -643,9 +693,9 @@ public final class IPC {
               done = true;
               break;
             case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              stringResponse_ = s;
+              com.google.protobuf.ByteString bs = input.readBytes();
+              bitField0_ |= 0x00000001;
+              stringResponse_ = bs;
               break;
             }
             default: {
@@ -680,10 +730,18 @@ public final class IPC {
               org.example.grpc.IPC.Response.class, org.example.grpc.IPC.Response.Builder.class);
     }
 
+    private int bitField0_;
     public static final int STRINGRESPONSE_FIELD_NUMBER = 1;
     private volatile java.lang.Object stringResponse_;
     /**
-     * <code>string stringResponse = 1;</code>
+     * <code>required string stringResponse = 1;</code>
+     * @return Whether the stringResponse field is set.
+     */
+    public boolean hasStringResponse() {
+      return ((bitField0_ & 0x00000001) != 0);
+    }
+    /**
+     * <code>required string stringResponse = 1;</code>
      * @return The stringResponse.
      */
     public java.lang.String getStringResponse() {
@@ -694,12 +752,14 @@ public final class IPC {
         com.google.protobuf.ByteString bs = 
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
-        stringResponse_ = s;
+        if (bs.isValidUtf8()) {
+          stringResponse_ = s;
+        }
         return s;
       }
     }
     /**
-     * <code>string stringResponse = 1;</code>
+     * <code>required string stringResponse = 1;</code>
      * @return The bytes for stringResponse.
      */
     public com.google.protobuf.ByteString
@@ -723,6 +783,10 @@ public final class IPC {
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
 
+      if (!hasStringResponse()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
       memoizedIsInitialized = 1;
       return true;
     }
@@ -730,7 +794,7 @@ public final class IPC {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getStringResponseBytes().isEmpty()) {
+      if (((bitField0_ & 0x00000001) != 0)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, stringResponse_);
       }
       unknownFields.writeTo(output);
@@ -742,7 +806,7 @@ public final class IPC {
       if (size != -1) return size;
 
       size = 0;
-      if (!getStringResponseBytes().isEmpty()) {
+      if (((bitField0_ & 0x00000001) != 0)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, stringResponse_);
       }
       size += unknownFields.getSerializedSize();
@@ -760,8 +824,11 @@ public final class IPC {
       }
       org.example.grpc.IPC.Response other = (org.example.grpc.IPC.Response) obj;
 
-      if (!getStringResponse()
-          .equals(other.getStringResponse())) return false;
+      if (hasStringResponse() != other.hasStringResponse()) return false;
+      if (hasStringResponse()) {
+        if (!getStringResponse()
+            .equals(other.getStringResponse())) return false;
+      }
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -773,8 +840,10 @@ public final class IPC {
       }
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
-      hash = (37 * hash) + STRINGRESPONSE_FIELD_NUMBER;
-      hash = (53 * hash) + getStringResponse().hashCode();
+      if (hasStringResponse()) {
+        hash = (37 * hash) + STRINGRESPONSE_FIELD_NUMBER;
+        hash = (53 * hash) + getStringResponse().hashCode();
+      }
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -909,7 +978,7 @@ public final class IPC {
       public Builder clear() {
         super.clear();
         stringResponse_ = "";
-
+        bitField0_ = (bitField0_ & ~0x00000001);
         return this;
       }
 
@@ -936,7 +1005,13 @@ public final class IPC {
       @java.lang.Override
       public org.example.grpc.IPC.Response buildPartial() {
         org.example.grpc.IPC.Response result = new org.example.grpc.IPC.Response(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          to_bitField0_ |= 0x00000001;
+        }
         result.stringResponse_ = stringResponse_;
+        result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
       }
@@ -985,7 +1060,8 @@ public final class IPC {
 
       public Builder mergeFrom(org.example.grpc.IPC.Response other) {
         if (other == org.example.grpc.IPC.Response.getDefaultInstance()) return this;
-        if (!other.getStringResponse().isEmpty()) {
+        if (other.hasStringResponse()) {
+          bitField0_ |= 0x00000001;
           stringResponse_ = other.stringResponse_;
           onChanged();
         }
@@ -996,6 +1072,9 @@ public final class IPC {
 
       @java.lang.Override
       public final boolean isInitialized() {
+        if (!hasStringResponse()) {
+          return false;
+        }
         return true;
       }
 
@@ -1017,10 +1096,18 @@ public final class IPC {
         }
         return this;
       }
+      private int bitField0_;
 
       private java.lang.Object stringResponse_ = "";
       /**
-       * <code>string stringResponse = 1;</code>
+       * <code>required string stringResponse = 1;</code>
+       * @return Whether the stringResponse field is set.
+       */
+      public boolean hasStringResponse() {
+        return ((bitField0_ & 0x00000001) != 0);
+      }
+      /**
+       * <code>required string stringResponse = 1;</code>
        * @return The stringResponse.
        */
       public java.lang.String getStringResponse() {
@@ -1029,14 +1116,16 @@ public final class IPC {
           com.google.protobuf.ByteString bs =
               (com.google.protobuf.ByteString) ref;
           java.lang.String s = bs.toStringUtf8();
-          stringResponse_ = s;
+          if (bs.isValidUtf8()) {
+            stringResponse_ = s;
+          }
           return s;
         } else {
           return (java.lang.String) ref;
         }
       }
       /**
-       * <code>string stringResponse = 1;</code>
+       * <code>required string stringResponse = 1;</code>
        * @return The bytes for stringResponse.
        */
       public com.google.protobuf.ByteString
@@ -1053,7 +1142,7 @@ public final class IPC {
         }
       }
       /**
-       * <code>string stringResponse = 1;</code>
+       * <code>required string stringResponse = 1;</code>
        * @param value The stringResponse to set.
        * @return This builder for chaining.
        */
@@ -1062,23 +1151,23 @@ public final class IPC {
         if (value == null) {
     throw new NullPointerException();
   }
-  
+  bitField0_ |= 0x00000001;
         stringResponse_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>string stringResponse = 1;</code>
+       * <code>required string stringResponse = 1;</code>
        * @return This builder for chaining.
        */
       public Builder clearStringResponse() {
-        
+        bitField0_ = (bitField0_ & ~0x00000001);
         stringResponse_ = getDefaultInstance().getStringResponse();
         onChanged();
         return this;
       }
       /**
-       * <code>string stringResponse = 1;</code>
+       * <code>required string stringResponse = 1;</code>
        * @param value The bytes for stringResponse to set.
        * @return This builder for chaining.
        */
@@ -1087,8 +1176,7 @@ public final class IPC {
         if (value == null) {
     throw new NullPointerException();
   }
-  checkByteStringIsUtf8(value);
-        
+  bitField0_ |= 0x00000001;
         stringResponse_ = value;
         onChanged();
         return this;
@@ -1119,7 +1207,7 @@ public final class IPC {
       return DEFAULT_INSTANCE;
     }
 
-    private static final com.google.protobuf.Parser<Response>
+    @java.lang.Deprecated public static final com.google.protobuf.Parser<Response>
         PARSER = new com.google.protobuf.AbstractParser<Response>() {
       @java.lang.Override
       public Response parsePartialFrom(
@@ -1146,43 +1234,63 @@ public final class IPC {
 
   }
 
-  public interface DistanceOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.example.grpc.Distance)
+  public interface InfosOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:org.example.grpc.Infos)
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>string distance = 1;</code>
-     * @return The distance.
+     * <code>required int32 id = 1;</code>
+     * @return Whether the id field is set.
      */
-    java.lang.String getDistance();
+    boolean hasId();
     /**
-     * <code>string distance = 1;</code>
-     * @return The bytes for distance.
+     * <code>required int32 id = 1;</code>
+     * @return The id.
      */
-    com.google.protobuf.ByteString
-        getDistanceBytes();
+    int getId();
+
+    /**
+     * <code>required int32 district = 2;</code>
+     * @return Whether the district field is set.
+     */
+    boolean hasDistrict();
+    /**
+     * <code>required int32 district = 2;</code>
+     * @return The district.
+     */
+    int getDistrict();
+
+    /**
+     * <code>required int64 grpcPort = 3;</code>
+     * @return Whether the grpcPort field is set.
+     */
+    boolean hasGrpcPort();
+    /**
+     * <code>required int64 grpcPort = 3;</code>
+     * @return The grpcPort.
+     */
+    long getGrpcPort();
   }
   /**
-   * Protobuf type {@code org.example.grpc.Distance}
+   * Protobuf type {@code org.example.grpc.Infos}
    */
-  public  static final class Distance extends
+  public  static final class Infos extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.example.grpc.Distance)
-      DistanceOrBuilder {
+      // @@protoc_insertion_point(message_implements:org.example.grpc.Infos)
+      InfosOrBuilder {
   private static final long serialVersionUID = 0L;
-    // Use Distance.newBuilder() to construct.
-    private Distance(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+    // Use Infos.newBuilder() to construct.
+    private Infos(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
       super(builder);
     }
-    private Distance() {
-      distance_ = "";
+    private Infos() {
     }
 
     @java.lang.Override
     @SuppressWarnings({"unused"})
     protected java.lang.Object newInstance(
         UnusedPrivateParameter unused) {
-      return new Distance();
+      return new Infos();
     }
 
     @java.lang.Override
@@ -1190,7 +1298,7 @@ public final class IPC {
     getUnknownFields() {
       return this.unknownFields;
     }
-    private Distance(
+    private Infos(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
@@ -1198,565 +1306,7 @@ public final class IPC {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              distance_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
-    public static final com.google.protobuf.Descriptors.Descriptor
-        getDescriptor() {
-      return org.example.grpc.IPC.internal_static_org_example_grpc_Distance_descriptor;
-    }
-
-    @java.lang.Override
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-        internalGetFieldAccessorTable() {
-      return org.example.grpc.IPC.internal_static_org_example_grpc_Distance_fieldAccessorTable
-          .ensureFieldAccessorsInitialized(
-              org.example.grpc.IPC.Distance.class, org.example.grpc.IPC.Distance.Builder.class);
-    }
-
-    public static final int DISTANCE_FIELD_NUMBER = 1;
-    private volatile java.lang.Object distance_;
-    /**
-     * <code>string distance = 1;</code>
-     * @return The distance.
-     */
-    public java.lang.String getDistance() {
-      java.lang.Object ref = distance_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        distance_ = s;
-        return s;
-      }
-    }
-    /**
-     * <code>string distance = 1;</code>
-     * @return The bytes for distance.
-     */
-    public com.google.protobuf.ByteString
-        getDistanceBytes() {
-      java.lang.Object ref = distance_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        distance_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-
-    private byte memoizedIsInitialized = -1;
-    @java.lang.Override
-    public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
-      if (isInitialized == 1) return true;
-      if (isInitialized == 0) return false;
-
-      memoizedIsInitialized = 1;
-      return true;
-    }
-
-    @java.lang.Override
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
-                        throws java.io.IOException {
-      if (!getDistanceBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, distance_);
-      }
-      unknownFields.writeTo(output);
-    }
-
-    @java.lang.Override
-    public int getSerializedSize() {
-      int size = memoizedSize;
-      if (size != -1) return size;
-
-      size = 0;
-      if (!getDistanceBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, distance_);
-      }
-      size += unknownFields.getSerializedSize();
-      memoizedSize = size;
-      return size;
-    }
-
-    @java.lang.Override
-    public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof org.example.grpc.IPC.Distance)) {
-        return super.equals(obj);
-      }
-      org.example.grpc.IPC.Distance other = (org.example.grpc.IPC.Distance) obj;
-
-      if (!getDistance()
-          .equals(other.getDistance())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
-      return true;
-    }
-
-    @java.lang.Override
-    public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
-      int hash = 41;
-      hash = (19 * hash) + getDescriptor().hashCode();
-      hash = (37 * hash) + DISTANCE_FIELD_NUMBER;
-      hash = (53 * hash) + getDistance().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
-      memoizedHashCode = hash;
-      return hash;
-    }
-
-    public static org.example.grpc.IPC.Distance parseFrom(
-        java.nio.ByteBuffer data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static org.example.grpc.IPC.Distance parseFrom(
-        java.nio.ByteBuffer data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static org.example.grpc.IPC.Distance parseFrom(
-        com.google.protobuf.ByteString data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static org.example.grpc.IPC.Distance parseFrom(
-        com.google.protobuf.ByteString data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static org.example.grpc.IPC.Distance parseFrom(byte[] data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static org.example.grpc.IPC.Distance parseFrom(
-        byte[] data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static org.example.grpc.IPC.Distance parseFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static org.example.grpc.IPC.Distance parseFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-    public static org.example.grpc.IPC.Distance parseDelimitedFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input);
-    }
-    public static org.example.grpc.IPC.Distance parseDelimitedFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
-    }
-    public static org.example.grpc.IPC.Distance parseFrom(
-        com.google.protobuf.CodedInputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static org.example.grpc.IPC.Distance parseFrom(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-
-    @java.lang.Override
-    public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder() {
-      return DEFAULT_INSTANCE.toBuilder();
-    }
-    public static Builder newBuilder(org.example.grpc.IPC.Distance prototype) {
-      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
-    }
-    @java.lang.Override
-    public Builder toBuilder() {
-      return this == DEFAULT_INSTANCE
-          ? new Builder() : new Builder().mergeFrom(this);
-    }
-
-    @java.lang.Override
-    protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      Builder builder = new Builder(parent);
-      return builder;
-    }
-    /**
-     * Protobuf type {@code org.example.grpc.Distance}
-     */
-    public static final class Builder extends
-        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.example.grpc.Distance)
-        org.example.grpc.IPC.DistanceOrBuilder {
-      public static final com.google.protobuf.Descriptors.Descriptor
-          getDescriptor() {
-        return org.example.grpc.IPC.internal_static_org_example_grpc_Distance_descriptor;
-      }
-
-      @java.lang.Override
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-          internalGetFieldAccessorTable() {
-        return org.example.grpc.IPC.internal_static_org_example_grpc_Distance_fieldAccessorTable
-            .ensureFieldAccessorsInitialized(
-                org.example.grpc.IPC.Distance.class, org.example.grpc.IPC.Distance.Builder.class);
-      }
-
-      // Construct using org.example.grpc.IPC.Distance.newBuilder()
-      private Builder() {
-        maybeForceBuilderInitialization();
-      }
-
-      private Builder(
-          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-        super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
-      }
-      @java.lang.Override
-      public Builder clear() {
-        super.clear();
-        distance_ = "";
-
-        return this;
-      }
-
-      @java.lang.Override
-      public com.google.protobuf.Descriptors.Descriptor
-          getDescriptorForType() {
-        return org.example.grpc.IPC.internal_static_org_example_grpc_Distance_descriptor;
-      }
-
-      @java.lang.Override
-      public org.example.grpc.IPC.Distance getDefaultInstanceForType() {
-        return org.example.grpc.IPC.Distance.getDefaultInstance();
-      }
-
-      @java.lang.Override
-      public org.example.grpc.IPC.Distance build() {
-        org.example.grpc.IPC.Distance result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
-        return result;
-      }
-
-      @java.lang.Override
-      public org.example.grpc.IPC.Distance buildPartial() {
-        org.example.grpc.IPC.Distance result = new org.example.grpc.IPC.Distance(this);
-        result.distance_ = distance_;
-        onBuilt();
-        return result;
-      }
-
-      @java.lang.Override
-      public Builder clone() {
-        return super.clone();
-      }
-      @java.lang.Override
-      public Builder setField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.setField(field, value);
-      }
-      @java.lang.Override
-      public Builder clearField(
-          com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return super.clearField(field);
-      }
-      @java.lang.Override
-      public Builder clearOneof(
-          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return super.clearOneof(oneof);
-      }
-      @java.lang.Override
-      public Builder setRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          int index, java.lang.Object value) {
-        return super.setRepeatedField(field, index, value);
-      }
-      @java.lang.Override
-      public Builder addRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.addRepeatedField(field, value);
-      }
-      @java.lang.Override
-      public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof org.example.grpc.IPC.Distance) {
-          return mergeFrom((org.example.grpc.IPC.Distance)other);
-        } else {
-          super.mergeFrom(other);
-          return this;
-        }
-      }
-
-      public Builder mergeFrom(org.example.grpc.IPC.Distance other) {
-        if (other == org.example.grpc.IPC.Distance.getDefaultInstance()) return this;
-        if (!other.getDistance().isEmpty()) {
-          distance_ = other.distance_;
-          onChanged();
-        }
-        this.mergeUnknownFields(other.unknownFields);
-        onChanged();
-        return this;
-      }
-
-      @java.lang.Override
-      public final boolean isInitialized() {
-        return true;
-      }
-
-      @java.lang.Override
-      public Builder mergeFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws java.io.IOException {
-        org.example.grpc.IPC.Distance parsedMessage = null;
-        try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (org.example.grpc.IPC.Distance) e.getUnfinishedMessage();
-          throw e.unwrapIOException();
-        } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
-        return this;
-      }
-
-      private java.lang.Object distance_ = "";
-      /**
-       * <code>string distance = 1;</code>
-       * @return The distance.
-       */
-      public java.lang.String getDistance() {
-        java.lang.Object ref = distance_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          distance_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
-      }
-      /**
-       * <code>string distance = 1;</code>
-       * @return The bytes for distance.
-       */
-      public com.google.protobuf.ByteString
-          getDistanceBytes() {
-        java.lang.Object ref = distance_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          distance_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <code>string distance = 1;</code>
-       * @param value The distance to set.
-       * @return This builder for chaining.
-       */
-      public Builder setDistance(
-          java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
-        distance_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>string distance = 1;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearDistance() {
-        
-        distance_ = getDefaultInstance().getDistance();
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>string distance = 1;</code>
-       * @param value The bytes for distance to set.
-       * @return This builder for chaining.
-       */
-      public Builder setDistanceBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
-        distance_ = value;
-        onChanged();
-        return this;
-      }
-      @java.lang.Override
-      public final Builder setUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFields(unknownFields);
-      }
-
-      @java.lang.Override
-      public final Builder mergeUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.mergeUnknownFields(unknownFields);
-      }
-
-
-      // @@protoc_insertion_point(builder_scope:org.example.grpc.Distance)
-    }
-
-    // @@protoc_insertion_point(class_scope:org.example.grpc.Distance)
-    private static final org.example.grpc.IPC.Distance DEFAULT_INSTANCE;
-    static {
-      DEFAULT_INSTANCE = new org.example.grpc.IPC.Distance();
-    }
-
-    public static org.example.grpc.IPC.Distance getDefaultInstance() {
-      return DEFAULT_INSTANCE;
-    }
-
-    private static final com.google.protobuf.Parser<Distance>
-        PARSER = new com.google.protobuf.AbstractParser<Distance>() {
-      @java.lang.Override
-      public Distance parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        return new Distance(input, extensionRegistry);
-      }
-    };
-
-    public static com.google.protobuf.Parser<Distance> parser() {
-      return PARSER;
-    }
-
-    @java.lang.Override
-    public com.google.protobuf.Parser<Distance> getParserForType() {
-      return PARSER;
-    }
-
-    @java.lang.Override
-    public org.example.grpc.IPC.Distance getDefaultInstanceForType() {
-      return DEFAULT_INSTANCE;
-    }
-
-  }
-
-  public interface PermissionOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.example.grpc.Permission)
-      com.google.protobuf.MessageOrBuilder {
-
-    /**
-     * <code>bool isDistanceBigger = 1;</code>
-     * @return The isDistanceBigger.
-     */
-    boolean getIsDistanceBigger();
-  }
-  /**
-   * Protobuf type {@code org.example.grpc.Permission}
-   */
-  public  static final class Permission extends
-      com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.example.grpc.Permission)
-      PermissionOrBuilder {
-  private static final long serialVersionUID = 0L;
-    // Use Permission.newBuilder() to construct.
-    private Permission(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
-      super(builder);
-    }
-    private Permission() {
-    }
-
-    @java.lang.Override
-    @SuppressWarnings({"unused"})
-    protected java.lang.Object newInstance(
-        UnusedPrivateParameter unused) {
-      return new Permission();
-    }
-
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
-    private Permission(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
+      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -1768,8 +1318,18 @@ public final class IPC {
               done = true;
               break;
             case 8: {
-
-              isDistanceBigger_ = input.readBool();
+              bitField0_ |= 0x00000001;
+              id_ = input.readInt32();
+              break;
+            }
+            case 16: {
+              bitField0_ |= 0x00000002;
+              district_ = input.readInt32();
+              break;
+            }
+            case 24: {
+              bitField0_ |= 0x00000004;
+              grpcPort_ = input.readInt64();
               break;
             }
             default: {
@@ -1793,25 +1353,67 @@ public final class IPC {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.example.grpc.IPC.internal_static_org_example_grpc_Permission_descriptor;
+      return org.example.grpc.IPC.internal_static_org_example_grpc_Infos_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.example.grpc.IPC.internal_static_org_example_grpc_Permission_fieldAccessorTable
+      return org.example.grpc.IPC.internal_static_org_example_grpc_Infos_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
-              org.example.grpc.IPC.Permission.class, org.example.grpc.IPC.Permission.Builder.class);
+              org.example.grpc.IPC.Infos.class, org.example.grpc.IPC.Infos.Builder.class);
     }
 
-    public static final int ISDISTANCEBIGGER_FIELD_NUMBER = 1;
-    private boolean isDistanceBigger_;
+    private int bitField0_;
+    public static final int ID_FIELD_NUMBER = 1;
+    private int id_;
     /**
-     * <code>bool isDistanceBigger = 1;</code>
-     * @return The isDistanceBigger.
+     * <code>required int32 id = 1;</code>
+     * @return Whether the id field is set.
      */
-    public boolean getIsDistanceBigger() {
-      return isDistanceBigger_;
+    public boolean hasId() {
+      return ((bitField0_ & 0x00000001) != 0);
+    }
+    /**
+     * <code>required int32 id = 1;</code>
+     * @return The id.
+     */
+    public int getId() {
+      return id_;
+    }
+
+    public static final int DISTRICT_FIELD_NUMBER = 2;
+    private int district_;
+    /**
+     * <code>required int32 district = 2;</code>
+     * @return Whether the district field is set.
+     */
+    public boolean hasDistrict() {
+      return ((bitField0_ & 0x00000002) != 0);
+    }
+    /**
+     * <code>required int32 district = 2;</code>
+     * @return The district.
+     */
+    public int getDistrict() {
+      return district_;
+    }
+
+    public static final int GRPCPORT_FIELD_NUMBER = 3;
+    private long grpcPort_;
+    /**
+     * <code>required int64 grpcPort = 3;</code>
+     * @return Whether the grpcPort field is set.
+     */
+    public boolean hasGrpcPort() {
+      return ((bitField0_ & 0x00000004) != 0);
+    }
+    /**
+     * <code>required int64 grpcPort = 3;</code>
+     * @return The grpcPort.
+     */
+    public long getGrpcPort() {
+      return grpcPort_;
     }
 
     private byte memoizedIsInitialized = -1;
@@ -1821,6 +1423,18 @@ public final class IPC {
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
 
+      if (!hasId()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      if (!hasDistrict()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      if (!hasGrpcPort()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
       memoizedIsInitialized = 1;
       return true;
     }
@@ -1828,8 +1442,14 @@ public final class IPC {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (isDistanceBigger_ != false) {
-        output.writeBool(1, isDistanceBigger_);
+      if (((bitField0_ & 0x00000001) != 0)) {
+        output.writeInt32(1, id_);
+      }
+      if (((bitField0_ & 0x00000002) != 0)) {
+        output.writeInt32(2, district_);
+      }
+      if (((bitField0_ & 0x00000004) != 0)) {
+        output.writeInt64(3, grpcPort_);
       }
       unknownFields.writeTo(output);
     }
@@ -1840,9 +1460,17 @@ public final class IPC {
       if (size != -1) return size;
 
       size = 0;
-      if (isDistanceBigger_ != false) {
+      if (((bitField0_ & 0x00000001) != 0)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBoolSize(1, isDistanceBigger_);
+          .computeInt32Size(1, id_);
+      }
+      if (((bitField0_ & 0x00000002) != 0)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(2, district_);
+      }
+      if (((bitField0_ & 0x00000004) != 0)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(3, grpcPort_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -1854,13 +1482,26 @@ public final class IPC {
       if (obj == this) {
        return true;
       }
-      if (!(obj instanceof org.example.grpc.IPC.Permission)) {
+      if (!(obj instanceof org.example.grpc.IPC.Infos)) {
         return super.equals(obj);
       }
-      org.example.grpc.IPC.Permission other = (org.example.grpc.IPC.Permission) obj;
+      org.example.grpc.IPC.Infos other = (org.example.grpc.IPC.Infos) obj;
 
-      if (getIsDistanceBigger()
-          != other.getIsDistanceBigger()) return false;
+      if (hasId() != other.hasId()) return false;
+      if (hasId()) {
+        if (getId()
+            != other.getId()) return false;
+      }
+      if (hasDistrict() != other.hasDistrict()) return false;
+      if (hasDistrict()) {
+        if (getDistrict()
+            != other.getDistrict()) return false;
+      }
+      if (hasGrpcPort() != other.hasGrpcPort()) return false;
+      if (hasGrpcPort()) {
+        if (getGrpcPort()
+            != other.getGrpcPort()) return false;
+      }
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -1872,77 +1513,87 @@ public final class IPC {
       }
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
-      hash = (37 * hash) + ISDISTANCEBIGGER_FIELD_NUMBER;
-      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
-          getIsDistanceBigger());
+      if (hasId()) {
+        hash = (37 * hash) + ID_FIELD_NUMBER;
+        hash = (53 * hash) + getId();
+      }
+      if (hasDistrict()) {
+        hash = (37 * hash) + DISTRICT_FIELD_NUMBER;
+        hash = (53 * hash) + getDistrict();
+      }
+      if (hasGrpcPort()) {
+        hash = (37 * hash) + GRPCPORT_FIELD_NUMBER;
+        hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+            getGrpcPort());
+      }
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
     }
 
-    public static org.example.grpc.IPC.Permission parseFrom(
+    public static org.example.grpc.IPC.Infos parseFrom(
         java.nio.ByteBuffer data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static org.example.grpc.IPC.Permission parseFrom(
+    public static org.example.grpc.IPC.Infos parseFrom(
         java.nio.ByteBuffer data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static org.example.grpc.IPC.Permission parseFrom(
+    public static org.example.grpc.IPC.Infos parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static org.example.grpc.IPC.Permission parseFrom(
+    public static org.example.grpc.IPC.Infos parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static org.example.grpc.IPC.Permission parseFrom(byte[] data)
+    public static org.example.grpc.IPC.Infos parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static org.example.grpc.IPC.Permission parseFrom(
+    public static org.example.grpc.IPC.Infos parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static org.example.grpc.IPC.Permission parseFrom(java.io.InputStream input)
+    public static org.example.grpc.IPC.Infos parseFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static org.example.grpc.IPC.Permission parseFrom(
+    public static org.example.grpc.IPC.Infos parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
-    public static org.example.grpc.IPC.Permission parseDelimitedFrom(java.io.InputStream input)
+    public static org.example.grpc.IPC.Infos parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
-    public static org.example.grpc.IPC.Permission parseDelimitedFrom(
+    public static org.example.grpc.IPC.Infos parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
     }
-    public static org.example.grpc.IPC.Permission parseFrom(
+    public static org.example.grpc.IPC.Infos parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static org.example.grpc.IPC.Permission parseFrom(
+    public static org.example.grpc.IPC.Infos parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -1955,7 +1606,7 @@ public final class IPC {
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
-    public static Builder newBuilder(org.example.grpc.IPC.Permission prototype) {
+    public static Builder newBuilder(org.example.grpc.IPC.Infos prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
     @java.lang.Override
@@ -1971,26 +1622,26 @@ public final class IPC {
       return builder;
     }
     /**
-     * Protobuf type {@code org.example.grpc.Permission}
+     * Protobuf type {@code org.example.grpc.Infos}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.example.grpc.Permission)
-        org.example.grpc.IPC.PermissionOrBuilder {
+        // @@protoc_insertion_point(builder_implements:org.example.grpc.Infos)
+        org.example.grpc.IPC.InfosOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.example.grpc.IPC.internal_static_org_example_grpc_Permission_descriptor;
+        return org.example.grpc.IPC.internal_static_org_example_grpc_Infos_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.example.grpc.IPC.internal_static_org_example_grpc_Permission_fieldAccessorTable
+        return org.example.grpc.IPC.internal_static_org_example_grpc_Infos_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
-                org.example.grpc.IPC.Permission.class, org.example.grpc.IPC.Permission.Builder.class);
+                org.example.grpc.IPC.Infos.class, org.example.grpc.IPC.Infos.Builder.class);
       }
 
-      // Construct using org.example.grpc.IPC.Permission.newBuilder()
+      // Construct using org.example.grpc.IPC.Infos.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
@@ -2008,25 +1659,29 @@ public final class IPC {
       @java.lang.Override
       public Builder clear() {
         super.clear();
-        isDistanceBigger_ = false;
-
+        id_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000001);
+        district_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000002);
+        grpcPort_ = 0L;
+        bitField0_ = (bitField0_ & ~0x00000004);
         return this;
       }
 
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.example.grpc.IPC.internal_static_org_example_grpc_Permission_descriptor;
+        return org.example.grpc.IPC.internal_static_org_example_grpc_Infos_descriptor;
       }
 
       @java.lang.Override
-      public org.example.grpc.IPC.Permission getDefaultInstanceForType() {
-        return org.example.grpc.IPC.Permission.getDefaultInstance();
+      public org.example.grpc.IPC.Infos getDefaultInstanceForType() {
+        return org.example.grpc.IPC.Infos.getDefaultInstance();
       }
 
       @java.lang.Override
-      public org.example.grpc.IPC.Permission build() {
-        org.example.grpc.IPC.Permission result = buildPartial();
+      public org.example.grpc.IPC.Infos build() {
+        org.example.grpc.IPC.Infos result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
         }
@@ -2034,9 +1689,23 @@ public final class IPC {
       }
 
       @java.lang.Override
-      public org.example.grpc.IPC.Permission buildPartial() {
-        org.example.grpc.IPC.Permission result = new org.example.grpc.IPC.Permission(this);
-        result.isDistanceBigger_ = isDistanceBigger_;
+      public org.example.grpc.IPC.Infos buildPartial() {
+        org.example.grpc.IPC.Infos result = new org.example.grpc.IPC.Infos(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.id_ = id_;
+          to_bitField0_ |= 0x00000001;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.district_ = district_;
+          to_bitField0_ |= 0x00000002;
+        }
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          result.grpcPort_ = grpcPort_;
+          to_bitField0_ |= 0x00000004;
+        }
+        result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
       }
@@ -2075,18 +1744,24 @@ public final class IPC {
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof org.example.grpc.IPC.Permission) {
-          return mergeFrom((org.example.grpc.IPC.Permission)other);
+        if (other instanceof org.example.grpc.IPC.Infos) {
+          return mergeFrom((org.example.grpc.IPC.Infos)other);
         } else {
           super.mergeFrom(other);
           return this;
         }
       }
 
-      public Builder mergeFrom(org.example.grpc.IPC.Permission other) {
-        if (other == org.example.grpc.IPC.Permission.getDefaultInstance()) return this;
-        if (other.getIsDistanceBigger() != false) {
-          setIsDistanceBigger(other.getIsDistanceBigger());
+      public Builder mergeFrom(org.example.grpc.IPC.Infos other) {
+        if (other == org.example.grpc.IPC.Infos.getDefaultInstance()) return this;
+        if (other.hasId()) {
+          setId(other.getId());
+        }
+        if (other.hasDistrict()) {
+          setDistrict(other.getDistrict());
+        }
+        if (other.hasGrpcPort()) {
+          setGrpcPort(other.getGrpcPort());
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -2095,6 +1770,15 @@ public final class IPC {
 
       @java.lang.Override
       public final boolean isInitialized() {
+        if (!hasId()) {
+          return false;
+        }
+        if (!hasDistrict()) {
+          return false;
+        }
+        if (!hasGrpcPort()) {
+          return false;
+        }
         return true;
       }
 
@@ -2103,11 +1787,11 @@ public final class IPC {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        org.example.grpc.IPC.Permission parsedMessage = null;
+        org.example.grpc.IPC.Infos parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (org.example.grpc.IPC.Permission) e.getUnfinishedMessage();
+          parsedMessage = (org.example.grpc.IPC.Infos) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
           if (parsedMessage != null) {
@@ -2116,33 +1800,115 @@ public final class IPC {
         }
         return this;
       }
+      private int bitField0_;
 
-      private boolean isDistanceBigger_ ;
+      private int id_ ;
       /**
-       * <code>bool isDistanceBigger = 1;</code>
-       * @return The isDistanceBigger.
+       * <code>required int32 id = 1;</code>
+       * @return Whether the id field is set.
        */
-      public boolean getIsDistanceBigger() {
-        return isDistanceBigger_;
+      public boolean hasId() {
+        return ((bitField0_ & 0x00000001) != 0);
       }
       /**
-       * <code>bool isDistanceBigger = 1;</code>
-       * @param value The isDistanceBigger to set.
+       * <code>required int32 id = 1;</code>
+       * @return The id.
+       */
+      public int getId() {
+        return id_;
+      }
+      /**
+       * <code>required int32 id = 1;</code>
+       * @param value The id to set.
        * @return This builder for chaining.
        */
-      public Builder setIsDistanceBigger(boolean value) {
-        
-        isDistanceBigger_ = value;
+      public Builder setId(int value) {
+        bitField0_ |= 0x00000001;
+        id_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>bool isDistanceBigger = 1;</code>
+       * <code>required int32 id = 1;</code>
        * @return This builder for chaining.
        */
-      public Builder clearIsDistanceBigger() {
-        
-        isDistanceBigger_ = false;
+      public Builder clearId() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        id_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int district_ ;
+      /**
+       * <code>required int32 district = 2;</code>
+       * @return Whether the district field is set.
+       */
+      public boolean hasDistrict() {
+        return ((bitField0_ & 0x00000002) != 0);
+      }
+      /**
+       * <code>required int32 district = 2;</code>
+       * @return The district.
+       */
+      public int getDistrict() {
+        return district_;
+      }
+      /**
+       * <code>required int32 district = 2;</code>
+       * @param value The district to set.
+       * @return This builder for chaining.
+       */
+      public Builder setDistrict(int value) {
+        bitField0_ |= 0x00000002;
+        district_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required int32 district = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearDistrict() {
+        bitField0_ = (bitField0_ & ~0x00000002);
+        district_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private long grpcPort_ ;
+      /**
+       * <code>required int64 grpcPort = 3;</code>
+       * @return Whether the grpcPort field is set.
+       */
+      public boolean hasGrpcPort() {
+        return ((bitField0_ & 0x00000004) != 0);
+      }
+      /**
+       * <code>required int64 grpcPort = 3;</code>
+       * @return The grpcPort.
+       */
+      public long getGrpcPort() {
+        return grpcPort_;
+      }
+      /**
+       * <code>required int64 grpcPort = 3;</code>
+       * @param value The grpcPort to set.
+       * @return This builder for chaining.
+       */
+      public Builder setGrpcPort(long value) {
+        bitField0_ |= 0x00000004;
+        grpcPort_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required int64 grpcPort = 3;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearGrpcPort() {
+        bitField0_ = (bitField0_ & ~0x00000004);
+        grpcPort_ = 0L;
         onChanged();
         return this;
       }
@@ -2159,41 +1925,41 @@ public final class IPC {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:org.example.grpc.Permission)
+      // @@protoc_insertion_point(builder_scope:org.example.grpc.Infos)
     }
 
-    // @@protoc_insertion_point(class_scope:org.example.grpc.Permission)
-    private static final org.example.grpc.IPC.Permission DEFAULT_INSTANCE;
+    // @@protoc_insertion_point(class_scope:org.example.grpc.Infos)
+    private static final org.example.grpc.IPC.Infos DEFAULT_INSTANCE;
     static {
-      DEFAULT_INSTANCE = new org.example.grpc.IPC.Permission();
+      DEFAULT_INSTANCE = new org.example.grpc.IPC.Infos();
     }
 
-    public static org.example.grpc.IPC.Permission getDefaultInstance() {
+    public static org.example.grpc.IPC.Infos getDefaultInstance() {
       return DEFAULT_INSTANCE;
     }
 
-    private static final com.google.protobuf.Parser<Permission>
-        PARSER = new com.google.protobuf.AbstractParser<Permission>() {
+    @java.lang.Deprecated public static final com.google.protobuf.Parser<Infos>
+        PARSER = new com.google.protobuf.AbstractParser<Infos>() {
       @java.lang.Override
-      public Permission parsePartialFrom(
+      public Infos parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new Permission(input, extensionRegistry);
+        return new Infos(input, extensionRegistry);
       }
     };
 
-    public static com.google.protobuf.Parser<Permission> parser() {
+    public static com.google.protobuf.Parser<Infos> parser() {
       return PARSER;
     }
 
     @java.lang.Override
-    public com.google.protobuf.Parser<Permission> getParserForType() {
+    public com.google.protobuf.Parser<Infos> getParserForType() {
       return PARSER;
     }
 
     @java.lang.Override
-    public org.example.grpc.IPC.Permission getDefaultInstanceForType() {
+    public org.example.grpc.IPC.Infos getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -2210,15 +1976,10 @@ public final class IPC {
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_org_example_grpc_Response_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_example_grpc_Distance_descriptor;
+    internal_static_org_example_grpc_Infos_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_example_grpc_Distance_fieldAccessorTable;
-  private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_example_grpc_Permission_descriptor;
-  private static final 
-    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_example_grpc_Permission_fieldAccessorTable;
+      internal_static_org_example_grpc_Infos_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -2229,14 +1990,13 @@ public final class IPC {
   static {
     java.lang.String[] descriptorData = {
       "\n\tIPC.proto\022\020org.example.grpc\"!\n\010Proposa" +
-      "l\022\025\n\rstringRequest\030\001 \001(\t\"\"\n\010Response\022\026\n\016" +
-      "stringResponse\030\001 \001(\t\"\034\n\010Distance\022\020\n\010dist" +
-      "ance\030\001 \001(\t\"&\n\nPermission\022\030\n\020isDistanceBi" +
-      "gger\030\001 \001(\0102\237\001\n\nIPCService\022F\n\014rideProposa" +
-      "l\022\032.org.example.grpc.Proposal\032\032.org.exam" +
-      "ple.grpc.Response\022I\n\rcheckDistance\022\032.org" +
-      ".example.grpc.Distance\032\034.org.example.grp" +
-      "c.Permissionb\006proto3"
+      "l\022\025\n\rstringRequest\030\001 \002(\t\"\"\n\010Response\022\026\n\016" +
+      "stringResponse\030\001 \002(\t\"7\n\005Infos\022\n\n\002id\030\001 \002(" +
+      "\005\022\020\n\010district\030\002 \002(\005\022\020\n\010grpcPort\030\003 \002(\0032\226\001" +
+      "\n\nIPCService\022H\n\ncoordinate\022\032.org.example" +
+      ".grpc.Proposal\032\032.org.example.grpc.Respon" +
+      "se(\0010\001\022>\n\007present\022\027.org.example.grpc.Inf" +
+      "os\032\032.org.example.grpc.Response"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -2254,18 +2014,12 @@ public final class IPC {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_example_grpc_Response_descriptor,
         new java.lang.String[] { "StringResponse", });
-    internal_static_org_example_grpc_Distance_descriptor =
+    internal_static_org_example_grpc_Infos_descriptor =
       getDescriptor().getMessageTypes().get(2);
-    internal_static_org_example_grpc_Distance_fieldAccessorTable = new
+    internal_static_org_example_grpc_Infos_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_example_grpc_Distance_descriptor,
-        new java.lang.String[] { "Distance", });
-    internal_static_org_example_grpc_Permission_descriptor =
-      getDescriptor().getMessageTypes().get(3);
-    internal_static_org_example_grpc_Permission_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_example_grpc_Permission_descriptor,
-        new java.lang.String[] { "IsDistanceBigger", });
+        internal_static_org_example_grpc_Infos_descriptor,
+        new java.lang.String[] { "Id", "District", "GrpcPort", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

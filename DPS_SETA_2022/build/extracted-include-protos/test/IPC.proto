@@ -1,24 +1,20 @@
-syntax = "proto3";
-
 package org.example.grpc;
 
 message Proposal {
-  string stringRequest = 1;
+  required string stringRequest = 1;
 }
 
 message Response {
-  string stringResponse = 1;
+  required string stringResponse = 1;
 }
 
-message Distance{
-  string distance = 1;
-}
-
-message Permission {
-  bool isDistanceBigger = 1;
+message infos {
+  required int32 id = 1;
+  required int32 district = 2;
+  required int64 grpcPort = 3;
 }
 
 service IPCService {
-  rpc rideProposal(Proposal) returns (Response);
-  rpc checkDistance(Distance) returns (Permission);
+  rpc coordinate(stream Proposal) returns (stream Response);
+  rpc present(infos) returns (Response);
 }

@@ -39,9 +39,10 @@ public class AdministratorServerServices {
     @Path("taxi-init")
     @Consumes("application/json")
     @Produces("application/json")
-    public synchronized Response newTaxi(String json) {
+    public Response newTaxi(String json) {
         if (json.isEmpty()) {
-            return Response.status(400, "Bad request or wrong formatting").build();
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("Bad request or wrong formatting").build();
         }
 
         TaxiInfo inputTaxiInfo;
@@ -49,16 +50,18 @@ public class AdministratorServerServices {
             inputTaxiInfo = gson.fromJson(json, TaxiInfo.class);
         } catch (JsonParseException e) {
             e.printStackTrace();
-            return Response.status(400, "Bad request or wrong formatting").build();
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("Bad request or wrong formatting").build();
         }
 
         String outputInfoJson;
         TaxiSchema taxiSchema = new TaxiSchema();
-        // Saving the taxi list of the server first, in this way it will better approximate the correct amount of taxis
-        taxiSchema.setTaxis((ArrayList<TaxiInfo>) AdministratorServer.getTaxis().clone());
-        // The addTaxi method will return a TaxiInfo with the possible corrected ID
-        taxiSchema.setTaxiInfo(administratorServer.addTaxi(inputTaxiInfo));
-
+        synchronized (administratorServer) {
+            // Saving the taxi list of the server first, in this way it will better approximate the correct amount of taxis
+            taxiSchema.setTaxis(AdministratorServer.getTaxis());
+            // The addTaxi method will return a TaxiInfo with the possible corrected ID
+            taxiSchema.setTaxiInfo(administratorServer.addTaxi(inputTaxiInfo));
+        }
         outputInfoJson = gson.toJson(taxiSchema, TaxiSchema.class);
 
         return Response.ok(outputInfoJson).build();
@@ -78,7 +81,7 @@ public class AdministratorServerServices {
     @Consumes("application/json")
     @Produces("application/json")
     public Response getOtherTaxis(@PathParam("id") int taxiID) {
-        ArrayList<TaxiInfo> taxis = (ArrayList<TaxiInfo>) AdministratorServer.getTaxis().clone();
+        ArrayList<TaxiInfo> taxis = AdministratorServer.getTaxis();
         if (taxis.removeIf(t -> t.getId() == taxiID)) {
             String outputInfo;
             try {

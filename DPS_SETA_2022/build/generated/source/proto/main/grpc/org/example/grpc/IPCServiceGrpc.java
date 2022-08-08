@@ -28,65 +28,65 @@ public final class IPCServiceGrpc {
 
   // Static method descriptors that strictly reflect the proto.
   private static volatile io.grpc.MethodDescriptor<org.example.grpc.IPC.Proposal,
-      org.example.grpc.IPC.Response> getRideProposalMethod;
+      org.example.grpc.IPC.Response> getCoordinateMethod;
 
   @io.grpc.stub.annotations.RpcMethod(
-      fullMethodName = SERVICE_NAME + '/' + "rideProposal",
+      fullMethodName = SERVICE_NAME + '/' + "coordinate",
       requestType = org.example.grpc.IPC.Proposal.class,
       responseType = org.example.grpc.IPC.Response.class,
-      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+      methodType = io.grpc.MethodDescriptor.MethodType.BIDI_STREAMING)
   public static io.grpc.MethodDescriptor<org.example.grpc.IPC.Proposal,
-      org.example.grpc.IPC.Response> getRideProposalMethod() {
-    io.grpc.MethodDescriptor<org.example.grpc.IPC.Proposal, org.example.grpc.IPC.Response> getRideProposalMethod;
-    if ((getRideProposalMethod = IPCServiceGrpc.getRideProposalMethod) == null) {
+      org.example.grpc.IPC.Response> getCoordinateMethod() {
+    io.grpc.MethodDescriptor<org.example.grpc.IPC.Proposal, org.example.grpc.IPC.Response> getCoordinateMethod;
+    if ((getCoordinateMethod = IPCServiceGrpc.getCoordinateMethod) == null) {
       synchronized (IPCServiceGrpc.class) {
-        if ((getRideProposalMethod = IPCServiceGrpc.getRideProposalMethod) == null) {
-          IPCServiceGrpc.getRideProposalMethod = getRideProposalMethod =
+        if ((getCoordinateMethod = IPCServiceGrpc.getCoordinateMethod) == null) {
+          IPCServiceGrpc.getCoordinateMethod = getCoordinateMethod =
               io.grpc.MethodDescriptor.<org.example.grpc.IPC.Proposal, org.example.grpc.IPC.Response>newBuilder()
-              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "rideProposal"))
+              .setType(io.grpc.MethodDescriptor.MethodType.BIDI_STREAMING)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "coordinate"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   org.example.grpc.IPC.Proposal.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   org.example.grpc.IPC.Response.getDefaultInstance()))
-              .setSchemaDescriptor(new IPCServiceMethodDescriptorSupplier("rideProposal"))
+              .setSchemaDescriptor(new IPCServiceMethodDescriptorSupplier("coordinate"))
               .build();
         }
       }
     }
-    return getRideProposalMethod;
+    return getCoordinateMethod;
   }
 
-  private static volatile io.grpc.MethodDescriptor<org.example.grpc.IPC.Distance,
-      org.example.grpc.IPC.Permission> getCheckDistanceMethod;
+  private static volatile io.grpc.MethodDescriptor<org.example.grpc.IPC.Infos,
+      org.example.grpc.IPC.Response> getPresentMethod;
 
   @io.grpc.stub.annotations.RpcMethod(
-      fullMethodName = SERVICE_NAME + '/' + "checkDistance",
-      requestType = org.example.grpc.IPC.Distance.class,
-      responseType = org.example.grpc.IPC.Permission.class,
+      fullMethodName = SERVICE_NAME + '/' + "present",
+      requestType = org.example.grpc.IPC.Infos.class,
+      responseType = org.example.grpc.IPC.Response.class,
       methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
-  public static io.grpc.MethodDescriptor<org.example.grpc.IPC.Distance,
-      org.example.grpc.IPC.Permission> getCheckDistanceMethod() {
-    io.grpc.MethodDescriptor<org.example.grpc.IPC.Distance, org.example.grpc.IPC.Permission> getCheckDistanceMethod;
-    if ((getCheckDistanceMethod = IPCServiceGrpc.getCheckDistanceMethod) == null) {
+  public static io.grpc.MethodDescriptor<org.example.grpc.IPC.Infos,
+      org.example.grpc.IPC.Response> getPresentMethod() {
+    io.grpc.MethodDescriptor<org.example.grpc.IPC.Infos, org.example.grpc.IPC.Response> getPresentMethod;
+    if ((getPresentMethod = IPCServiceGrpc.getPresentMethod) == null) {
       synchronized (IPCServiceGrpc.class) {
-        if ((getCheckDistanceMethod = IPCServiceGrpc.getCheckDistanceMethod) == null) {
-          IPCServiceGrpc.getCheckDistanceMethod = getCheckDistanceMethod =
-              io.grpc.MethodDescriptor.<org.example.grpc.IPC.Distance, org.example.grpc.IPC.Permission>newBuilder()
+        if ((getPresentMethod = IPCServiceGrpc.getPresentMethod) == null) {
+          IPCServiceGrpc.getPresentMethod = getPresentMethod =
+              io.grpc.MethodDescriptor.<org.example.grpc.IPC.Infos, org.example.grpc.IPC.Response>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "checkDistance"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "present"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
-                  org.example.grpc.IPC.Distance.getDefaultInstance()))
+                  org.example.grpc.IPC.Infos.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
-                  org.example.grpc.IPC.Permission.getDefaultInstance()))
-              .setSchemaDescriptor(new IPCServiceMethodDescriptorSupplier("checkDistance"))
+                  org.example.grpc.IPC.Response.getDefaultInstance()))
+              .setSchemaDescriptor(new IPCServiceMethodDescriptorSupplier("present"))
               .build();
         }
       }
     }
-    return getCheckDistanceMethod;
+    return getPresentMethod;
   }
 
   /**
@@ -118,34 +118,34 @@ public final class IPCServiceGrpc {
 
     /**
      */
-    public void rideProposal(org.example.grpc.IPC.Proposal request,
+    public io.grpc.stub.StreamObserver<org.example.grpc.IPC.Proposal> coordinate(
         io.grpc.stub.StreamObserver<org.example.grpc.IPC.Response> responseObserver) {
-      asyncUnimplementedUnaryCall(getRideProposalMethod(), responseObserver);
+      return asyncUnimplementedStreamingCall(getCoordinateMethod(), responseObserver);
     }
 
     /**
      */
-    public void checkDistance(org.example.grpc.IPC.Distance request,
-        io.grpc.stub.StreamObserver<org.example.grpc.IPC.Permission> responseObserver) {
-      asyncUnimplementedUnaryCall(getCheckDistanceMethod(), responseObserver);
+    public void present(org.example.grpc.IPC.Infos request,
+        io.grpc.stub.StreamObserver<org.example.grpc.IPC.Response> responseObserver) {
+      asyncUnimplementedUnaryCall(getPresentMethod(), responseObserver);
     }
 
     @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
       return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
           .addMethod(
-            getRideProposalMethod(),
-            asyncUnaryCall(
+            getCoordinateMethod(),
+            asyncBidiStreamingCall(
               new MethodHandlers<
                 org.example.grpc.IPC.Proposal,
                 org.example.grpc.IPC.Response>(
-                  this, METHODID_RIDE_PROPOSAL)))
+                  this, METHODID_COORDINATE)))
           .addMethod(
-            getCheckDistanceMethod(),
+            getPresentMethod(),
             asyncUnaryCall(
               new MethodHandlers<
-                org.example.grpc.IPC.Distance,
-                org.example.grpc.IPC.Permission>(
-                  this, METHODID_CHECK_DISTANCE)))
+                org.example.grpc.IPC.Infos,
+                org.example.grpc.IPC.Response>(
+                  this, METHODID_PRESENT)))
           .build();
     }
   }
@@ -170,18 +170,18 @@ public final class IPCServiceGrpc {
 
     /**
      */
-    public void rideProposal(org.example.grpc.IPC.Proposal request,
+    public io.grpc.stub.StreamObserver<org.example.grpc.IPC.Proposal> coordinate(
         io.grpc.stub.StreamObserver<org.example.grpc.IPC.Response> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getRideProposalMethod(), getCallOptions()), request, responseObserver);
+      return asyncBidiStreamingCall(
+          getChannel().newCall(getCoordinateMethod(), getCallOptions()), responseObserver);
     }
 
     /**
      */
-    public void checkDistance(org.example.grpc.IPC.Distance request,
-        io.grpc.stub.StreamObserver<org.example.grpc.IPC.Permission> responseObserver) {
+    public void present(org.example.grpc.IPC.Infos request,
+        io.grpc.stub.StreamObserver<org.example.grpc.IPC.Response> responseObserver) {
       asyncUnaryCall(
-          getChannel().newCall(getCheckDistanceMethod(), getCallOptions()), request, responseObserver);
+          getChannel().newCall(getPresentMethod(), getCallOptions()), request, responseObserver);
     }
   }
 
@@ -205,16 +205,9 @@ public final class IPCServiceGrpc {
 
     /**
      */
-    public org.example.grpc.IPC.Response rideProposal(org.example.grpc.IPC.Proposal request) {
+    public org.example.grpc.IPC.Response present(org.example.grpc.IPC.Infos request) {
       return blockingUnaryCall(
-          getChannel(), getRideProposalMethod(), getCallOptions(), request);
-    }
-
-    /**
-     */
-    public org.example.grpc.IPC.Permission checkDistance(org.example.grpc.IPC.Distance request) {
-      return blockingUnaryCall(
-          getChannel(), getCheckDistanceMethod(), getCallOptions(), request);
+          getChannel(), getPresentMethod(), getCallOptions(), request);
     }
   }
 
@@ -238,23 +231,15 @@ public final class IPCServiceGrpc {
 
     /**
      */
-    public com.google.common.util.concurrent.ListenableFuture<org.example.grpc.IPC.Response> rideProposal(
-        org.example.grpc.IPC.Proposal request) {
+    public com.google.common.util.concurrent.ListenableFuture<org.example.grpc.IPC.Response> present(
+        org.example.grpc.IPC.Infos request) {
       return futureUnaryCall(
-          getChannel().newCall(getRideProposalMethod(), getCallOptions()), request);
-    }
-
-    /**
-     */
-    public com.google.common.util.concurrent.ListenableFuture<org.example.grpc.IPC.Permission> checkDistance(
-        org.example.grpc.IPC.Distance request) {
-      return futureUnaryCall(
-          getChannel().newCall(getCheckDistanceMethod(), getCallOptions()), request);
+          getChannel().newCall(getPresentMethod(), getCallOptions()), request);
     }
   }
 
-  private static final int METHODID_RIDE_PROPOSAL = 0;
-  private static final int METHODID_CHECK_DISTANCE = 1;
+  private static final int METHODID_PRESENT = 0;
+  private static final int METHODID_COORDINATE = 1;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -273,13 +258,9 @@ public final class IPCServiceGrpc {
     @java.lang.SuppressWarnings("unchecked")
     public void invoke(Req request, io.grpc.stub.StreamObserver<Resp> responseObserver) {
       switch (methodId) {
-        case METHODID_RIDE_PROPOSAL:
-          serviceImpl.rideProposal((org.example.grpc.IPC.Proposal) request,
+        case METHODID_PRESENT:
+          serviceImpl.present((org.example.grpc.IPC.Infos) request,
               (io.grpc.stub.StreamObserver<org.example.grpc.IPC.Response>) responseObserver);
-          break;
-        case METHODID_CHECK_DISTANCE:
-          serviceImpl.checkDistance((org.example.grpc.IPC.Distance) request,
-              (io.grpc.stub.StreamObserver<org.example.grpc.IPC.Permission>) responseObserver);
           break;
         default:
           throw new AssertionError();
@@ -291,6 +272,9 @@ public final class IPCServiceGrpc {
     public io.grpc.stub.StreamObserver<Req> invoke(
         io.grpc.stub.StreamObserver<Resp> responseObserver) {
       switch (methodId) {
+        case METHODID_COORDINATE:
+          return (io.grpc.stub.StreamObserver<Req>) serviceImpl.coordinate(
+              (io.grpc.stub.StreamObserver<org.example.grpc.IPC.Response>) responseObserver);
         default:
           throw new AssertionError();
       }
@@ -342,8 +326,8 @@ public final class IPCServiceGrpc {
         if (result == null) {
           serviceDescriptor = result = io.grpc.ServiceDescriptor.newBuilder(SERVICE_NAME)
               .setSchemaDescriptor(new IPCServiceFileDescriptorSupplier())
-              .addMethod(getRideProposalMethod())
-              .addMethod(getCheckDistanceMethod())
+              .addMethod(getCoordinateMethod())
+              .addMethod(getPresentMethod())
               .build();
         }
       }

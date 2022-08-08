@@ -1,6 +1,0 @@
-message RideRequest {
-  required int32 taxiId = 1;
-  required int32 rideId = 2;
-  required float distance = 3;
-  repeated int32 position = 4;
-}

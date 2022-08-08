@@ -16,14 +16,8 @@ public class App {
 
             server.awaitTermination();
 
-        } catch (IOException e) {
-
+        } catch (IOException | InterruptedException e) {
             e.printStackTrace();
-
-        } catch (InterruptedException e) {
-
-            e.printStackTrace();
-
         }
 
     }
