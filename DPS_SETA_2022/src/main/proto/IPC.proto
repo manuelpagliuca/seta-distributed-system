@@ -11,10 +11,14 @@ message Response {
 message Infos {
   required int32 id = 1;
   required int32 district = 2;
-  required int64 grpcPort = 3;
+  required int32 grpcPort = 3;
+  repeated int32 position = 4;
+  required bool isRecharging = 5;
+  required bool isRiding = 6;
+  required double battery = 7;
 }
 
 service IPCService {
-  rpc coordinate(stream Proposal) returns (stream Response);
+  rpc coordinate(Infos) returns (Response);
   rpc present(Infos) returns (Response);
 }

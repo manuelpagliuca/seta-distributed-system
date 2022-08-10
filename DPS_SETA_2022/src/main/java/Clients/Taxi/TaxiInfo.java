@@ -15,7 +15,6 @@ public class TaxiInfo implements Serializable {
     private String administratorServerAddr = null;
     private boolean isRecharging = false;
     private boolean isRiding = false;
-
     private double battery = -1;
 
     public TaxiInfo(TaxiInfo info) {

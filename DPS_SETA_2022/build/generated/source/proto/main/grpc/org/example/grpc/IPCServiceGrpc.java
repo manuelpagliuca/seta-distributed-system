@@ -27,27 +27,27 @@ public final class IPCServiceGrpc {
   public static final String SERVICE_NAME = "org.example.grpc.IPCService";
 
   // Static method descriptors that strictly reflect the proto.
-  private static volatile io.grpc.MethodDescriptor<org.example.grpc.IPC.Proposal,
+  private static volatile io.grpc.MethodDescriptor<org.example.grpc.IPC.Infos,
       org.example.grpc.IPC.Response> getCoordinateMethod;
 
   @io.grpc.stub.annotations.RpcMethod(
       fullMethodName = SERVICE_NAME + '/' + "coordinate",
-      requestType = org.example.grpc.IPC.Proposal.class,
+      requestType = org.example.grpc.IPC.Infos.class,
       responseType = org.example.grpc.IPC.Response.class,
-      methodType = io.grpc.MethodDescriptor.MethodType.BIDI_STREAMING)
-  public static io.grpc.MethodDescriptor<org.example.grpc.IPC.Proposal,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<org.example.grpc.IPC.Infos,
       org.example.grpc.IPC.Response> getCoordinateMethod() {
-    io.grpc.MethodDescriptor<org.example.grpc.IPC.Proposal, org.example.grpc.IPC.Response> getCoordinateMethod;
+    io.grpc.MethodDescriptor<org.example.grpc.IPC.Infos, org.example.grpc.IPC.Response> getCoordinateMethod;
     if ((getCoordinateMethod = IPCServiceGrpc.getCoordinateMethod) == null) {
       synchronized (IPCServiceGrpc.class) {
         if ((getCoordinateMethod = IPCServiceGrpc.getCoordinateMethod) == null) {
           IPCServiceGrpc.getCoordinateMethod = getCoordinateMethod =
-              io.grpc.MethodDescriptor.<org.example.grpc.IPC.Proposal, org.example.grpc.IPC.Response>newBuilder()
-              .setType(io.grpc.MethodDescriptor.MethodType.BIDI_STREAMING)
+              io.grpc.MethodDescriptor.<org.example.grpc.IPC.Infos, org.example.grpc.IPC.Response>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
               .setFullMethodName(generateFullMethodName(SERVICE_NAME, "coordinate"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
-                  org.example.grpc.IPC.Proposal.getDefaultInstance()))
+                  org.example.grpc.IPC.Infos.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   org.example.grpc.IPC.Response.getDefaultInstance()))
               .setSchemaDescriptor(new IPCServiceMethodDescriptorSupplier("coordinate"))
@@ -118,9 +118,9 @@ public final class IPCServiceGrpc {
 
     /**
      */
-    public io.grpc.stub.StreamObserver<org.example.grpc.IPC.Proposal> coordinate(
+    public void coordinate(org.example.grpc.IPC.Infos request,
         io.grpc.stub.StreamObserver<org.example.grpc.IPC.Response> responseObserver) {
-      return asyncUnimplementedStreamingCall(getCoordinateMethod(), responseObserver);
+      asyncUnimplementedUnaryCall(getCoordinateMethod(), responseObserver);
     }
 
     /**
@@ -134,9 +134,9 @@ public final class IPCServiceGrpc {
       return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
           .addMethod(
             getCoordinateMethod(),
-            asyncBidiStreamingCall(
+            asyncUnaryCall(
               new MethodHandlers<
-                org.example.grpc.IPC.Proposal,
+                org.example.grpc.IPC.Infos,
                 org.example.grpc.IPC.Response>(
                   this, METHODID_COORDINATE)))
           .addMethod(
@@ -170,10 +170,10 @@ public final class IPCServiceGrpc {
 
     /**
      */
-    public io.grpc.stub.StreamObserver<org.example.grpc.IPC.Proposal> coordinate(
+    public void coordinate(org.example.grpc.IPC.Infos request,
         io.grpc.stub.StreamObserver<org.example.grpc.IPC.Response> responseObserver) {
-      return asyncBidiStreamingCall(
-          getChannel().newCall(getCoordinateMethod(), getCallOptions()), responseObserver);
+      asyncUnaryCall(
+          getChannel().newCall(getCoordinateMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -205,6 +205,13 @@ public final class IPCServiceGrpc {
 
     /**
      */
+    public org.example.grpc.IPC.Response coordinate(org.example.grpc.IPC.Infos request) {
+      return blockingUnaryCall(
+          getChannel(), getCoordinateMethod(), getCallOptions(), request);
+    }
+
+    /**
+     */
     public org.example.grpc.IPC.Response present(org.example.grpc.IPC.Infos request) {
       return blockingUnaryCall(
           getChannel(), getPresentMethod(), getCallOptions(), request);
@@ -231,6 +238,14 @@ public final class IPCServiceGrpc {
 
     /**
      */
+    public com.google.common.util.concurrent.ListenableFuture<org.example.grpc.IPC.Response> coordinate(
+        org.example.grpc.IPC.Infos request) {
+      return futureUnaryCall(
+          getChannel().newCall(getCoordinateMethod(), getCallOptions()), request);
+    }
+
+    /**
+     */
     public com.google.common.util.concurrent.ListenableFuture<org.example.grpc.IPC.Response> present(
         org.example.grpc.IPC.Infos request) {
       return futureUnaryCall(
@@ -238,8 +253,8 @@ public final class IPCServiceGrpc {
     }
   }
 
-  private static final int METHODID_PRESENT = 0;
-  private static final int METHODID_COORDINATE = 1;
+  private static final int METHODID_COORDINATE = 0;
+  private static final int METHODID_PRESENT = 1;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -258,6 +273,10 @@ public final class IPCServiceGrpc {
     @java.lang.SuppressWarnings("unchecked")
     public void invoke(Req request, io.grpc.stub.StreamObserver<Resp> responseObserver) {
       switch (methodId) {
+        case METHODID_COORDINATE:
+          serviceImpl.coordinate((org.example.grpc.IPC.Infos) request,
+              (io.grpc.stub.StreamObserver<org.example.grpc.IPC.Response>) responseObserver);
+          break;
         case METHODID_PRESENT:
           serviceImpl.present((org.example.grpc.IPC.Infos) request,
               (io.grpc.stub.StreamObserver<org.example.grpc.IPC.Response>) responseObserver);
@@ -272,9 +291,6 @@ public final class IPCServiceGrpc {
     public io.grpc.stub.StreamObserver<Req> invoke(
         io.grpc.stub.StreamObserver<Resp> responseObserver) {
       switch (methodId) {
-        case METHODID_COORDINATE:
-          return (io.grpc.stub.StreamObserver<Req>) serviceImpl.coordinate(
-              (io.grpc.stub.StreamObserver<org.example.grpc.IPC.Response>) responseObserver);
         default:
           throw new AssertionError();
       }

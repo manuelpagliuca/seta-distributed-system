@@ -1261,15 +1261,65 @@ public final class IPC {
     int getDistrict();
 
     /**
-     * <code>required int64 grpcPort = 3;</code>
+     * <code>required int32 grpcPort = 3;</code>
      * @return Whether the grpcPort field is set.
      */
     boolean hasGrpcPort();
     /**
-     * <code>required int64 grpcPort = 3;</code>
+     * <code>required int32 grpcPort = 3;</code>
      * @return The grpcPort.
      */
-    long getGrpcPort();
+    int getGrpcPort();
+
+    /**
+     * <code>repeated int32 position = 4;</code>
+     * @return A list containing the position.
+     */
+    java.util.List<java.lang.Integer> getPositionList();
+    /**
+     * <code>repeated int32 position = 4;</code>
+     * @return The count of position.
+     */
+    int getPositionCount();
+    /**
+     * <code>repeated int32 position = 4;</code>
+     * @param index The index of the element to return.
+     * @return The position at the given index.
+     */
+    int getPosition(int index);
+
+    /**
+     * <code>required bool isRecharging = 5;</code>
+     * @return Whether the isRecharging field is set.
+     */
+    boolean hasIsRecharging();
+    /**
+     * <code>required bool isRecharging = 5;</code>
+     * @return The isRecharging.
+     */
+    boolean getIsRecharging();
+
+    /**
+     * <code>required bool isRiding = 6;</code>
+     * @return Whether the isRiding field is set.
+     */
+    boolean hasIsRiding();
+    /**
+     * <code>required bool isRiding = 6;</code>
+     * @return The isRiding.
+     */
+    boolean getIsRiding();
+
+    /**
+     * <code>required double battery = 7;</code>
+     * @return Whether the battery field is set.
+     */
+    boolean hasBattery();
+    /**
+     * <code>required double battery = 7;</code>
+     * @return The battery.
+     */
+    double getBattery();
   }
   /**
    * Protobuf type {@code org.example.grpc.Infos}
@@ -1284,6 +1334,7 @@ public final class IPC {
       super(builder);
     }
     private Infos() {
+      position_ = emptyIntList();
     }
 
     @java.lang.Override
@@ -1329,7 +1380,43 @@ public final class IPC {
             }
             case 24: {
               bitField0_ |= 0x00000004;
-              grpcPort_ = input.readInt64();
+              grpcPort_ = input.readInt32();
+              break;
+            }
+            case 32: {
+              if (!((mutable_bitField0_ & 0x00000008) != 0)) {
+                position_ = newIntList();
+                mutable_bitField0_ |= 0x00000008;
+              }
+              position_.addInt(input.readInt32());
+              break;
+            }
+            case 34: {
+              int length = input.readRawVarint32();
+              int limit = input.pushLimit(length);
+              if (!((mutable_bitField0_ & 0x00000008) != 0) && input.getBytesUntilLimit() > 0) {
+                position_ = newIntList();
+                mutable_bitField0_ |= 0x00000008;
+              }
+              while (input.getBytesUntilLimit() > 0) {
+                position_.addInt(input.readInt32());
+              }
+              input.popLimit(limit);
+              break;
+            }
+            case 40: {
+              bitField0_ |= 0x00000008;
+              isRecharging_ = input.readBool();
+              break;
+            }
+            case 48: {
+              bitField0_ |= 0x00000010;
+              isRiding_ = input.readBool();
+              break;
+            }
+            case 57: {
+              bitField0_ |= 0x00000020;
+              battery_ = input.readDouble();
               break;
             }
             default: {
@@ -1347,6 +1434,9 @@ public final class IPC {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
+        if (((mutable_bitField0_ & 0x00000008) != 0)) {
+          position_.makeImmutable(); // C
+        }
         this.unknownFields = unknownFields.build();
         makeExtensionsImmutable();
       }
@@ -1400,20 +1490,97 @@ public final class IPC {
     }
 
     public static final int GRPCPORT_FIELD_NUMBER = 3;
-    private long grpcPort_;
+    private int grpcPort_;
     /**
-     * <code>required int64 grpcPort = 3;</code>
+     * <code>required int32 grpcPort = 3;</code>
      * @return Whether the grpcPort field is set.
      */
     public boolean hasGrpcPort() {
       return ((bitField0_ & 0x00000004) != 0);
     }
     /**
-     * <code>required int64 grpcPort = 3;</code>
+     * <code>required int32 grpcPort = 3;</code>
      * @return The grpcPort.
      */
-    public long getGrpcPort() {
+    public int getGrpcPort() {
       return grpcPort_;
+    }
+
+    public static final int POSITION_FIELD_NUMBER = 4;
+    private com.google.protobuf.Internal.IntList position_;
+    /**
+     * <code>repeated int32 position = 4;</code>
+     * @return A list containing the position.
+     */
+    public java.util.List<java.lang.Integer>
+        getPositionList() {
+      return position_;
+    }
+    /**
+     * <code>repeated int32 position = 4;</code>
+     * @return The count of position.
+     */
+    public int getPositionCount() {
+      return position_.size();
+    }
+    /**
+     * <code>repeated int32 position = 4;</code>
+     * @param index The index of the element to return.
+     * @return The position at the given index.
+     */
+    public int getPosition(int index) {
+      return position_.getInt(index);
+    }
+
+    public static final int ISRECHARGING_FIELD_NUMBER = 5;
+    private boolean isRecharging_;
+    /**
+     * <code>required bool isRecharging = 5;</code>
+     * @return Whether the isRecharging field is set.
+     */
+    public boolean hasIsRecharging() {
+      return ((bitField0_ & 0x00000008) != 0);
+    }
+    /**
+     * <code>required bool isRecharging = 5;</code>
+     * @return The isRecharging.
+     */
+    public boolean getIsRecharging() {
+      return isRecharging_;
+    }
+
+    public static final int ISRIDING_FIELD_NUMBER = 6;
+    private boolean isRiding_;
+    /**
+     * <code>required bool isRiding = 6;</code>
+     * @return Whether the isRiding field is set.
+     */
+    public boolean hasIsRiding() {
+      return ((bitField0_ & 0x00000010) != 0);
+    }
+    /**
+     * <code>required bool isRiding = 6;</code>
+     * @return The isRiding.
+     */
+    public boolean getIsRiding() {
+      return isRiding_;
+    }
+
+    public static final int BATTERY_FIELD_NUMBER = 7;
+    private double battery_;
+    /**
+     * <code>required double battery = 7;</code>
+     * @return Whether the battery field is set.
+     */
+    public boolean hasBattery() {
+      return ((bitField0_ & 0x00000020) != 0);
+    }
+    /**
+     * <code>required double battery = 7;</code>
+     * @return The battery.
+     */
+    public double getBattery() {
+      return battery_;
     }
 
     private byte memoizedIsInitialized = -1;
@@ -1435,6 +1602,18 @@ public final class IPC {
         memoizedIsInitialized = 0;
         return false;
       }
+      if (!hasIsRecharging()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      if (!hasIsRiding()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      if (!hasBattery()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
       memoizedIsInitialized = 1;
       return true;
     }
@@ -1449,7 +1628,19 @@ public final class IPC {
         output.writeInt32(2, district_);
       }
       if (((bitField0_ & 0x00000004) != 0)) {
-        output.writeInt64(3, grpcPort_);
+        output.writeInt32(3, grpcPort_);
+      }
+      for (int i = 0; i < position_.size(); i++) {
+        output.writeInt32(4, position_.getInt(i));
+      }
+      if (((bitField0_ & 0x00000008) != 0)) {
+        output.writeBool(5, isRecharging_);
+      }
+      if (((bitField0_ & 0x00000010) != 0)) {
+        output.writeBool(6, isRiding_);
+      }
+      if (((bitField0_ & 0x00000020) != 0)) {
+        output.writeDouble(7, battery_);
       }
       unknownFields.writeTo(output);
     }
@@ -1470,7 +1661,28 @@ public final class IPC {
       }
       if (((bitField0_ & 0x00000004) != 0)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeInt64Size(3, grpcPort_);
+          .computeInt32Size(3, grpcPort_);
+      }
+      {
+        int dataSize = 0;
+        for (int i = 0; i < position_.size(); i++) {
+          dataSize += com.google.protobuf.CodedOutputStream
+            .computeInt32SizeNoTag(position_.getInt(i));
+        }
+        size += dataSize;
+        size += 1 * getPositionList().size();
+      }
+      if (((bitField0_ & 0x00000008) != 0)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(5, isRecharging_);
+      }
+      if (((bitField0_ & 0x00000010) != 0)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(6, isRiding_);
+      }
+      if (((bitField0_ & 0x00000020) != 0)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(7, battery_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -1502,6 +1714,24 @@ public final class IPC {
         if (getGrpcPort()
             != other.getGrpcPort()) return false;
       }
+      if (!getPositionList()
+          .equals(other.getPositionList())) return false;
+      if (hasIsRecharging() != other.hasIsRecharging()) return false;
+      if (hasIsRecharging()) {
+        if (getIsRecharging()
+            != other.getIsRecharging()) return false;
+      }
+      if (hasIsRiding() != other.hasIsRiding()) return false;
+      if (hasIsRiding()) {
+        if (getIsRiding()
+            != other.getIsRiding()) return false;
+      }
+      if (hasBattery() != other.hasBattery()) return false;
+      if (hasBattery()) {
+        if (java.lang.Double.doubleToLongBits(getBattery())
+            != java.lang.Double.doubleToLongBits(
+                other.getBattery())) return false;
+      }
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -1523,8 +1753,26 @@ public final class IPC {
       }
       if (hasGrpcPort()) {
         hash = (37 * hash) + GRPCPORT_FIELD_NUMBER;
+        hash = (53 * hash) + getGrpcPort();
+      }
+      if (getPositionCount() > 0) {
+        hash = (37 * hash) + POSITION_FIELD_NUMBER;
+        hash = (53 * hash) + getPositionList().hashCode();
+      }
+      if (hasIsRecharging()) {
+        hash = (37 * hash) + ISRECHARGING_FIELD_NUMBER;
+        hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+            getIsRecharging());
+      }
+      if (hasIsRiding()) {
+        hash = (37 * hash) + ISRIDING_FIELD_NUMBER;
+        hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+            getIsRiding());
+      }
+      if (hasBattery()) {
+        hash = (37 * hash) + BATTERY_FIELD_NUMBER;
         hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-            getGrpcPort());
+            java.lang.Double.doubleToLongBits(getBattery()));
       }
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
@@ -1663,8 +1911,16 @@ public final class IPC {
         bitField0_ = (bitField0_ & ~0x00000001);
         district_ = 0;
         bitField0_ = (bitField0_ & ~0x00000002);
-        grpcPort_ = 0L;
+        grpcPort_ = 0;
         bitField0_ = (bitField0_ & ~0x00000004);
+        position_ = emptyIntList();
+        bitField0_ = (bitField0_ & ~0x00000008);
+        isRecharging_ = false;
+        bitField0_ = (bitField0_ & ~0x00000010);
+        isRiding_ = false;
+        bitField0_ = (bitField0_ & ~0x00000020);
+        battery_ = 0D;
+        bitField0_ = (bitField0_ & ~0x00000040);
         return this;
       }
 
@@ -1704,6 +1960,23 @@ public final class IPC {
         if (((from_bitField0_ & 0x00000004) != 0)) {
           result.grpcPort_ = grpcPort_;
           to_bitField0_ |= 0x00000004;
+        }
+        if (((bitField0_ & 0x00000008) != 0)) {
+          position_.makeImmutable();
+          bitField0_ = (bitField0_ & ~0x00000008);
+        }
+        result.position_ = position_;
+        if (((from_bitField0_ & 0x00000010) != 0)) {
+          result.isRecharging_ = isRecharging_;
+          to_bitField0_ |= 0x00000008;
+        }
+        if (((from_bitField0_ & 0x00000020) != 0)) {
+          result.isRiding_ = isRiding_;
+          to_bitField0_ |= 0x00000010;
+        }
+        if (((from_bitField0_ & 0x00000040) != 0)) {
+          result.battery_ = battery_;
+          to_bitField0_ |= 0x00000020;
         }
         result.bitField0_ = to_bitField0_;
         onBuilt();
@@ -1763,6 +2036,25 @@ public final class IPC {
         if (other.hasGrpcPort()) {
           setGrpcPort(other.getGrpcPort());
         }
+        if (!other.position_.isEmpty()) {
+          if (position_.isEmpty()) {
+            position_ = other.position_;
+            bitField0_ = (bitField0_ & ~0x00000008);
+          } else {
+            ensurePositionIsMutable();
+            position_.addAll(other.position_);
+          }
+          onChanged();
+        }
+        if (other.hasIsRecharging()) {
+          setIsRecharging(other.getIsRecharging());
+        }
+        if (other.hasIsRiding()) {
+          setIsRiding(other.getIsRiding());
+        }
+        if (other.hasBattery()) {
+          setBattery(other.getBattery());
+        }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
         return this;
@@ -1777,6 +2069,15 @@ public final class IPC {
           return false;
         }
         if (!hasGrpcPort()) {
+          return false;
+        }
+        if (!hasIsRecharging()) {
+          return false;
+        }
+        if (!hasIsRiding()) {
+          return false;
+        }
+        if (!hasBattery()) {
           return false;
         }
         return true;
@@ -1876,39 +2177,229 @@ public final class IPC {
         return this;
       }
 
-      private long grpcPort_ ;
+      private int grpcPort_ ;
       /**
-       * <code>required int64 grpcPort = 3;</code>
+       * <code>required int32 grpcPort = 3;</code>
        * @return Whether the grpcPort field is set.
        */
       public boolean hasGrpcPort() {
         return ((bitField0_ & 0x00000004) != 0);
       }
       /**
-       * <code>required int64 grpcPort = 3;</code>
+       * <code>required int32 grpcPort = 3;</code>
        * @return The grpcPort.
        */
-      public long getGrpcPort() {
+      public int getGrpcPort() {
         return grpcPort_;
       }
       /**
-       * <code>required int64 grpcPort = 3;</code>
+       * <code>required int32 grpcPort = 3;</code>
        * @param value The grpcPort to set.
        * @return This builder for chaining.
        */
-      public Builder setGrpcPort(long value) {
+      public Builder setGrpcPort(int value) {
         bitField0_ |= 0x00000004;
         grpcPort_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>required int64 grpcPort = 3;</code>
+       * <code>required int32 grpcPort = 3;</code>
        * @return This builder for chaining.
        */
       public Builder clearGrpcPort() {
         bitField0_ = (bitField0_ & ~0x00000004);
-        grpcPort_ = 0L;
+        grpcPort_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private com.google.protobuf.Internal.IntList position_ = emptyIntList();
+      private void ensurePositionIsMutable() {
+        if (!((bitField0_ & 0x00000008) != 0)) {
+          position_ = mutableCopy(position_);
+          bitField0_ |= 0x00000008;
+         }
+      }
+      /**
+       * <code>repeated int32 position = 4;</code>
+       * @return A list containing the position.
+       */
+      public java.util.List<java.lang.Integer>
+          getPositionList() {
+        return ((bitField0_ & 0x00000008) != 0) ?
+                 java.util.Collections.unmodifiableList(position_) : position_;
+      }
+      /**
+       * <code>repeated int32 position = 4;</code>
+       * @return The count of position.
+       */
+      public int getPositionCount() {
+        return position_.size();
+      }
+      /**
+       * <code>repeated int32 position = 4;</code>
+       * @param index The index of the element to return.
+       * @return The position at the given index.
+       */
+      public int getPosition(int index) {
+        return position_.getInt(index);
+      }
+      /**
+       * <code>repeated int32 position = 4;</code>
+       * @param index The index to set the value at.
+       * @param value The position to set.
+       * @return This builder for chaining.
+       */
+      public Builder setPosition(
+          int index, int value) {
+        ensurePositionIsMutable();
+        position_.setInt(index, value);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated int32 position = 4;</code>
+       * @param value The position to add.
+       * @return This builder for chaining.
+       */
+      public Builder addPosition(int value) {
+        ensurePositionIsMutable();
+        position_.addInt(value);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated int32 position = 4;</code>
+       * @param values The position to add.
+       * @return This builder for chaining.
+       */
+      public Builder addAllPosition(
+          java.lang.Iterable<? extends java.lang.Integer> values) {
+        ensurePositionIsMutable();
+        com.google.protobuf.AbstractMessageLite.Builder.addAll(
+            values, position_);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated int32 position = 4;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearPosition() {
+        position_ = emptyIntList();
+        bitField0_ = (bitField0_ & ~0x00000008);
+        onChanged();
+        return this;
+      }
+
+      private boolean isRecharging_ ;
+      /**
+       * <code>required bool isRecharging = 5;</code>
+       * @return Whether the isRecharging field is set.
+       */
+      public boolean hasIsRecharging() {
+        return ((bitField0_ & 0x00000010) != 0);
+      }
+      /**
+       * <code>required bool isRecharging = 5;</code>
+       * @return The isRecharging.
+       */
+      public boolean getIsRecharging() {
+        return isRecharging_;
+      }
+      /**
+       * <code>required bool isRecharging = 5;</code>
+       * @param value The isRecharging to set.
+       * @return This builder for chaining.
+       */
+      public Builder setIsRecharging(boolean value) {
+        bitField0_ |= 0x00000010;
+        isRecharging_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required bool isRecharging = 5;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearIsRecharging() {
+        bitField0_ = (bitField0_ & ~0x00000010);
+        isRecharging_ = false;
+        onChanged();
+        return this;
+      }
+
+      private boolean isRiding_ ;
+      /**
+       * <code>required bool isRiding = 6;</code>
+       * @return Whether the isRiding field is set.
+       */
+      public boolean hasIsRiding() {
+        return ((bitField0_ & 0x00000020) != 0);
+      }
+      /**
+       * <code>required bool isRiding = 6;</code>
+       * @return The isRiding.
+       */
+      public boolean getIsRiding() {
+        return isRiding_;
+      }
+      /**
+       * <code>required bool isRiding = 6;</code>
+       * @param value The isRiding to set.
+       * @return This builder for chaining.
+       */
+      public Builder setIsRiding(boolean value) {
+        bitField0_ |= 0x00000020;
+        isRiding_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required bool isRiding = 6;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearIsRiding() {
+        bitField0_ = (bitField0_ & ~0x00000020);
+        isRiding_ = false;
+        onChanged();
+        return this;
+      }
+
+      private double battery_ ;
+      /**
+       * <code>required double battery = 7;</code>
+       * @return Whether the battery field is set.
+       */
+      public boolean hasBattery() {
+        return ((bitField0_ & 0x00000040) != 0);
+      }
+      /**
+       * <code>required double battery = 7;</code>
+       * @return The battery.
+       */
+      public double getBattery() {
+        return battery_;
+      }
+      /**
+       * <code>required double battery = 7;</code>
+       * @param value The battery to set.
+       * @return This builder for chaining.
+       */
+      public Builder setBattery(double value) {
+        bitField0_ |= 0x00000040;
+        battery_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required double battery = 7;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearBattery() {
+        bitField0_ = (bitField0_ & ~0x00000040);
+        battery_ = 0D;
         onChanged();
         return this;
       }
@@ -1991,12 +2482,14 @@ public final class IPC {
     java.lang.String[] descriptorData = {
       "\n\tIPC.proto\022\020org.example.grpc\"!\n\010Proposa" +
       "l\022\025\n\rstringRequest\030\001 \002(\t\"\"\n\010Response\022\026\n\016" +
-      "stringResponse\030\001 \002(\t\"7\n\005Infos\022\n\n\002id\030\001 \002(" +
-      "\005\022\020\n\010district\030\002 \002(\005\022\020\n\010grpcPort\030\003 \002(\0032\226\001" +
-      "\n\nIPCService\022H\n\ncoordinate\022\032.org.example" +
-      ".grpc.Proposal\032\032.org.example.grpc.Respon" +
-      "se(\0010\001\022>\n\007present\022\027.org.example.grpc.Inf" +
-      "os\032\032.org.example.grpc.Response"
+      "stringResponse\030\001 \002(\t\"\202\001\n\005Infos\022\n\n\002id\030\001 \002" +
+      "(\005\022\020\n\010district\030\002 \002(\005\022\020\n\010grpcPort\030\003 \002(\005\022\020" +
+      "\n\010position\030\004 \003(\005\022\024\n\014isRecharging\030\005 \002(\010\022\020" +
+      "\n\010isRiding\030\006 \002(\010\022\017\n\007battery\030\007 \002(\0012\217\001\n\nIP" +
+      "CService\022A\n\ncoordinate\022\027.org.example.grp" +
+      "c.Infos\032\032.org.example.grpc.Response\022>\n\007p" +
+      "resent\022\027.org.example.grpc.Infos\032\032.org.ex" +
+      "ample.grpc.Response"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -2019,7 +2512,7 @@ public final class IPC {
     internal_static_org_example_grpc_Infos_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_example_grpc_Infos_descriptor,
-        new java.lang.String[] { "Id", "District", "GrpcPort", });
+        new java.lang.String[] { "Id", "District", "GrpcPort", "Position", "IsRecharging", "IsRiding", "Battery", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

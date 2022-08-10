@@ -9,7 +9,6 @@ import Clients.SETA.RideInfo;
 import Schemes.TaxiSchema;
 import com.google.gson.Gson;
 
-import grpcTest.IPCServiceImpl;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 
@@ -29,15 +28,19 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
 import java.util.Scanner;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class Taxi {
-    private final static String ADMIN_SERVER_ADDR = "localhost";
+public class Taxi extends IPCServiceGrpc.IPCServiceImplBase {
+    private final static String ADMIN_SERVER_ADDRESS = "localhost";
     private final static int ADMIN_SERVER_PORT = 9001;
-    private final static String ADMIN_SERVER_URL = "http://" + ADMIN_SERVER_ADDR + ":" + ADMIN_SERVER_PORT;
-    private final static Gson gson = new Gson();
-    private final static String broker = "tcp://localhost:1883";
+    private final static String ADMIN_SERVER_URL = "http://" + ADMIN_SERVER_ADDRESS + ":" + ADMIN_SERVER_PORT;
+    private final static Gson GSON = new Gson();
+    private final static String MQTT_BROKER_URL = "tcp://localhost:1883";
+
+    private static TaxiInfo buffer;
+    private static Semaphore semaphore = new Semaphore(1);
 
     public static void main(String[] args) throws MqttException {
         Client client = ClientBuilder.newClient();
@@ -65,11 +68,23 @@ public class Taxi {
 
         // gRPC for the P2P communication between processes
         startGrpcServer(grpcPort);
-        if (taxis.size() > 0) {
-            grpcPresentToOthers(thisTaxi, taxis);
-        }
 
-        //startGrpcClient(39568);
+        Thread copyBufferThread = new Thread(() -> {
+            while (!Thread.interrupted()) {
+                if (!taxis.contains(buffer) && buffer != null) {
+                    synchronized (buffer) {
+                        if (buffer != null) {
+                            taxis.add(buffer);
+                        }
+                    }
+                }
+            }
+        });
+        copyBufferThread.start();
+
+        if (taxis.size() > 0) {
+            communicationBetweenTaxis(taxis, thisTaxi);
+        }
 
         // Using the MQTT client for seeking rides on the relative assigned district of the taxi
         //seekingRides(mqttClient, thisTaxi);
@@ -77,69 +92,62 @@ public class Taxi {
         // closingMqttConnection(mqttClient); // Utility function will be helpful when from console i want to quit the taxi
 
         // Debug
-        /*while (true) {
+        while (true) {
             try {
-                printFormattedInfos(thisTaxi, taxis.get());
+                //printFormattedInfos(thisTaxi, taxis.get());
+                System.out.println(taxis);
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
-        }*/
+        }
 
         // TODO: Inizia l'acquisizione dei dati dal sensore
     }
 
-    private static void grpcPresentToOthers(TaxiInfo thisTaxi, ArrayList<TaxiInfo> taxis) {
-        ManagedChannel channel;
+    @Override
+    public void present(IPC.Infos request, StreamObserver<IPC.Response> responseObserver) {
+        //System.out.println("Client data: " + request.toString());
+        int[] pos = new int[2];
+        pos[0] = request.getPosition(0);
+        pos[1] = request.getPosition(1);
 
-        IPC.Infos infos = IPC.Infos.newBuilder()
+        buffer = new TaxiInfo();
+        buffer.setId(request.getId());
+        buffer.setDistrict(request.getDistrict());
+        buffer.setGrpcPort(request.getGrpcPort());
+        buffer.setPosition(pos);
+        buffer.setRecharging(request.getIsRecharging());
+        buffer.setRiding(request.getIsRiding());
+        buffer.setBattery(request.getBattery());
+
+        responseObserver.onNext(IPC.Response.newBuilder()
+                .setStringResponse("ACK, your data has been received and saved from "
+                        + request.getId()
+                        + " through gRPC port "
+                        + request.getGrpcPort()).build());
+        responseObserver.onCompleted();
+    }
+
+    private static void communicationBetweenTaxis(ArrayList<TaxiInfo> taxis, TaxiInfo thisTaxi) {
+        IPC.Infos presentMsg = IPC.Infos.newBuilder()
                 .setId(thisTaxi.getId())
                 .setDistrict(thisTaxi.getDistrict())
                 .setGrpcPort(thisTaxi.getGrpcPort())
+                .addPosition(thisTaxi.getPosition()[0])
+                .addPosition(thisTaxi.getPosition()[1])
+                .setIsRecharging(thisTaxi.isRecharging())
+                .setIsRiding(thisTaxi.isRiding())
+                .setBattery(thisTaxi.getBattery())
                 .build();
 
-        for (TaxiInfo e : taxis) {
-            channel = ManagedChannelBuilder.forTarget(ADMIN_SERVER_ADDR + ":" + e.getGrpcPort()).build();
-            IPCServiceGrpc.IPCServiceStub stub = IPCServiceGrpc.newStub(channel);
-
-            //stub.present();
-
-
-            System.out.println();
-            //response.getStringResponse();
-        }
-
-
-    }
-
-    private static void startGrpcClient(int grpcPort) {
-        final ManagedChannel channel = ManagedChannelBuilder.forTarget(ADMIN_SERVER_ADDR + ":" + grpcPort).build();
-        IPCServiceGrpc.IPCServiceStub stub = IPCServiceGrpc.newStub(channel);
-        StreamObserver<IPC.Proposal> serverStream = stub.coordinate(new StreamObserver<>() {
-            @Override
-            public void onNext(IPC.Response value) {
-                System.out.println("[From taxi server] " + value.getStringResponse());
-            }
-
-            @Override
-            public void onError(Throwable t) {
-
-            }
-
-            @Override
-            public void onCompleted() {
-
-            }
-        });
-
-        serverStream.onNext(IPC.Proposal.newBuilder().setStringRequest("Message 1 to the taxi server").build());
-        serverStream.onNext(IPC.Proposal.newBuilder().setStringRequest("Message 2 to the taxi server").build());
-        serverStream.onNext(IPC.Proposal.newBuilder().setStringRequest("Message 3 to the taxi server").build());
-
-        try {
-            channel.awaitTermination(10, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        for (TaxiInfo t : taxis) {
+            ManagedChannel channel = ManagedChannelBuilder
+                    .forTarget(ADMIN_SERVER_ADDRESS + ":" + t.getGrpcPort())
+                    .usePlaintext().build();
+            IPCServiceGrpc.IPCServiceBlockingStub stub = IPCServiceGrpc.newBlockingStub(channel);
+            IPC.Response response = stub.present(presentMsg);
+            System.out.println("Response " + response.getStringResponse());
         }
     }
 
@@ -148,17 +156,17 @@ public class Taxi {
             try {
                 io.grpc.Server server =
                         ServerBuilder.forPort(grpcPort)
-                                .addService(new IPCServiceImpl()).build();
+                                .addService(new Taxi()).build();
                 server.start();
-                System.out.println("Server started!\n");
                 server.awaitTermination();
                 System.out.println("The server for gRPC communication has terminated");
             } catch (IOException | InterruptedException e) {
                 e.printStackTrace();
             }
         });
-    }
 
+        thread.start();
+    }
 
     /*
      * Command Line Interface for receiving user commands
@@ -203,7 +211,7 @@ public class Taxi {
         System.out.println("Listening on topic: " + topic);
 
         final ManagedChannel channel = ManagedChannelBuilder
-                .forTarget(ADMIN_SERVER_ADDR + ":" + thisTaxi.getGrpcPort())
+                .forTarget(ADMIN_SERVER_ADDRESS + ":" + thisTaxi.getGrpcPort())
                 .usePlaintext().build();
 
         //creating the synchronous blocking stub
@@ -223,7 +231,7 @@ public class Taxi {
             public void messageArrived(String topic, MqttMessage message) throws Exception {
                 String ride = new String(message.getPayload());
                 System.out.println(ride);
-                RideInfo rideInfo = gson.fromJson(ride, RideInfo.class);
+                RideInfo rideInfo = GSON.fromJson(ride, RideInfo.class);
 
                 //TODO: Algoritmo decentralizzato da accordare attraverso le gRPC
 
@@ -261,7 +269,7 @@ public class Taxi {
         RideRequest rideRequest =
                 new RideRequest(thisTaxi.getId(), ride.getId(), ride.getStartingDistrict(), taxiToRideDistance, thisTaxi.getBattery());
 
-        String body = gson.toJson(rideRequest);
+        String body = GSON.toJson(rideRequest);
 
 
         //BidirectionalMsgServiceOuterClass.ClientRequest clientRequest =                BidirectionalMsgServiceOuterClass.ClientRequest.newBuilder().setStringRequest(body).build();
@@ -373,13 +381,12 @@ public class Taxi {
         // Send the taxi initialization request with a tentative random ID
         final String INIT_PATH = "/taxi-init";
 
-        TaxiInfo initInfo = new TaxiInfo(generateRndID(), grpcPort, ADMIN_SERVER_ADDR);
+        TaxiInfo initInfo = new TaxiInfo(generateRndID(), grpcPort, ADMIN_SERVER_ADDRESS);
         // Receive the initialization data from the server: valid ID, position, list of other taxis
 
-        String serverInitInfos = postRequest(client, ADMIN_SERVER_URL + INIT_PATH, gson.toJson(initInfo));
+        String serverInitInfos = postRequest(client, ADMIN_SERVER_URL + INIT_PATH, GSON.toJson(initInfo));
 
-        TaxiSchema info = gson.fromJson(serverInitInfos, TaxiSchema.class);
-        return info;
+        return GSON.fromJson(serverInitInfos, TaxiSchema.class);
     }
 
     /*
@@ -407,8 +414,7 @@ public class Taxi {
             ex.printStackTrace();
         }
 
-        ArrayList<TaxiInfo> otherTaxis = gson.fromJson(responseJson, ArrayList.class);
-        return otherTaxis;
+        return GSON.fromJson(responseJson, ArrayList.class);
     }
 
     /*
@@ -449,11 +455,8 @@ public class Taxi {
     // Perform an HTTP GET request given the url and the body as json
     public static Response getRequest(Client client, String url) {
         WebTarget webTarget = client.target(url);
-
         Invocation.Builder builder = webTarget.request(MediaType.APPLICATION_JSON_TYPE);
-        Response response = builder.get();
-
-        return response;
+        return builder.get();
     }
 
     private static String delRequest(Client client, String url) {
@@ -488,18 +491,18 @@ public class Taxi {
 
     // Print the given information of the taxi
     private static void printFormattedInfos(TaxiInfo initInfo, ArrayList<TaxiInfo> taxis) {
-        String infos = "[" + initInfo.toString() + ", taxis=[";
+        StringBuilder infos = new StringBuilder("[" + initInfo.toString() + ", taxis=[");
 
-        infos += "[";
+        infos.append("[");
         if (!taxis.isEmpty()) {
             for (TaxiInfo e : taxis)
-                infos += "id=" + e.getId() + ",";
+                infos.append("id=").append(e.getId()).append(",");
         }
 
-        if (infos.endsWith(",")) {
-            infos = infos.substring(0, infos.length() - 1);
+        if (infos.toString().endsWith(",")) {
+            infos = new StringBuilder(infos.substring(0, infos.length() - 1));
         }
-        infos += "]]";
+        infos.append("]]");
 
         System.out.println(infos);
     }

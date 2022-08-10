@@ -1,7 +1,5 @@
 package Administrator;
 
-import Clients.Taxi.TaxiInfo;
-import Schemes.TaxiSchema;
 import com.google.gson.Gson;
 import jakarta.ws.rs.client.*;
 import jakarta.ws.rs.core.MediaType;
@@ -13,8 +11,8 @@ public class AdministratorClient {
     private final static String ADMIN_SERVER_ADDR = "localhost";
     private final static int ADMIN_SERVER_PORT = 9001;
     private final static String ADMIN_SERVER_URL = "http://" + ADMIN_SERVER_ADDR + ":" + ADMIN_SERVER_PORT;
-    private static Scanner scanner = new Scanner(System.in);
-    private static Gson gson = new Gson();
+    private static final Scanner SCANNER = new Scanner(System.in);
+    private static final Gson GSON = new Gson();
 
     public static void main(String[] args) {
         System.out.println("Administrator client menu");
@@ -23,21 +21,18 @@ public class AdministratorClient {
         System.out.println("-------------------------");
         Client client = ClientBuilder.newClient();
 
-        int choice = scanner.nextInt();
+        int choice = SCANNER.nextInt();
 
-        switch (choice) {
-            case 1:
-                removeTaxi(client);
-                break;
-            default:
-                System.out.println("The selected option is not valid.");
-                break;
+        if (choice == 1) {
+            removeTaxi(client);
+        } else {
+            System.out.println("The selected option is not valid.");
         }
     }
 
     private static void removeTaxi(Client client) {
         System.out.println("Which taxi do you want to remove? (Insert the ID): ");
-        int taxiID = scanner.nextInt();
+        int taxiID = SCANNER.nextInt();
 
         final String INIT_PATH = "/del-taxi/" + taxiID;
 
