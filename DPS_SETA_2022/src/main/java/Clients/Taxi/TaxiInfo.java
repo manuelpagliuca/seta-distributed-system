@@ -12,7 +12,7 @@ public class TaxiInfo implements Serializable {
     private int grpcPort = -1;
     private int district = -1;
     private int[] position = new int[2];
-    private String administratorServerAddr = null;
+    private String administratorServerAddress = null;
     private boolean isRecharging = false;
     private boolean isRiding = false;
     private double battery = -1;
@@ -25,13 +25,13 @@ public class TaxiInfo implements Serializable {
         this.isRecharging = info.isRecharging;
         this.isRiding = info.isRiding;
         this.battery = info.battery;
-        this.administratorServerAddr = info.administratorServerAddr;
+        this.administratorServerAddress = info.administratorServerAddress;
     }
 
     public TaxiInfo(int id, int grpcPort, String admServer) {
         this.id = id;
         this.grpcPort = grpcPort;
-        this.administratorServerAddr = admServer;
+        this.administratorServerAddress = admServer;
     }
 
     public TaxiInfo() {
@@ -84,12 +84,12 @@ public class TaxiInfo implements Serializable {
         this.position = position;
     }
 
-    public String getAdministratorServerAddr() {
-        return administratorServerAddr;
+    public String getAdministratorServerAddress() {
+        return administratorServerAddress;
     }
 
-    public void setAdministratorServerAddr(String administratorServerAddr) {
-        this.administratorServerAddr = administratorServerAddr;
+    public void setAdministratorServerAddress(String administratorServerAddress) {
+        this.administratorServerAddress = administratorServerAddress;
     }
 
     public boolean isRecharging() {

@@ -2,16 +2,22 @@ package Clients.SETA;
 
 import java.io.Serializable;
 
+enum Status {
+    FREE,
+    BUSY,
+    COMPLETED
+}
+
 public class RideInfo implements Serializable {
-    public int id;
-    public int[] startPosition = new int[2];
-    public int[] destinationPosition = new int[2];
+    private int id;
+    private int[] startPosition = new int[2];
+    private int[] destinationPosition = new int[2];
+    private Status status = Status.FREE;
 
     // Utility
     public int getDistrict(int[] position) {
         if (position.length != 2)
             return -1;
-
         if (position[0] < 5 && position[1] < 5)
             return 1;
         else if (position[0] > 5 && position[1] < 5)
@@ -54,10 +60,19 @@ public class RideInfo implements Serializable {
         this.id = id;
     }
 
+    public Status getStatus() {
+        return status;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
+    }
+
     @Override
     public String toString() {
         return "Ride " + id + ", from ("
                 + startPosition[0] + ", " + startPosition[1] + ") to ("
-                + destinationPosition[0] + ", " + destinationPosition[1] + ")";
+                + destinationPosition[0] + ", " + destinationPosition[1] + ")"
+                + ", Status: " + status.toString();
     }
 }

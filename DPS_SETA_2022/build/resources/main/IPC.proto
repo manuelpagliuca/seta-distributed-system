@@ -18,6 +18,10 @@ message Infos {
   required double battery = 7;
 }
 
+message RideProposal{
+  required double distance = 1;
+}
+
 service IPCService {
   rpc coordinate(Infos) returns (Response);
   rpc present(Infos) returns (Response);

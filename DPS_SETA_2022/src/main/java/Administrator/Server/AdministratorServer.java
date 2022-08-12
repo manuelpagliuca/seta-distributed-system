@@ -97,7 +97,7 @@ public class AdministratorServer {
         newTaxi.setDistrict(genRandomDistrict());
         newTaxi.setPosition(genTaxiInitialPosition(newTaxi.getDistrict()));
         newTaxi.setGrpcPort(info.getGrpcPort());
-        newTaxi.setAdministratorServerAddr(info.getAdministratorServerAddr());
+        newTaxi.setAdministratorServerAddress(info.getAdministratorServerAddress());
 
         synchronized (taxis) {
             taxis.add(newTaxi);

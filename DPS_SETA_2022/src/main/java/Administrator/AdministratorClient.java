@@ -8,11 +8,10 @@ import jakarta.ws.rs.core.Response;
 import java.util.Scanner;
 
 public class AdministratorClient {
-    private final static String ADMIN_SERVER_ADDR = "localhost";
+    private final static String ADMIN_SERVER_ADDRESS = "localhost";
     private final static int ADMIN_SERVER_PORT = 9001;
-    private final static String ADMIN_SERVER_URL = "http://" + ADMIN_SERVER_ADDR + ":" + ADMIN_SERVER_PORT;
+    private final static String ADMIN_SERVER_URL = "http://" + ADMIN_SERVER_ADDRESS + ":" + ADMIN_SERVER_PORT;
     private static final Scanner SCANNER = new Scanner(System.in);
-    private static final Gson GSON = new Gson();
 
     public static void main(String[] args) {
         System.out.println("Administrator client menu");
