@@ -18,11 +18,19 @@ message Infos {
   required double battery = 7;
 }
 
-message RideProposal{
-  required double distance = 1;
+message Goodbye {
+  required int32 grpcPort = 1;
+}
+
+message RideCharge {
+  required Infos taxi = 1;
+  repeated int32 passengerPosition = 2;
+  required double distanceToTaxi = 3;
 }
 
 service IPCService {
-  rpc coordinate(Infos) returns (Response);
   rpc present(Infos) returns (Response);
+  rpc compareDistances(RideCharge) returns (RideCharge);
+  // todo: implement the src file
+  rpc goodbye(Goodbye) returns (Response);
 }

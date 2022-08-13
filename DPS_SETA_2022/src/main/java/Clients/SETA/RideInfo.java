@@ -2,17 +2,11 @@ package Clients.SETA;
 
 import java.io.Serializable;
 
-enum Status {
-    FREE,
-    BUSY,
-    COMPLETED
-}
-
 public class RideInfo implements Serializable {
     private int id;
     private int[] startPosition = new int[2];
     private int[] destinationPosition = new int[2];
-    private Status status = Status.FREE;
+    public Status status = Status.FREE;
 
     // Utility
     public int getDistrict(int[] position) {

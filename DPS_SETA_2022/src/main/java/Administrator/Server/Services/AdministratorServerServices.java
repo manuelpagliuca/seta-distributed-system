@@ -34,7 +34,7 @@ public class AdministratorServerServices {
      * In both case the same or the new ID (contained in the TaxiInfo class)
      * will be returned to the client with the list of other taxis present
      * on the server. This will happen through a wrapper class "TaxiSchema".
-     * */
+     */
     @POST
     @Path("taxi-init")
     @Consumes("application/json")

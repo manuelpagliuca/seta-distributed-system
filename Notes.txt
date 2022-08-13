@@ -1,0 +1,36 @@
+GET REQUEST
+
+/*
+ * Return the view of the other taxis from the point of view of the requester (this process/taxi)
+ * ----------------------------------------------------------------------------------------------
+ * Essentially will perform an HTTP POST request to the "/get-taxis" exposed REST API, which will
+ * return the list of all the other taxis present on the administrator server minus the taxi
+ * which is making the request ('thisTaxi' variable).
+ */
+private static ArrayList<TaxiInfo> getTaxisOnServer(Client client, int taxiID) {
+	final String GET_PATH = "/get-taxis/" + taxiID;
+
+	Response response = getRequest(client, ADMIN_SERVER_URL + GET_PATH);
+
+	if (response.getStatus() == Response.Status.GONE.getStatusCode()) {
+		System.out.println(response.readEntity(String.class));
+		System.exit(0);
+
+	}
+
+	String responseJson = null;
+	try {
+		responseJson = response.readEntity(String.class);
+	} catch (Exception ex) {
+		ex.printStackTrace();
+	}
+
+	return GSON.fromJson(responseJson, ArrayList.class);
+}
+
+// Perform an HTTP GET request given the url and the body as json
+public static Response getRequest(Client client, String url) {
+	WebTarget webTarget = client.target(url);
+	Invocation.Builder builder = webTarget.request(MediaType.APPLICATION_JSON_TYPE);
+	return builder.get();
+}
