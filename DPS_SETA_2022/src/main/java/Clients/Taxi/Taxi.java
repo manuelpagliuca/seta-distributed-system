@@ -58,6 +58,8 @@ public class Taxi extends IPCServiceGrpc.IPCServiceImplBase {
         CLI cli = new CLI(id, client, ADMIN_SERVER_URL, scanner);
         cli.start();
 
+        InfoThread infoThread = new InfoThread(id);
+
         // Init the gRPC for the P2P communication between taxis
         GrpcServer grpcServer = new GrpcServer(grpcPort);
         grpcServer.start();
@@ -77,16 +79,7 @@ public class Taxi extends IPCServiceGrpc.IPCServiceImplBase {
 
     private static void printInfos() {
         Thread printInfos = new Thread(() -> {
-            while (true) {
-                try {
-                    //printFormattedInfos(taxiInfo, taxi.taxis);
-                    //System.out.println(taxis);
-                    //System.out.println(taxi.taxis);
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-            }
+
         });
         printInfos.start();
     }
@@ -207,7 +200,6 @@ public class Taxi extends IPCServiceGrpc.IPCServiceImplBase {
         }
     }
 
-
     /*
      * Seeking for rides on the relative district on which the taxi is assigned
      * ------------------------------------------------------------------------
@@ -273,8 +265,6 @@ public class Taxi extends IPCServiceGrpc.IPCServiceImplBase {
                             rideInfo.setStatus(Status.BUSY);
                             System.out.println("I got the ownership for the ride " + rideInfo.getId());
                         }
-
-
                     }
                 }
             }
@@ -452,28 +442,5 @@ public class Taxi extends IPCServiceGrpc.IPCServiceImplBase {
     private static int generateRndID() {
         Random random = new Random();
         return random.nextInt(1, 100 + 1);
-    }
-
-    // Print the given information of the taxi
-    private static void printFormattedInfos(TaxiInfo initInfo, ArrayList<TaxiInfo> taxis) {
-        StringBuilder infos = new StringBuilder("[" + initInfo.toString() + ", taxis=[");
-
-        infos.append("[");
-        if (!taxis.isEmpty()) {
-            for (TaxiInfo e : taxis)
-                infos.append("id=").append(e.getId()).append(",");
-        }
-
-        if (infos.toString().endsWith(",")) {
-            infos = new StringBuilder(infos.substring(0, infos.length() - 1));
-        }
-        infos.append("]]");
-
-        System.out.println(infos);
-    }
-
-    private static void printFormattedInfos(TaxiInfo initInfo) {
-        String infos = "[" + initInfo.toString() + "]";
-        System.out.println(infos);
     }
 }
