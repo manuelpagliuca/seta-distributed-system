@@ -1,8 +1,6 @@
 package Clients.Taxi;
 
-import io.grpc.Grpc;
 import io.grpc.ServerBuilder;
-
 import java.io.IOException;
 
 public class GrpcServer implements Runnable {
@@ -11,13 +9,6 @@ public class GrpcServer implements Runnable {
 
     GrpcServer(int grpcPort) {
         this.grpcPort = grpcPort;
-    }
-
-    public void start() {
-        if (t == null) {
-            t = new Thread(this);
-            t.start();
-        }
     }
 
     /* Start the gRPC server side of the taxi
@@ -42,5 +33,10 @@ public class GrpcServer implements Runnable {
         }
     }
 
-
+    public void start() {
+        if (t == null) {
+            t = new Thread(this);
+            t.start();
+        }
+    }
 }

@@ -13,6 +13,7 @@ import org.glassfish.jersey.server.ResourceConfig;
 
 import java.io.IOException;
 import java.net.URI;
+import java.sql.Timestamp;
 import java.util.*;
 
 /*
@@ -30,6 +31,7 @@ public class AdministratorServer {
     private static final int PORT = 9001;
     private static AdministratorServer instance = null;
     private static final ArrayList<TaxiInfo> taxis = new ArrayList<>();
+    private static ServerTaxisUpdater taxisUpdater = new ServerTaxisUpdater();
 
     public AdministratorServer() {
     }
@@ -45,12 +47,12 @@ public class AdministratorServer {
         ResourceConfig config = new ResourceConfig();
         config.register(AdministratorServerServices.class);
         String serverAddress = "http://" + HOST + ":" + PORT;
-        HttpServer restServer = GrizzlyHttpServerFactory.createHttpServer(URI.create(serverAddress), config);
+        HttpServer restServer = GrizzlyHttpServerFactory
+                .createHttpServer(URI.create(serverAddress), config);
 
-        ServerTaxisUpdater taxiListsUpdater = new ServerTaxisUpdater();
+        taxisUpdater.start();
 
         try {
-            taxiListsUpdater.start();
             restServer.start();
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -101,6 +103,7 @@ public class AdministratorServer {
 
         synchronized (taxis) {
             taxis.add(newTaxi);
+            taxisUpdater.update();
         }
 
         return newTaxi;
@@ -111,7 +114,7 @@ public class AdministratorServer {
      * This function perform a DELETE operation through a REST endpoint which is
      * exposes in the services class.
      *
-     * It could also signaling the relative taxi process through gRPC to end is
+     * It could also signal the relative taxi process through gRPC to end is
      * execution.
      */
     public synchronized boolean removeTaxi(int taxiID) {
@@ -129,12 +132,12 @@ public class AdministratorServer {
 
     // Print all the taxis ID each one with the list of the other taxis on the smart city (debug)
     public void printAllTaxis() {
-        //for (Map.Entry<TaxiInfo, ArrayList<TaxiInfo>> e : taxis.entrySet()) {
-        for (TaxiInfo e : taxis) {
-            System.out.println("id= " + e.getId()
-                    + ", gRPC=" + e.getGrpcPort());
-        }
-        System.out.println("---");
+        Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+        System.out.println(timestamp);
+        System.out.println("---" + timestamp + "---");
+
+        for (TaxiInfo e : taxis)
+            System.out.println("id=" + e.getId() + ", gRPC=" + e.getGrpcPort());
     }
 
     // Generate a random district inside the integer range [1,4]

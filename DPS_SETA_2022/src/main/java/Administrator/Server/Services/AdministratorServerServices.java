@@ -41,8 +41,10 @@ public class AdministratorServerServices {
     @Produces("application/json")
     public Response newTaxi(String json) {
         if (json.isEmpty()) {
-            return Response.status(Response.Status.BAD_REQUEST)
-                    .entity("Bad request or wrong formatting").build();
+            return Response
+                    .status(Response.Status.BAD_REQUEST)
+                    .entity("Bad request or wrong formatting")
+                    .build();
         }
 
         TaxiInfo inputTaxiInfo;
@@ -50,14 +52,17 @@ public class AdministratorServerServices {
             inputTaxiInfo = gson.fromJson(json, TaxiInfo.class);
         } catch (JsonParseException e) {
             e.printStackTrace();
-            return Response.status(Response.Status.BAD_REQUEST)
-                    .entity("Bad request or wrong formatting").build();
+            return Response
+                    .status(Response.Status.BAD_REQUEST)
+                    .entity("Bad request or wrong formatting")
+                    .build();
         }
 
         String outputInfoJson;
         TaxiSchema taxiSchema = new TaxiSchema();
         synchronized (administratorServer) {
-            // Saving the taxi list of the server first, in this way it will better approximate the correct amount of taxis
+            // Saving the taxi list of the server first, in this way it will better approximate
+            // the correct amount of taxis
             taxiSchema.setTaxis(AdministratorServer.getTaxis());
             // The addTaxi method will return a TaxiInfo with the possible corrected ID
             taxiSchema.setTaxiInfo(administratorServer.addTaxi(inputTaxiInfo));
@@ -68,14 +73,14 @@ public class AdministratorServerServices {
     }
 
     /*
-     * HTTP POST Request at "/get-taxis" for getting list of other taxis.
+     * HTTP POST Request at "/get-taxis+id" for getting list of other taxis.
      * ------------------------------------------------------------------
      * Given the buffered information of the taxi which is requesting this
      * method, it will return the view of the other taxis on the server.
      *
      * In essence, it will return the list of the taxis which are present
      * on the administrator without the requesting taxi.
-     * */
+     */
     @GET
     @Path("get-taxis/{id}")
     @Consumes("application/json")
@@ -94,10 +99,15 @@ public class AdministratorServerServices {
         } else {
             // If the taxi ID can't be removed, means that it has been already deleted
             // So we must communicate to the client that it has to quit his execution.
-            return Response.status(Response.Status.GONE).entity("The ID of your taxi process is not anymore " +
-                    "present in the administrator server, quit your execution.").build();
+            return Response
+                    .status(Response.Status.GONE)
+                    .entity("The ID of your taxi process is not anymore present " +
+                            "in the administrator server, quit your execution.")
+                    .build();
         }
-        return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+        return Response
+                .status(Response.Status.INTERNAL_SERVER_ERROR)
+                .build();
     }
 
     /*
@@ -112,13 +122,14 @@ public class AdministratorServerServices {
     public Response deleteTaxi(@PathParam("id") int taxiId) {
         boolean ans = AdministratorServer.getInstance().removeTaxi(taxiId);
 
-        if (ans) {
-            return Response.ok("Deletion completed successfully.").build();
-        } else {
+        if (ans)
+            return Response
+                    .ok("Deletion completed successfully.")
+                    .build();
+        else
             return Response
                     .status(Response.Status.NOT_FOUND)
                     .entity("The given ID was not found in the administrator server").build();
-        }
     }
 
 }

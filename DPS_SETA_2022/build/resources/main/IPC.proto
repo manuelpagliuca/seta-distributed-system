@@ -28,9 +28,13 @@ message RideCharge {
   required double distanceToTaxi = 3;
 }
 
+message ACK {
+  required bool vote = 1;
+}
+
 service IPCService {
   rpc present(Infos) returns (Response);
-  rpc compareDistances(RideCharge) returns (RideCharge);
-  // todo: implement the src file
+  rpc compareDistances(RideCharge) returns (ACK);
+  rpc changedPosition(Infos) returns (ACK);
   rpc goodbye(Goodbye) returns (Response);
 }

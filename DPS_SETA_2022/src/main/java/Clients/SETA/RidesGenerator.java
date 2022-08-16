@@ -66,13 +66,14 @@ public class RidesGenerator {
                 }
             });
             rideGeneration(client, pubTopics, pubQos);
-            // TODO: Insert some thread for handling the reading from console, so that it is possible to interact with the broker
-            /*System.out.println("\n ***  Press a random key to exit *** \n");
-            Scanner command = new Scanner(System.in);
-            command.nextLine();
-
-            client.disconnect();*/
-
+            // TODO: Insert some thread for handling the reading from console,
+            // todo: so that it is possible to interact with the broker
+            /*
+               System.out.println("\n ***  Press a random key to exit *** \n");
+               Scanner command = new Scanner(System.in);
+               command.nextLine();
+               client.disconnect();
+             */
         } catch (MqttException me) {
             System.out.println("reason " + me.getReasonCode());
             System.out.println("msg " + me.getMessage());
@@ -121,8 +122,12 @@ public class RidesGenerator {
 
         Random random = new Random();
         int[] startPos = new int[2];
-        startPos[0] = random.nextInt(0, 10);
-        startPos[1] = random.nextInt(0, 10);
+        // todo: debugging (remove this)
+        startPos[0] = random.nextInt(5,9);
+        startPos[1] = random.nextInt(0,5);
+
+        //startPos[0] = random.nextInt(0, 10);
+        //startPos[1] = random.nextInt(0, 10);
 
         ride.setStartPosition(startPos);
         int[] destPos = new int[2];

@@ -23,18 +23,18 @@ import org.example.grpc.IPC;
 import org.example.grpc.IPCServiceGrpc;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Random;
 import java.util.Scanner;
 
 public class Taxi extends IPCServiceGrpc.IPCServiceImplBase {
+    // Connection data
     private final static String ADMIN_SERVER_ADDRESS = "localhost";
     private final static int ADMIN_SERVER_PORT = 9001;
     private final static String ADMIN_SERVER_URL = "http://" + ADMIN_SERVER_ADDRESS + ":" + ADMIN_SERVER_PORT;
-    private final static Gson GSON = new Gson();
     private final static String MQTT_BROKER_URL = "tcp://localhost:1883";
+    private final static Gson GSON = new Gson();
 
-    // Taxi data
+    // Taxi Data
     private static int grpcPort;
     private static Client client;
     private static double battery = 100.0;
@@ -45,6 +45,7 @@ public class Taxi extends IPCServiceGrpc.IPCServiceImplBase {
     private static boolean isRiding = false;
     private static ArrayList<TaxiInfo> taxis = new ArrayList<>();
 
+    // MQTT Subscriber
     private static final String clientID = MqttClient.generateClientId();
     private static MqttClient mqttClient = null;
 
@@ -57,8 +58,6 @@ public class Taxi extends IPCServiceGrpc.IPCServiceImplBase {
         Scanner scanner = new Scanner(System.in);
         CLI cli = new CLI(id, client, ADMIN_SERVER_URL, scanner);
         cli.start();
-
-        InfoThread infoThread = new InfoThread(id);
 
         // Init the gRPC for the P2P communication between taxis
         GrpcServer grpcServer = new GrpcServer(grpcPort);
@@ -85,7 +84,7 @@ public class Taxi extends IPCServiceGrpc.IPCServiceImplBase {
     }
 
     @Override
-    public void compareDistances(IPC.RideCharge request, StreamObserver<IPC.RideCharge> responseObserver) {
+    public void compareDistances(IPC.RideCharge request, StreamObserver<IPC.ACK> responseObserver) {
         // Check the distance between the server taxi and the received distance
         int[] passengerPos = new int[2];
         passengerPos[0] = request.getPassengerPosition(0);
@@ -94,43 +93,56 @@ public class Taxi extends IPCServiceGrpc.IPCServiceImplBase {
         final double clientDistance = request.getDistanceToTaxi();
         final double serverDistance = euclideanDistance(position, passengerPos);
 
-        if (!isRecharging && !isRiding) {
-            // If the taxi is recharging it counts as a vote
-            responseObserver.onNext(request);
+        if (isRecharging || isRiding) {
+            // This taxi is recharging or on a ride
+            System.out.println("This taxi is recharging or on a ride, sends ACK to " + request.getTaxi().getId());
+            responseObserver.onNext(IPC.ACK.newBuilder().setVote(true).build());
             responseObserver.onCompleted();
             return;
         }
 
         if (serverDistance > clientDistance) {
-            // The client taxi has a smaller distance to the passenger
-            responseObserver.onNext(request);
+            // The client taxi has a smaller distance to the passenger than this, ACK
+            responseObserver.onNext(IPC.ACK.newBuilder().setVote(true).build());
             responseObserver.onCompleted();
             return;
         } else if (serverDistance == clientDistance) {
-            // The server and client taxi got the same distance
             if (battery < request.getTaxi().getBattery()) {
-                // The taxi server got less battery than the client
-                responseObserver.onNext(request);
+                // Requester has more battery than this, ACK
+                responseObserver.onNext(IPC.ACK.newBuilder().setVote(true).build());
                 responseObserver.onCompleted();
                 return;
             } else if (battery == request.getTaxi().getBattery()) {
-                // The server and client taxi got the same battery levels
                 if (id < request.getTaxi().getId()) {
-                    // The server taxi got a bigger ID than the client taxi
-                    responseObserver.onNext(request);
+                    // The requesting taxi has a greater ID than this taxi, ACK
+                    responseObserver.onNext(IPC.ACK.newBuilder().setVote(true).build());
                     responseObserver.onCompleted();
                     return;
                 }
             }
         }
-        // TODO: could use different proto messages, like a boolean for making the code more clean
-        // The taxi from server side is a better choice than the client, so no ACK (it returns a different taxi bacl)
-        responseObserver.onNext(IPC.RideCharge.newBuilder()
-                .setTaxi(getIPCInfos())
-                .addPassengerPosition(request.getPassengerPosition(0))
-                .addPassengerPosition(request.getPassengerPosition(1))
-                .setDistanceToTaxi(serverDistance)
-                .build());
+
+        // This taxi has a better distance, battery level or ID value than the requester, sends NACK to him
+        responseObserver.onNext(IPC.ACK.newBuilder().setVote(false).build());
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void changedPosition(IPC.Infos request, StreamObserver<IPC.ACK> responseObserver) {
+        for (TaxiInfo t : taxis) {
+            if (t.getId() == request.getId()) {
+                int[] pos = new int[2];
+                pos[0] = request.getPosition(0);
+                pos[1] = request.getPosition(1);
+                t.setPosition(pos);
+                t.setDistrict(request.getDistrict());
+                t.setBattery(request.getBattery());
+                t.setRecharging(request.getIsRecharging());
+                t.setRiding(request.getIsRiding());
+            }
+        }
+        System.out.println("Saved the new position of taxi " + request.getId());
+        responseObserver.onNext(IPC.ACK.newBuilder().setVote(true).build());
         responseObserver.onCompleted();
     }
 
@@ -195,7 +207,7 @@ public class Taxi extends IPCServiceGrpc.IPCServiceImplBase {
                     .usePlaintext().build();
             IPCServiceGrpc.IPCServiceBlockingStub stub = IPCServiceGrpc.newBlockingStub(channel);
             IPC.Response response = stub.present(presentMsg);
-            System.out.println("Response: " + response.getStringResponse());
+            //todo: debug //System.out.println("Response: " + response.getStringResponse());
             channel.shutdown();
         }
     }
@@ -211,7 +223,7 @@ public class Taxi extends IPCServiceGrpc.IPCServiceImplBase {
      * should take the ownership of the ride (the coordination will be performed
      * through gRPC).
      */
-    private static void startMqttClient() {
+    private synchronized static void startMqttClient() {
         try {
             mqttClient = new MqttClient(MQTT_BROKER_URL, clientID, null);
         } catch (MqttException e) {
@@ -238,32 +250,38 @@ public class Taxi extends IPCServiceGrpc.IPCServiceImplBase {
             }
 
             @Override
-            public void messageArrived(String topic, MqttMessage message) throws Exception {
+            public synchronized void messageArrived(String topic, MqttMessage message) throws Exception {
                 String ride = new String(message.getPayload());
                 RideInfo rideInfo = GSON.fromJson(ride, RideInfo.class);
-                int[] passengerPosition = rideInfo.getStartPosition();
-                System.out.println(rideInfo);
 
-                if (!isRiding && !isRecharging) {
-                    if (rideInfo.getStatus() == Status.FREE) {
-                        if (!taxis.isEmpty()) {
-                            double clientDistance = euclideanDistance(position, passengerPosition);
-                            // todo: Should consider only free taxis (no recharging or in a ride)
-                            int taxisInDistrict = getNumberOfTaxisInDistrict();
-                            System.out.println("Waiting for " + taxisInDistrict + " ACK votes");
-                            int ackVotes = compareDistancesGrpc(clientDistance, rideInfo.getStartPosition());
+                if (district == rideInfo.getStartingDistrict()) {
+                    System.out.println("MQTT District " + district + " ride communication: " + rideInfo);
 
-                            if (ackVotes == taxisInDistrict) {
-                                System.out.println("I got the ownership for the ride " + rideInfo.getId());
-                                rideInfo.setStatus(Status.BUSY);
-                                performRide(rideInfo);
+                    if (!isRiding && !isRecharging) {
+                        if (rideInfo.getStatus() == Status.FREE) {
+                            if (!taxis.isEmpty()) {
+                                int[] passengerPosition = rideInfo.getStartPosition();
+                                double clientDistance = euclideanDistance(position, passengerPosition);
+                                // todo: Should consider only free taxis (no recharging or in a ride)
+                                final int taxisInDistrict = getNumberOfTaxisInDistrict();
+                                System.out.println("Waiting for " + taxisInDistrict + " ACK votes");
+                                final int ackVotes = compareDistancesGrpc(clientDistance, rideInfo.getStartPosition());
+                                System.out.println("Received a total of " + ackVotes + " ACKs");
+
+                                if (ackVotes == taxisInDistrict) {
+                                    System.out.println("I got the ownership for the ride " + rideInfo.getId());
+                                    rideInfo.setStatus(Status.BUSY);
+                                    performRide(rideInfo);
+                                } else {
+                                    // The ride has been taken from someone else
+                                    // It should wait of information in case of new position of the taxi
+                                    Thread.sleep(1000);
+                                    System.out.println("I didn't got the ownership for the ride " + rideInfo.getId());
+                                }
                             } else {
-                                // The ride has been taken from someone else
-                                System.out.println("I didn't got the ownership for the ride " + rideInfo.getId());
+                                rideInfo.setStatus(Status.BUSY);
+                                System.out.println("I got the ownership for the ride " + rideInfo.getId());
                             }
-                        } else {
-                            rideInfo.setStatus(Status.BUSY);
-                            System.out.println("I got the ownership for the ride " + rideInfo.getId());
                         }
                     }
                 }
@@ -287,20 +305,12 @@ public class Taxi extends IPCServiceGrpc.IPCServiceImplBase {
     }
 
     private static void performRide(RideInfo rideInfo) throws InterruptedException, MqttException {
-        isRiding = true;
-
         final int DELIVERY_TIME = 5000;
-        Thread.sleep(DELIVERY_TIME);
 
+        isRiding = true;
         double distToPassenger = euclideanDistance(position, rideInfo.getStartPosition());
         double rideDistance = euclideanDistance(rideInfo.getStartPosition(), rideInfo.getDestinationPosition());
         double totalKm = distToPassenger + rideDistance;
-
-        battery -= (totalKm);
-        System.out.println("After " + totalKm + " Km the battery levels are " + battery);
-
-        position[0] = rideInfo.getDestinationPosition()[0];
-        position[1] = rideInfo.getDestinationPosition()[1];
 
         if (district != rideInfo.getDestinationDistrict()) {
             String topic = "seta/smartcity/rides/district" + district;
@@ -314,7 +324,42 @@ public class Taxi extends IPCServiceGrpc.IPCServiceImplBase {
             System.out.println("Subscribed on topic: " + topic);
         }
 
+        position[0] = rideInfo.getDestinationPosition()[0];
+        position[1] = rideInfo.getDestinationPosition()[1];
+
+        communicateNewPosition();
+
+        Thread.sleep(DELIVERY_TIME);
+        battery -= totalKm;
+        System.out.printf("I reached the destination and after %,.2f Km the battery levels are %,.2f %%\n", totalKm, battery);
+
         isRiding = false;
+    }
+
+    private static void communicateNewPosition() {
+        IPC.Infos presentMsg = IPC.Infos.newBuilder()
+                .setId(id)
+                .setDistrict(district)
+                .setGrpcPort(grpcPort)
+                .addPosition(position[0])
+                .addPosition(position[1])
+                .setIsRecharging(isRecharging)
+                .setIsRiding(isRiding)
+                .setBattery(battery)
+                .build();
+
+        for (TaxiInfo t : taxis) {
+            ManagedChannel channel = ManagedChannelBuilder
+                    .forTarget(ADMIN_SERVER_ADDRESS + ":" + t.getGrpcPort())
+                    .usePlaintext().build();
+            IPCServiceGrpc.IPCServiceBlockingStub stub = IPCServiceGrpc.newBlockingStub(channel);
+            IPC.ACK ack = stub.changedPosition(presentMsg);
+
+            if (ack.getVote())
+                System.out.println(t.getId() + " ACKed my new position");
+
+            channel.shutdown();
+        }
     }
 
     private static IPC.Infos getIPCInfos() {
@@ -333,7 +378,7 @@ public class Taxi extends IPCServiceGrpc.IPCServiceImplBase {
     /*
      *
      */
-    private static int compareDistancesGrpc(double distToStart, int[] startPosition) {
+    private static int compareDistancesGrpc(double distToStart, int[] startPosition) throws InterruptedException {
         IPC.RideCharge proposal = IPC.RideCharge.newBuilder()
                 .setTaxi(getIPCInfos())
                 .addPassengerPosition(startPosition[0])
@@ -343,21 +388,29 @@ public class Taxi extends IPCServiceGrpc.IPCServiceImplBase {
 
         int ackCounter = 0;
 
+        // Send the proposal only to the other taxis in the same district
         for (TaxiInfo t : taxis) {
-            String target = ADMIN_SERVER_ADDRESS + ":" + t.getGrpcPort();
-            ManagedChannel channel = ManagedChannelBuilder
-                    .forTarget(target)
-                    .usePlaintext()
-                    .build();
-            System.out.println("Sending my distance to " + target);
-            IPCServiceGrpc.IPCServiceBlockingStub stub = IPCServiceGrpc.newBlockingStub(channel);
-            IPC.RideCharge response = stub.compareDistances(proposal);
-            /* If the client taxi has a smaller distance then another server taxi
-             * it will receive its own data back (as ACK vote for consensus). */
-            if (proposal.getTaxi().getId() == response.getTaxi().getId())
-                ackCounter++;
-            channel.shutdown();
+            if (t.getDistrict() == district) {
+                String target = ADMIN_SERVER_ADDRESS + ":" + t.getGrpcPort();
+                ManagedChannel channel = ManagedChannelBuilder
+                        .forTarget(target)
+                        .usePlaintext()
+                        .build();
+                //todo //System.out.println("Sending my distance to " + target);
+                IPCServiceGrpc.IPCServiceBlockingStub stub = IPCServiceGrpc.newBlockingStub(channel);
+                IPC.ACK ack = stub.compareDistances(proposal);
+                /* If the client taxi has a smaller distance then another server taxi
+                 * it will receive its own data back (as ACK vote for consensus) */
+                if (ack.getVote()) {
+                    ackCounter++;
+                    System.out.println("Received an ACK from " + t.getId());
+                } else
+                    System.out.println("Received a NACK from " + t.getId());
+
+                channel.shutdown();
+            }
         }
+        Thread.sleep(500);
         return ackCounter;
     }
 
