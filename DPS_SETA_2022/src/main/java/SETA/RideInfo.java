@@ -1,4 +1,4 @@
-package Clients.SETA;
+package SETA;
 
 import java.io.Serializable;
 
@@ -6,9 +6,8 @@ public class RideInfo implements Serializable {
     private int id;
     private int[] startPosition = new int[2];
     private int[] destinationPosition = new int[2];
-    public Status status = Status.FREE;
 
-    // Utility
+    // Utility.Utility
     public int getDistrict(int[] position) {
         if (position.length != 2)
             return -1;
@@ -54,19 +53,10 @@ public class RideInfo implements Serializable {
         this.id = id;
     }
 
-    public Status getStatus() {
-        return status;
-    }
-
-    public void setStatus(Status status) {
-        this.status = status;
-    }
-
     @Override
     public String toString() {
         return "Ride " + id + ", from ("
                 + startPosition[0] + ", " + startPosition[1] + ") to ("
-                + destinationPosition[0] + ", " + destinationPosition[1] + ")"
-                + ", Status: " + status.toString();
+                + destinationPosition[0] + ", " + destinationPosition[1] + ")";
     }
 }

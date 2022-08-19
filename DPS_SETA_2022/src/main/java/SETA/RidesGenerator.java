@@ -1,4 +1,4 @@
-package Clients.SETA;
+package SETA;
 
 import com.google.gson.Gson;
 import org.eclipse.paho.client.mqttv3.*;
@@ -95,24 +95,26 @@ public class RidesGenerator {
      * This method generate 2 rides each 5 seconds on the relative topics (this will
      * depend on the district of the generated rides).
      */
-    private static void rideGeneration(MqttClient client, String[] pubTopics, int pubQos)
-            throws MqttException, InterruptedException {
-        // TODO: Possibly remove the true condition there
-        while (true) {
+    private static void rideGeneration(MqttClient client, String[] pubTopics, int pubQos) throws
+            MqttException, InterruptedException {
+        while (!Thread.currentThread().isInterrupted()) {
             RideInfo ride1 = generateRide();
             RideInfo ride2 = generateRide();
 
             MqttMessage message = new MqttMessage(gson.toJson(ride1).getBytes());
             message.setQos(pubQos);
+            message.setRetained(true);
 
             client.publish(pubTopics[ride1.getStartingDistrict() - 1], message);
             System.out.println(pubTopics[ride1.getStartingDistrict() - 1] + ", " + message);
 
             MqttMessage message2 = new MqttMessage(gson.toJson(ride2).getBytes());
             message2.setQos(pubQos);
+            message2.setRetained(true);
 
             client.publish(pubTopics[ride2.getStartingDistrict() - 1], message2);
             System.out.println(pubTopics[ride2.getStartingDistrict() - 1] + ", " + message2);
+
             Thread.sleep(5000);
         }
     }
@@ -123,8 +125,8 @@ public class RidesGenerator {
         Random random = new Random();
         int[] startPos = new int[2];
         // todo: debugging (remove this)
-        startPos[0] = random.nextInt(5,9);
-        startPos[1] = random.nextInt(0,5);
+        startPos[0] = random.nextInt(5, 9);
+        startPos[1] = random.nextInt(0, 5);
 
         //startPos[0] = random.nextInt(0, 10);
         //startPos[1] = random.nextInt(0, 10);
@@ -141,7 +143,6 @@ public class RidesGenerator {
 
         ride.setDestinationPosition(destPos);
         ride.setId(++rideIds);
-        ride.setStatus(Status.FREE);
 
         return ride;
     }

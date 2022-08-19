@@ -2,14 +2,13 @@
  * Mat. Number 975169
  * Manuel Pagliuca
  * M.Sc. in Computer Science @UNIMI A.Y. 2021/2022 */
-package Administrator.Server.Services;
+package Administrator.Server;
 
-import Schemes.TaxiSchema;
-import Administrator.Server.AdministratorServer;
-import Clients.Taxi.TaxiInfo;
 import com.google.gson.*;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
+import Client.TaxiInfo;
+import Schemes.TaxiSchema;
 
 import java.util.ArrayList;
 
@@ -73,41 +72,26 @@ public class AdministratorServerServices {
     }
 
     /*
-     * HTTP POST Request at "/get-taxis+id" for getting list of other taxis.
+     * HTTP POST Request at "/get-taxis" for getting list of other taxis.
      * ------------------------------------------------------------------
-     * Given the buffered information of the taxi which is requesting this
-     * method, it will return the view of the other taxis on the server.
-     *
-     * In essence, it will return the list of the taxis which are present
-     * on the administrator without the requesting taxi.
+     * it will return the list of the taxis which are present on the
+     * administrator server.
      */
     @GET
-    @Path("get-taxis/{id}")
-    @Consumes("application/json")
+    @Path("get-taxis")
     @Produces("application/json")
-    public Response getOtherTaxis(@PathParam("id") int taxiID) {
+    public Response getOtherTaxis() {
         ArrayList<TaxiInfo> taxis = AdministratorServer.getTaxis();
-        if (taxis.removeIf(t -> t.getId() == taxiID)) {
-            String outputInfo;
-            try {
-                outputInfo = gson.toJson(taxis, ArrayList.class);
-                return Response.ok(outputInfo).build();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-        } else {
-            // If the taxi ID can't be removed, means that it has been already deleted
-            // So we must communicate to the client that it has to quit his execution.
+        String outputInfo;
+        try {
+            outputInfo = gson.toJson(taxis, ArrayList.class);
+            return Response.ok(outputInfo).build();
+        } catch (Exception e) {
+            e.printStackTrace();
             return Response
-                    .status(Response.Status.GONE)
-                    .entity("The ID of your taxi process is not anymore present " +
-                            "in the administrator server, quit your execution.")
+                    .status(Response.Status.INTERNAL_SERVER_ERROR)
                     .build();
         }
-        return Response
-                .status(Response.Status.INTERNAL_SERVER_ERROR)
-                .build();
     }
 
     /*

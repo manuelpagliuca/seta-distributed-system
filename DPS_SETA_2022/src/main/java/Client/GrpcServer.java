@@ -1,4 +1,4 @@
-package Clients.Taxi;
+package Client;
 
 import io.grpc.ServerBuilder;
 import java.io.IOException;

@@ -1,6 +1,6 @@
 package Schemes;
 
-import Clients.Taxi.TaxiInfo;
+import Client.TaxiInfo;
 
 import java.io.Serializable;
 import java.util.ArrayList;

@@ -4,9 +4,8 @@
  * M.Sc. of Computer Science @UNIMI A.Y. 2021/2022 */
 package Administrator.Server;
 
-import Clients.Taxi.TaxiInfo;
-import Administrator.Server.Services.AdministratorServerServices;
 
+import Client.TaxiInfo;
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
@@ -31,8 +30,8 @@ public class AdministratorServer {
     private static final int PORT = 9001;
     private static AdministratorServer instance = null;
     private static final ArrayList<TaxiInfo> taxis = new ArrayList<>();
-    private static ServerTaxisUpdater taxisUpdater = new ServerTaxisUpdater();
-
+    private static final Administrator.Server.ServerTaxisUpdater taxisUpdater =
+            new Administrator.Server.ServerTaxisUpdater();
     public AdministratorServer() {
     }
 
@@ -45,7 +44,7 @@ public class AdministratorServer {
 
     public static void main(String[] args) {
         ResourceConfig config = new ResourceConfig();
-        config.register(AdministratorServerServices.class);
+        config.register(Administrator.Server.AdministratorServerServices.class);
         String serverAddress = "http://" + HOST + ":" + PORT;
         HttpServer restServer = GrizzlyHttpServerFactory
                 .createHttpServer(URI.create(serverAddress), config);
@@ -128,7 +127,7 @@ public class AdministratorServer {
         return false;
     }
 
-    /// Utility
+    /// Utility.Utility
 
     // Print all the taxis ID each one with the list of the other taxis on the smart city (debug)
     public void printAllTaxis() {

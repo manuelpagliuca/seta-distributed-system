@@ -1,60 +1,61 @@
 package Administrator;
 
-import com.google.gson.Gson;
+import com.google.common.reflect.TypeToken;
 import jakarta.ws.rs.client.*;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
+import Utility.Utility;
 
+import java.util.ArrayList;
 import java.util.Scanner;
+
+import static Utility.Utility.GSON;
+
+import Client.TaxiInfo;
 
 public class AdministratorClient {
     private final static String ADMIN_SERVER_ADDRESS = "localhost";
     private final static int ADMIN_SERVER_PORT = 9001;
     private final static String ADMIN_SERVER_URL = "http://" + ADMIN_SERVER_ADDRESS + ":" + ADMIN_SERVER_PORT;
     private static final Scanner SCANNER = new Scanner(System.in);
+    private static Client client = ClientBuilder.newClient();
 
     public static void main(String[] args) {
         System.out.println("Administrator client menu");
         System.out.println("-------------------------");
         System.out.println("1) Delete a given taxi");
+        System.out.println("2) Taxis in the smart city");
         System.out.println("-------------------------");
-        Client client = ClientBuilder.newClient();
 
-        int choice = SCANNER.nextInt();
+        while (SCANNER.hasNext()) {
+            int choice = SCANNER.nextInt();
 
-        if (choice == 1) {
-            removeTaxi(client);
-        } else {
-            System.out.println("The selected option is not valid.");
+            if (choice == 1) {
+                removeTaxi();
+            } else if (choice == 2) {
+                getTaxis();
+            } else {
+                System.out.println("The selected option is not valid.");
+            }
         }
+
     }
 
-    private static void removeTaxi(Client client) {
+    private static void removeTaxi() {
         System.out.println("Which taxi do you want to remove? (Insert the ID): ");
         int taxiID = SCANNER.nextInt();
 
-        final String INIT_PATH = "/del-taxi/" + taxiID;
+        final String PATH = "/del-taxi/" + taxiID;
 
-        // Receive the initialization data from the server: valid ID, position, list of other taxis
-
-        String serverInitInfos = delRequest(client, ADMIN_SERVER_URL + INIT_PATH);
+        String serverInitInfos = Utility.delRequest(client, ADMIN_SERVER_URL + PATH);
         System.out.println(serverInitInfos);
     }
 
-    private static String delRequest(Client client, String url) {
-        WebTarget webTarget = client.target(url);
+    private static void getTaxis() {
+        final String PATH = "/get-taxis";
+        String json = Utility.getRequest(client, ADMIN_SERVER_URL + PATH);
 
-        Invocation.Builder builder = webTarget.request(MediaType.APPLICATION_JSON_TYPE);
-        Response response = builder.delete();
+        ArrayList<TaxiInfo> taxis = GSON.fromJson(json, new TypeToken<ArrayList<TaxiInfo>>(){}.getType());
 
-        response.bufferEntity();
-
-        String responseJson = null;
-        try {
-            responseJson = response.readEntity(String.class);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-        return responseJson;
+        for (TaxiInfo t : taxis)
+            System.out.println(t);
     }
 }

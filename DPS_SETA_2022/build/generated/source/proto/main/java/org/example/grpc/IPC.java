@@ -3002,32 +3002,54 @@ public final class IPC {
     org.example.grpc.IPC.InfosOrBuilder getTaxiOrBuilder();
 
     /**
-     * <code>repeated int32 passengerPosition = 2;</code>
-     * @return A list containing the passengerPosition.
+     * <code>repeated int32 destinationPosition = 2;</code>
+     * @return A list containing the destinationPosition.
      */
-    java.util.List<java.lang.Integer> getPassengerPositionList();
+    java.util.List<java.lang.Integer> getDestinationPositionList();
     /**
-     * <code>repeated int32 passengerPosition = 2;</code>
-     * @return The count of passengerPosition.
+     * <code>repeated int32 destinationPosition = 2;</code>
+     * @return The count of destinationPosition.
      */
-    int getPassengerPositionCount();
+    int getDestinationPositionCount();
     /**
-     * <code>repeated int32 passengerPosition = 2;</code>
+     * <code>repeated int32 destinationPosition = 2;</code>
      * @param index The index of the element to return.
-     * @return The passengerPosition at the given index.
+     * @return The destinationPosition at the given index.
      */
-    int getPassengerPosition(int index);
+    int getDestinationPosition(int index);
 
     /**
-     * <code>required double distanceToTaxi = 3;</code>
-     * @return Whether the distanceToTaxi field is set.
+     * <code>required double distanceToDestination = 3;</code>
+     * @return Whether the distanceToDestination field is set.
      */
-    boolean hasDistanceToTaxi();
+    boolean hasDistanceToDestination();
     /**
-     * <code>required double distanceToTaxi = 3;</code>
-     * @return The distanceToTaxi.
+     * <code>required double distanceToDestination = 3;</code>
+     * @return The distanceToDestination.
      */
-    double getDistanceToTaxi();
+    double getDistanceToDestination();
+
+    /**
+     * <code>required bool rechargingRide = 4;</code>
+     * @return Whether the rechargingRide field is set.
+     */
+    boolean hasRechargingRide();
+    /**
+     * <code>required bool rechargingRide = 4;</code>
+     * @return The rechargingRide.
+     */
+    boolean getRechargingRide();
+
+    /**
+     * <code>required int64 logicalClock = 5;</code>
+     * @return Whether the logicalClock field is set.
+     */
+    boolean hasLogicalClock();
+    /**
+     * <code>required int64 logicalClock = 5;</code>
+     * @return The logicalClock.
+     */
+    long getLogicalClock();
   }
   /**
    * Protobuf type {@code org.example.grpc.RideCharge}
@@ -3042,7 +3064,7 @@ public final class IPC {
       super(builder);
     }
     private RideCharge() {
-      passengerPosition_ = emptyIntList();
+      destinationPosition_ = emptyIntList();
     }
 
     @java.lang.Override
@@ -3091,28 +3113,38 @@ public final class IPC {
             }
             case 16: {
               if (!((mutable_bitField0_ & 0x00000002) != 0)) {
-                passengerPosition_ = newIntList();
+                destinationPosition_ = newIntList();
                 mutable_bitField0_ |= 0x00000002;
               }
-              passengerPosition_.addInt(input.readInt32());
+              destinationPosition_.addInt(input.readInt32());
               break;
             }
             case 18: {
               int length = input.readRawVarint32();
               int limit = input.pushLimit(length);
               if (!((mutable_bitField0_ & 0x00000002) != 0) && input.getBytesUntilLimit() > 0) {
-                passengerPosition_ = newIntList();
+                destinationPosition_ = newIntList();
                 mutable_bitField0_ |= 0x00000002;
               }
               while (input.getBytesUntilLimit() > 0) {
-                passengerPosition_.addInt(input.readInt32());
+                destinationPosition_.addInt(input.readInt32());
               }
               input.popLimit(limit);
               break;
             }
             case 25: {
               bitField0_ |= 0x00000002;
-              distanceToTaxi_ = input.readDouble();
+              distanceToDestination_ = input.readDouble();
+              break;
+            }
+            case 32: {
+              bitField0_ |= 0x00000004;
+              rechargingRide_ = input.readBool();
+              break;
+            }
+            case 40: {
+              bitField0_ |= 0x00000008;
+              logicalClock_ = input.readInt64();
               break;
             }
             default: {
@@ -3131,7 +3163,7 @@ public final class IPC {
             e).setUnfinishedMessage(this);
       } finally {
         if (((mutable_bitField0_ & 0x00000002) != 0)) {
-          passengerPosition_.makeImmutable(); // C
+          destinationPosition_.makeImmutable(); // C
         }
         this.unknownFields = unknownFields.build();
         makeExtensionsImmutable();
@@ -3174,47 +3206,81 @@ public final class IPC {
       return taxi_ == null ? org.example.grpc.IPC.Infos.getDefaultInstance() : taxi_;
     }
 
-    public static final int PASSENGERPOSITION_FIELD_NUMBER = 2;
-    private com.google.protobuf.Internal.IntList passengerPosition_;
+    public static final int DESTINATIONPOSITION_FIELD_NUMBER = 2;
+    private com.google.protobuf.Internal.IntList destinationPosition_;
     /**
-     * <code>repeated int32 passengerPosition = 2;</code>
-     * @return A list containing the passengerPosition.
+     * <code>repeated int32 destinationPosition = 2;</code>
+     * @return A list containing the destinationPosition.
      */
     public java.util.List<java.lang.Integer>
-        getPassengerPositionList() {
-      return passengerPosition_;
+        getDestinationPositionList() {
+      return destinationPosition_;
     }
     /**
-     * <code>repeated int32 passengerPosition = 2;</code>
-     * @return The count of passengerPosition.
+     * <code>repeated int32 destinationPosition = 2;</code>
+     * @return The count of destinationPosition.
      */
-    public int getPassengerPositionCount() {
-      return passengerPosition_.size();
+    public int getDestinationPositionCount() {
+      return destinationPosition_.size();
     }
     /**
-     * <code>repeated int32 passengerPosition = 2;</code>
+     * <code>repeated int32 destinationPosition = 2;</code>
      * @param index The index of the element to return.
-     * @return The passengerPosition at the given index.
+     * @return The destinationPosition at the given index.
      */
-    public int getPassengerPosition(int index) {
-      return passengerPosition_.getInt(index);
+    public int getDestinationPosition(int index) {
+      return destinationPosition_.getInt(index);
     }
 
-    public static final int DISTANCETOTAXI_FIELD_NUMBER = 3;
-    private double distanceToTaxi_;
+    public static final int DISTANCETODESTINATION_FIELD_NUMBER = 3;
+    private double distanceToDestination_;
     /**
-     * <code>required double distanceToTaxi = 3;</code>
-     * @return Whether the distanceToTaxi field is set.
+     * <code>required double distanceToDestination = 3;</code>
+     * @return Whether the distanceToDestination field is set.
      */
-    public boolean hasDistanceToTaxi() {
+    public boolean hasDistanceToDestination() {
       return ((bitField0_ & 0x00000002) != 0);
     }
     /**
-     * <code>required double distanceToTaxi = 3;</code>
-     * @return The distanceToTaxi.
+     * <code>required double distanceToDestination = 3;</code>
+     * @return The distanceToDestination.
      */
-    public double getDistanceToTaxi() {
-      return distanceToTaxi_;
+    public double getDistanceToDestination() {
+      return distanceToDestination_;
+    }
+
+    public static final int RECHARGINGRIDE_FIELD_NUMBER = 4;
+    private boolean rechargingRide_;
+    /**
+     * <code>required bool rechargingRide = 4;</code>
+     * @return Whether the rechargingRide field is set.
+     */
+    public boolean hasRechargingRide() {
+      return ((bitField0_ & 0x00000004) != 0);
+    }
+    /**
+     * <code>required bool rechargingRide = 4;</code>
+     * @return The rechargingRide.
+     */
+    public boolean getRechargingRide() {
+      return rechargingRide_;
+    }
+
+    public static final int LOGICALCLOCK_FIELD_NUMBER = 5;
+    private long logicalClock_;
+    /**
+     * <code>required int64 logicalClock = 5;</code>
+     * @return Whether the logicalClock field is set.
+     */
+    public boolean hasLogicalClock() {
+      return ((bitField0_ & 0x00000008) != 0);
+    }
+    /**
+     * <code>required int64 logicalClock = 5;</code>
+     * @return The logicalClock.
+     */
+    public long getLogicalClock() {
+      return logicalClock_;
     }
 
     private byte memoizedIsInitialized = -1;
@@ -3228,7 +3294,15 @@ public final class IPC {
         memoizedIsInitialized = 0;
         return false;
       }
-      if (!hasDistanceToTaxi()) {
+      if (!hasDistanceToDestination()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      if (!hasRechargingRide()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      if (!hasLogicalClock()) {
         memoizedIsInitialized = 0;
         return false;
       }
@@ -3246,11 +3320,17 @@ public final class IPC {
       if (((bitField0_ & 0x00000001) != 0)) {
         output.writeMessage(1, getTaxi());
       }
-      for (int i = 0; i < passengerPosition_.size(); i++) {
-        output.writeInt32(2, passengerPosition_.getInt(i));
+      for (int i = 0; i < destinationPosition_.size(); i++) {
+        output.writeInt32(2, destinationPosition_.getInt(i));
       }
       if (((bitField0_ & 0x00000002) != 0)) {
-        output.writeDouble(3, distanceToTaxi_);
+        output.writeDouble(3, distanceToDestination_);
+      }
+      if (((bitField0_ & 0x00000004) != 0)) {
+        output.writeBool(4, rechargingRide_);
+      }
+      if (((bitField0_ & 0x00000008) != 0)) {
+        output.writeInt64(5, logicalClock_);
       }
       unknownFields.writeTo(output);
     }
@@ -3267,16 +3347,24 @@ public final class IPC {
       }
       {
         int dataSize = 0;
-        for (int i = 0; i < passengerPosition_.size(); i++) {
+        for (int i = 0; i < destinationPosition_.size(); i++) {
           dataSize += com.google.protobuf.CodedOutputStream
-            .computeInt32SizeNoTag(passengerPosition_.getInt(i));
+            .computeInt32SizeNoTag(destinationPosition_.getInt(i));
         }
         size += dataSize;
-        size += 1 * getPassengerPositionList().size();
+        size += 1 * getDestinationPositionList().size();
       }
       if (((bitField0_ & 0x00000002) != 0)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeDoubleSize(3, distanceToTaxi_);
+          .computeDoubleSize(3, distanceToDestination_);
+      }
+      if (((bitField0_ & 0x00000004) != 0)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(4, rechargingRide_);
+      }
+      if (((bitField0_ & 0x00000008) != 0)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(5, logicalClock_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -3298,13 +3386,23 @@ public final class IPC {
         if (!getTaxi()
             .equals(other.getTaxi())) return false;
       }
-      if (!getPassengerPositionList()
-          .equals(other.getPassengerPositionList())) return false;
-      if (hasDistanceToTaxi() != other.hasDistanceToTaxi()) return false;
-      if (hasDistanceToTaxi()) {
-        if (java.lang.Double.doubleToLongBits(getDistanceToTaxi())
+      if (!getDestinationPositionList()
+          .equals(other.getDestinationPositionList())) return false;
+      if (hasDistanceToDestination() != other.hasDistanceToDestination()) return false;
+      if (hasDistanceToDestination()) {
+        if (java.lang.Double.doubleToLongBits(getDistanceToDestination())
             != java.lang.Double.doubleToLongBits(
-                other.getDistanceToTaxi())) return false;
+                other.getDistanceToDestination())) return false;
+      }
+      if (hasRechargingRide() != other.hasRechargingRide()) return false;
+      if (hasRechargingRide()) {
+        if (getRechargingRide()
+            != other.getRechargingRide()) return false;
+      }
+      if (hasLogicalClock() != other.hasLogicalClock()) return false;
+      if (hasLogicalClock()) {
+        if (getLogicalClock()
+            != other.getLogicalClock()) return false;
       }
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
@@ -3321,14 +3419,24 @@ public final class IPC {
         hash = (37 * hash) + TAXI_FIELD_NUMBER;
         hash = (53 * hash) + getTaxi().hashCode();
       }
-      if (getPassengerPositionCount() > 0) {
-        hash = (37 * hash) + PASSENGERPOSITION_FIELD_NUMBER;
-        hash = (53 * hash) + getPassengerPositionList().hashCode();
+      if (getDestinationPositionCount() > 0) {
+        hash = (37 * hash) + DESTINATIONPOSITION_FIELD_NUMBER;
+        hash = (53 * hash) + getDestinationPositionList().hashCode();
       }
-      if (hasDistanceToTaxi()) {
-        hash = (37 * hash) + DISTANCETOTAXI_FIELD_NUMBER;
+      if (hasDistanceToDestination()) {
+        hash = (37 * hash) + DISTANCETODESTINATION_FIELD_NUMBER;
         hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-            java.lang.Double.doubleToLongBits(getDistanceToTaxi()));
+            java.lang.Double.doubleToLongBits(getDistanceToDestination()));
+      }
+      if (hasRechargingRide()) {
+        hash = (37 * hash) + RECHARGINGRIDE_FIELD_NUMBER;
+        hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+            getRechargingRide());
+      }
+      if (hasLogicalClock()) {
+        hash = (37 * hash) + LOGICALCLOCK_FIELD_NUMBER;
+        hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+            getLogicalClock());
       }
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
@@ -3470,10 +3578,14 @@ public final class IPC {
           taxiBuilder_.clear();
         }
         bitField0_ = (bitField0_ & ~0x00000001);
-        passengerPosition_ = emptyIntList();
+        destinationPosition_ = emptyIntList();
         bitField0_ = (bitField0_ & ~0x00000002);
-        distanceToTaxi_ = 0D;
+        distanceToDestination_ = 0D;
         bitField0_ = (bitField0_ & ~0x00000004);
+        rechargingRide_ = false;
+        bitField0_ = (bitField0_ & ~0x00000008);
+        logicalClock_ = 0L;
+        bitField0_ = (bitField0_ & ~0x00000010);
         return this;
       }
 
@@ -3511,13 +3623,21 @@ public final class IPC {
           to_bitField0_ |= 0x00000001;
         }
         if (((bitField0_ & 0x00000002) != 0)) {
-          passengerPosition_.makeImmutable();
+          destinationPosition_.makeImmutable();
           bitField0_ = (bitField0_ & ~0x00000002);
         }
-        result.passengerPosition_ = passengerPosition_;
+        result.destinationPosition_ = destinationPosition_;
         if (((from_bitField0_ & 0x00000004) != 0)) {
-          result.distanceToTaxi_ = distanceToTaxi_;
+          result.distanceToDestination_ = distanceToDestination_;
           to_bitField0_ |= 0x00000002;
+        }
+        if (((from_bitField0_ & 0x00000008) != 0)) {
+          result.rechargingRide_ = rechargingRide_;
+          to_bitField0_ |= 0x00000004;
+        }
+        if (((from_bitField0_ & 0x00000010) != 0)) {
+          result.logicalClock_ = logicalClock_;
+          to_bitField0_ |= 0x00000008;
         }
         result.bitField0_ = to_bitField0_;
         onBuilt();
@@ -3571,18 +3691,24 @@ public final class IPC {
         if (other.hasTaxi()) {
           mergeTaxi(other.getTaxi());
         }
-        if (!other.passengerPosition_.isEmpty()) {
-          if (passengerPosition_.isEmpty()) {
-            passengerPosition_ = other.passengerPosition_;
+        if (!other.destinationPosition_.isEmpty()) {
+          if (destinationPosition_.isEmpty()) {
+            destinationPosition_ = other.destinationPosition_;
             bitField0_ = (bitField0_ & ~0x00000002);
           } else {
-            ensurePassengerPositionIsMutable();
-            passengerPosition_.addAll(other.passengerPosition_);
+            ensureDestinationPositionIsMutable();
+            destinationPosition_.addAll(other.destinationPosition_);
           }
           onChanged();
         }
-        if (other.hasDistanceToTaxi()) {
-          setDistanceToTaxi(other.getDistanceToTaxi());
+        if (other.hasDistanceToDestination()) {
+          setDistanceToDestination(other.getDistanceToDestination());
+        }
+        if (other.hasRechargingRide()) {
+          setRechargingRide(other.getRechargingRide());
+        }
+        if (other.hasLogicalClock()) {
+          setLogicalClock(other.getLogicalClock());
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -3594,7 +3720,13 @@ public final class IPC {
         if (!hasTaxi()) {
           return false;
         }
-        if (!hasDistanceToTaxi()) {
+        if (!hasDistanceToDestination()) {
+          return false;
+        }
+        if (!hasRechargingRide()) {
+          return false;
+        }
+        if (!hasLogicalClock()) {
           return false;
         }
         if (!getTaxi().isInitialized()) {
@@ -3743,118 +3875,192 @@ public final class IPC {
         return taxiBuilder_;
       }
 
-      private com.google.protobuf.Internal.IntList passengerPosition_ = emptyIntList();
-      private void ensurePassengerPositionIsMutable() {
+      private com.google.protobuf.Internal.IntList destinationPosition_ = emptyIntList();
+      private void ensureDestinationPositionIsMutable() {
         if (!((bitField0_ & 0x00000002) != 0)) {
-          passengerPosition_ = mutableCopy(passengerPosition_);
+          destinationPosition_ = mutableCopy(destinationPosition_);
           bitField0_ |= 0x00000002;
          }
       }
       /**
-       * <code>repeated int32 passengerPosition = 2;</code>
-       * @return A list containing the passengerPosition.
+       * <code>repeated int32 destinationPosition = 2;</code>
+       * @return A list containing the destinationPosition.
        */
       public java.util.List<java.lang.Integer>
-          getPassengerPositionList() {
+          getDestinationPositionList() {
         return ((bitField0_ & 0x00000002) != 0) ?
-                 java.util.Collections.unmodifiableList(passengerPosition_) : passengerPosition_;
+                 java.util.Collections.unmodifiableList(destinationPosition_) : destinationPosition_;
       }
       /**
-       * <code>repeated int32 passengerPosition = 2;</code>
-       * @return The count of passengerPosition.
+       * <code>repeated int32 destinationPosition = 2;</code>
+       * @return The count of destinationPosition.
        */
-      public int getPassengerPositionCount() {
-        return passengerPosition_.size();
+      public int getDestinationPositionCount() {
+        return destinationPosition_.size();
       }
       /**
-       * <code>repeated int32 passengerPosition = 2;</code>
+       * <code>repeated int32 destinationPosition = 2;</code>
        * @param index The index of the element to return.
-       * @return The passengerPosition at the given index.
+       * @return The destinationPosition at the given index.
        */
-      public int getPassengerPosition(int index) {
-        return passengerPosition_.getInt(index);
+      public int getDestinationPosition(int index) {
+        return destinationPosition_.getInt(index);
       }
       /**
-       * <code>repeated int32 passengerPosition = 2;</code>
+       * <code>repeated int32 destinationPosition = 2;</code>
        * @param index The index to set the value at.
-       * @param value The passengerPosition to set.
+       * @param value The destinationPosition to set.
        * @return This builder for chaining.
        */
-      public Builder setPassengerPosition(
+      public Builder setDestinationPosition(
           int index, int value) {
-        ensurePassengerPositionIsMutable();
-        passengerPosition_.setInt(index, value);
+        ensureDestinationPositionIsMutable();
+        destinationPosition_.setInt(index, value);
         onChanged();
         return this;
       }
       /**
-       * <code>repeated int32 passengerPosition = 2;</code>
-       * @param value The passengerPosition to add.
+       * <code>repeated int32 destinationPosition = 2;</code>
+       * @param value The destinationPosition to add.
        * @return This builder for chaining.
        */
-      public Builder addPassengerPosition(int value) {
-        ensurePassengerPositionIsMutable();
-        passengerPosition_.addInt(value);
+      public Builder addDestinationPosition(int value) {
+        ensureDestinationPositionIsMutable();
+        destinationPosition_.addInt(value);
         onChanged();
         return this;
       }
       /**
-       * <code>repeated int32 passengerPosition = 2;</code>
-       * @param values The passengerPosition to add.
+       * <code>repeated int32 destinationPosition = 2;</code>
+       * @param values The destinationPosition to add.
        * @return This builder for chaining.
        */
-      public Builder addAllPassengerPosition(
+      public Builder addAllDestinationPosition(
           java.lang.Iterable<? extends java.lang.Integer> values) {
-        ensurePassengerPositionIsMutable();
+        ensureDestinationPositionIsMutable();
         com.google.protobuf.AbstractMessageLite.Builder.addAll(
-            values, passengerPosition_);
+            values, destinationPosition_);
         onChanged();
         return this;
       }
       /**
-       * <code>repeated int32 passengerPosition = 2;</code>
+       * <code>repeated int32 destinationPosition = 2;</code>
        * @return This builder for chaining.
        */
-      public Builder clearPassengerPosition() {
-        passengerPosition_ = emptyIntList();
+      public Builder clearDestinationPosition() {
+        destinationPosition_ = emptyIntList();
         bitField0_ = (bitField0_ & ~0x00000002);
         onChanged();
         return this;
       }
 
-      private double distanceToTaxi_ ;
+      private double distanceToDestination_ ;
       /**
-       * <code>required double distanceToTaxi = 3;</code>
-       * @return Whether the distanceToTaxi field is set.
+       * <code>required double distanceToDestination = 3;</code>
+       * @return Whether the distanceToDestination field is set.
        */
-      public boolean hasDistanceToTaxi() {
+      public boolean hasDistanceToDestination() {
         return ((bitField0_ & 0x00000004) != 0);
       }
       /**
-       * <code>required double distanceToTaxi = 3;</code>
-       * @return The distanceToTaxi.
+       * <code>required double distanceToDestination = 3;</code>
+       * @return The distanceToDestination.
        */
-      public double getDistanceToTaxi() {
-        return distanceToTaxi_;
+      public double getDistanceToDestination() {
+        return distanceToDestination_;
       }
       /**
-       * <code>required double distanceToTaxi = 3;</code>
-       * @param value The distanceToTaxi to set.
+       * <code>required double distanceToDestination = 3;</code>
+       * @param value The distanceToDestination to set.
        * @return This builder for chaining.
        */
-      public Builder setDistanceToTaxi(double value) {
+      public Builder setDistanceToDestination(double value) {
         bitField0_ |= 0x00000004;
-        distanceToTaxi_ = value;
+        distanceToDestination_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>required double distanceToTaxi = 3;</code>
+       * <code>required double distanceToDestination = 3;</code>
        * @return This builder for chaining.
        */
-      public Builder clearDistanceToTaxi() {
+      public Builder clearDistanceToDestination() {
         bitField0_ = (bitField0_ & ~0x00000004);
-        distanceToTaxi_ = 0D;
+        distanceToDestination_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private boolean rechargingRide_ ;
+      /**
+       * <code>required bool rechargingRide = 4;</code>
+       * @return Whether the rechargingRide field is set.
+       */
+      public boolean hasRechargingRide() {
+        return ((bitField0_ & 0x00000008) != 0);
+      }
+      /**
+       * <code>required bool rechargingRide = 4;</code>
+       * @return The rechargingRide.
+       */
+      public boolean getRechargingRide() {
+        return rechargingRide_;
+      }
+      /**
+       * <code>required bool rechargingRide = 4;</code>
+       * @param value The rechargingRide to set.
+       * @return This builder for chaining.
+       */
+      public Builder setRechargingRide(boolean value) {
+        bitField0_ |= 0x00000008;
+        rechargingRide_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required bool rechargingRide = 4;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearRechargingRide() {
+        bitField0_ = (bitField0_ & ~0x00000008);
+        rechargingRide_ = false;
+        onChanged();
+        return this;
+      }
+
+      private long logicalClock_ ;
+      /**
+       * <code>required int64 logicalClock = 5;</code>
+       * @return Whether the logicalClock field is set.
+       */
+      public boolean hasLogicalClock() {
+        return ((bitField0_ & 0x00000010) != 0);
+      }
+      /**
+       * <code>required int64 logicalClock = 5;</code>
+       * @return The logicalClock.
+       */
+      public long getLogicalClock() {
+        return logicalClock_;
+      }
+      /**
+       * <code>required int64 logicalClock = 5;</code>
+       * @param value The logicalClock to set.
+       * @return This builder for chaining.
+       */
+      public Builder setLogicalClock(long value) {
+        bitField0_ |= 0x00000010;
+        logicalClock_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required int64 logicalClock = 5;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearLogicalClock() {
+        bitField0_ = (bitField0_ & ~0x00000010);
+        logicalClock_ = 0L;
         onChanged();
         return this;
       }
@@ -4483,17 +4689,19 @@ public final class IPC {
       "(\005\022\020\n\010district\030\002 \002(\005\022\020\n\010grpcPort\030\003 \002(\005\022\020" +
       "\n\010position\030\004 \003(\005\022\024\n\014isRecharging\030\005 \002(\010\022\020" +
       "\n\010isRiding\030\006 \002(\010\022\017\n\007battery\030\007 \002(\001\"\033\n\007Goo" +
-      "dbye\022\020\n\010grpcPort\030\001 \002(\005\"f\n\nRideCharge\022%\n\004" +
-      "taxi\030\001 \002(\0132\027.org.example.grpc.Infos\022\031\n\021p" +
-      "assengerPosition\030\002 \003(\005\022\026\n\016distanceToTaxi" +
-      "\030\003 \002(\001\"\023\n\003ACK\022\014\n\004vote\030\001 \002(\0102\232\002\n\nIPCServi" +
-      "ce\022>\n\007present\022\027.org.example.grpc.Infos\032\032" +
-      ".org.example.grpc.Response\022G\n\020compareDis" +
-      "tances\022\034.org.example.grpc.RideCharge\032\025.o" +
-      "rg.example.grpc.ACK\022A\n\017changedPosition\022\027" +
-      ".org.example.grpc.Infos\032\025.org.example.gr" +
-      "pc.ACK\022@\n\007goodbye\022\031.org.example.grpc.Goo" +
-      "dbye\032\032.org.example.grpc.Response"
+      "dbye\022\020\n\010grpcPort\030\001 \002(\005\"\235\001\n\nRideCharge\022%\n" +
+      "\004taxi\030\001 \002(\0132\027.org.example.grpc.Infos\022\033\n\023" +
+      "destinationPosition\030\002 \003(\005\022\035\n\025distanceToD" +
+      "estination\030\003 \002(\001\022\026\n\016rechargingRide\030\004 \002(\010" +
+      "\022\024\n\014logicalClock\030\005 \002(\003\"\023\n\003ACK\022\014\n\004vote\030\001 " +
+      "\002(\0102\247\002\n\nIPCService\0229\n\007present\022\027.org.exam" +
+      "ple.grpc.Infos\032\025.org.example.grpc.ACK\022O\n" +
+      "\024coordinateRideStream\022\034.org.example.grpc" +
+      ".RideCharge\032\025.org.example.grpc.ACK(\0010\001\022K" +
+      "\n\025changedPositionStream\022\027.org.example.gr" +
+      "pc.Infos\032\025.org.example.grpc.ACK(\0010\001\022@\n\007g" +
+      "oodbye\022\031.org.example.grpc.Goodbye\032\032.org." +
+      "example.grpc.Response"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -4528,7 +4736,7 @@ public final class IPC {
     internal_static_org_example_grpc_RideCharge_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_example_grpc_RideCharge_descriptor,
-        new java.lang.String[] { "Taxi", "PassengerPosition", "DistanceToTaxi", });
+        new java.lang.String[] { "Taxi", "DestinationPosition", "DistanceToDestination", "RechargingRide", "LogicalClock", });
     internal_static_org_example_grpc_ACK_descriptor =
       getDescriptor().getMessageTypes().get(5);
     internal_static_org_example_grpc_ACK_fieldAccessorTable = new

@@ -2,7 +2,9 @@
  * Mat. Number 975169
  * Manuel Pagliuca
  * M.Sc. of Computer Science @UNIMI A.Y. 2021/2022 */
-package Clients.Taxi;
+package Client;
+
+import org.example.grpc.IPC;
 
 import java.io.Serializable;
 
@@ -32,6 +34,21 @@ public class TaxiInfo implements Serializable {
         this.id = id;
         this.grpcPort = grpcPort;
         this.administratorServerAddress = admServer;
+    }
+
+    public TaxiInfo(IPC.Infos infos) {
+        id = infos.getId();
+        grpcPort = infos.getGrpcPort();
+        district = infos.getDistrict();
+
+        int[] pos = new int[2];
+        pos[0] = infos.getPosition(0);
+        pos[1] = infos.getPosition(1);
+        position = pos;
+
+        isRecharging = infos.getIsRecharging();
+        isRiding = infos.getIsRiding();
+        battery = infos.getBattery();
     }
 
     public TaxiInfo() {

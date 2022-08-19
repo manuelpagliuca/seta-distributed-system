@@ -28,28 +28,28 @@ public final class IPCServiceGrpc {
 
   // Static method descriptors that strictly reflect the proto.
   private static volatile io.grpc.MethodDescriptor<org.example.grpc.IPC.Infos,
-      org.example.grpc.IPC.Response> getPresentMethod;
+      org.example.grpc.IPC.ACK> getPresentMethod;
 
   @io.grpc.stub.annotations.RpcMethod(
       fullMethodName = SERVICE_NAME + '/' + "present",
       requestType = org.example.grpc.IPC.Infos.class,
-      responseType = org.example.grpc.IPC.Response.class,
+      responseType = org.example.grpc.IPC.ACK.class,
       methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<org.example.grpc.IPC.Infos,
-      org.example.grpc.IPC.Response> getPresentMethod() {
-    io.grpc.MethodDescriptor<org.example.grpc.IPC.Infos, org.example.grpc.IPC.Response> getPresentMethod;
+      org.example.grpc.IPC.ACK> getPresentMethod() {
+    io.grpc.MethodDescriptor<org.example.grpc.IPC.Infos, org.example.grpc.IPC.ACK> getPresentMethod;
     if ((getPresentMethod = IPCServiceGrpc.getPresentMethod) == null) {
       synchronized (IPCServiceGrpc.class) {
         if ((getPresentMethod = IPCServiceGrpc.getPresentMethod) == null) {
           IPCServiceGrpc.getPresentMethod = getPresentMethod =
-              io.grpc.MethodDescriptor.<org.example.grpc.IPC.Infos, org.example.grpc.IPC.Response>newBuilder()
+              io.grpc.MethodDescriptor.<org.example.grpc.IPC.Infos, org.example.grpc.IPC.ACK>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
               .setFullMethodName(generateFullMethodName(SERVICE_NAME, "present"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   org.example.grpc.IPC.Infos.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
-                  org.example.grpc.IPC.Response.getDefaultInstance()))
+                  org.example.grpc.IPC.ACK.getDefaultInstance()))
               .setSchemaDescriptor(new IPCServiceMethodDescriptorSupplier("present"))
               .build();
         }
@@ -59,65 +59,65 @@ public final class IPCServiceGrpc {
   }
 
   private static volatile io.grpc.MethodDescriptor<org.example.grpc.IPC.RideCharge,
-      org.example.grpc.IPC.ACK> getCompareDistancesMethod;
+      org.example.grpc.IPC.ACK> getCoordinateRideStreamMethod;
 
   @io.grpc.stub.annotations.RpcMethod(
-      fullMethodName = SERVICE_NAME + '/' + "compareDistances",
+      fullMethodName = SERVICE_NAME + '/' + "coordinateRideStream",
       requestType = org.example.grpc.IPC.RideCharge.class,
       responseType = org.example.grpc.IPC.ACK.class,
-      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+      methodType = io.grpc.MethodDescriptor.MethodType.BIDI_STREAMING)
   public static io.grpc.MethodDescriptor<org.example.grpc.IPC.RideCharge,
-      org.example.grpc.IPC.ACK> getCompareDistancesMethod() {
-    io.grpc.MethodDescriptor<org.example.grpc.IPC.RideCharge, org.example.grpc.IPC.ACK> getCompareDistancesMethod;
-    if ((getCompareDistancesMethod = IPCServiceGrpc.getCompareDistancesMethod) == null) {
+      org.example.grpc.IPC.ACK> getCoordinateRideStreamMethod() {
+    io.grpc.MethodDescriptor<org.example.grpc.IPC.RideCharge, org.example.grpc.IPC.ACK> getCoordinateRideStreamMethod;
+    if ((getCoordinateRideStreamMethod = IPCServiceGrpc.getCoordinateRideStreamMethod) == null) {
       synchronized (IPCServiceGrpc.class) {
-        if ((getCompareDistancesMethod = IPCServiceGrpc.getCompareDistancesMethod) == null) {
-          IPCServiceGrpc.getCompareDistancesMethod = getCompareDistancesMethod =
+        if ((getCoordinateRideStreamMethod = IPCServiceGrpc.getCoordinateRideStreamMethod) == null) {
+          IPCServiceGrpc.getCoordinateRideStreamMethod = getCoordinateRideStreamMethod =
               io.grpc.MethodDescriptor.<org.example.grpc.IPC.RideCharge, org.example.grpc.IPC.ACK>newBuilder()
-              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "compareDistances"))
+              .setType(io.grpc.MethodDescriptor.MethodType.BIDI_STREAMING)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "coordinateRideStream"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   org.example.grpc.IPC.RideCharge.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   org.example.grpc.IPC.ACK.getDefaultInstance()))
-              .setSchemaDescriptor(new IPCServiceMethodDescriptorSupplier("compareDistances"))
+              .setSchemaDescriptor(new IPCServiceMethodDescriptorSupplier("coordinateRideStream"))
               .build();
         }
       }
     }
-    return getCompareDistancesMethod;
+    return getCoordinateRideStreamMethod;
   }
 
   private static volatile io.grpc.MethodDescriptor<org.example.grpc.IPC.Infos,
-      org.example.grpc.IPC.ACK> getChangedPositionMethod;
+      org.example.grpc.IPC.ACK> getChangedPositionStreamMethod;
 
   @io.grpc.stub.annotations.RpcMethod(
-      fullMethodName = SERVICE_NAME + '/' + "changedPosition",
+      fullMethodName = SERVICE_NAME + '/' + "changedPositionStream",
       requestType = org.example.grpc.IPC.Infos.class,
       responseType = org.example.grpc.IPC.ACK.class,
-      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+      methodType = io.grpc.MethodDescriptor.MethodType.BIDI_STREAMING)
   public static io.grpc.MethodDescriptor<org.example.grpc.IPC.Infos,
-      org.example.grpc.IPC.ACK> getChangedPositionMethod() {
-    io.grpc.MethodDescriptor<org.example.grpc.IPC.Infos, org.example.grpc.IPC.ACK> getChangedPositionMethod;
-    if ((getChangedPositionMethod = IPCServiceGrpc.getChangedPositionMethod) == null) {
+      org.example.grpc.IPC.ACK> getChangedPositionStreamMethod() {
+    io.grpc.MethodDescriptor<org.example.grpc.IPC.Infos, org.example.grpc.IPC.ACK> getChangedPositionStreamMethod;
+    if ((getChangedPositionStreamMethod = IPCServiceGrpc.getChangedPositionStreamMethod) == null) {
       synchronized (IPCServiceGrpc.class) {
-        if ((getChangedPositionMethod = IPCServiceGrpc.getChangedPositionMethod) == null) {
-          IPCServiceGrpc.getChangedPositionMethod = getChangedPositionMethod =
+        if ((getChangedPositionStreamMethod = IPCServiceGrpc.getChangedPositionStreamMethod) == null) {
+          IPCServiceGrpc.getChangedPositionStreamMethod = getChangedPositionStreamMethod =
               io.grpc.MethodDescriptor.<org.example.grpc.IPC.Infos, org.example.grpc.IPC.ACK>newBuilder()
-              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "changedPosition"))
+              .setType(io.grpc.MethodDescriptor.MethodType.BIDI_STREAMING)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "changedPositionStream"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   org.example.grpc.IPC.Infos.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   org.example.grpc.IPC.ACK.getDefaultInstance()))
-              .setSchemaDescriptor(new IPCServiceMethodDescriptorSupplier("changedPosition"))
+              .setSchemaDescriptor(new IPCServiceMethodDescriptorSupplier("changedPositionStream"))
               .build();
         }
       }
     }
-    return getChangedPositionMethod;
+    return getChangedPositionStreamMethod;
   }
 
   private static volatile io.grpc.MethodDescriptor<org.example.grpc.IPC.Goodbye,
@@ -181,22 +181,25 @@ public final class IPCServiceGrpc {
     /**
      */
     public void present(org.example.grpc.IPC.Infos request,
-        io.grpc.stub.StreamObserver<org.example.grpc.IPC.Response> responseObserver) {
+        io.grpc.stub.StreamObserver<org.example.grpc.IPC.ACK> responseObserver) {
       asyncUnimplementedUnaryCall(getPresentMethod(), responseObserver);
     }
 
     /**
      */
-    public void compareDistances(org.example.grpc.IPC.RideCharge request,
+    public io.grpc.stub.StreamObserver<org.example.grpc.IPC.RideCharge> coordinateRideStream(
         io.grpc.stub.StreamObserver<org.example.grpc.IPC.ACK> responseObserver) {
-      asyncUnimplementedUnaryCall(getCompareDistancesMethod(), responseObserver);
+      return asyncUnimplementedStreamingCall(getCoordinateRideStreamMethod(), responseObserver);
     }
 
     /**
+     * <pre>
+     * todo: rpc per comunicare il fatto che sta
+     * </pre>
      */
-    public void changedPosition(org.example.grpc.IPC.Infos request,
+    public io.grpc.stub.StreamObserver<org.example.grpc.IPC.Infos> changedPositionStream(
         io.grpc.stub.StreamObserver<org.example.grpc.IPC.ACK> responseObserver) {
-      asyncUnimplementedUnaryCall(getChangedPositionMethod(), responseObserver);
+      return asyncUnimplementedStreamingCall(getChangedPositionStreamMethod(), responseObserver);
     }
 
     /**
@@ -213,22 +216,22 @@ public final class IPCServiceGrpc {
             asyncUnaryCall(
               new MethodHandlers<
                 org.example.grpc.IPC.Infos,
-                org.example.grpc.IPC.Response>(
+                org.example.grpc.IPC.ACK>(
                   this, METHODID_PRESENT)))
           .addMethod(
-            getCompareDistancesMethod(),
-            asyncUnaryCall(
+            getCoordinateRideStreamMethod(),
+            asyncBidiStreamingCall(
               new MethodHandlers<
                 org.example.grpc.IPC.RideCharge,
                 org.example.grpc.IPC.ACK>(
-                  this, METHODID_COMPARE_DISTANCES)))
+                  this, METHODID_COORDINATE_RIDE_STREAM)))
           .addMethod(
-            getChangedPositionMethod(),
-            asyncUnaryCall(
+            getChangedPositionStreamMethod(),
+            asyncBidiStreamingCall(
               new MethodHandlers<
                 org.example.grpc.IPC.Infos,
                 org.example.grpc.IPC.ACK>(
-                  this, METHODID_CHANGED_POSITION)))
+                  this, METHODID_CHANGED_POSITION_STREAM)))
           .addMethod(
             getGoodbyeMethod(),
             asyncUnaryCall(
@@ -261,25 +264,28 @@ public final class IPCServiceGrpc {
     /**
      */
     public void present(org.example.grpc.IPC.Infos request,
-        io.grpc.stub.StreamObserver<org.example.grpc.IPC.Response> responseObserver) {
+        io.grpc.stub.StreamObserver<org.example.grpc.IPC.ACK> responseObserver) {
       asyncUnaryCall(
           getChannel().newCall(getPresentMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
      */
-    public void compareDistances(org.example.grpc.IPC.RideCharge request,
+    public io.grpc.stub.StreamObserver<org.example.grpc.IPC.RideCharge> coordinateRideStream(
         io.grpc.stub.StreamObserver<org.example.grpc.IPC.ACK> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getCompareDistancesMethod(), getCallOptions()), request, responseObserver);
+      return asyncBidiStreamingCall(
+          getChannel().newCall(getCoordinateRideStreamMethod(), getCallOptions()), responseObserver);
     }
 
     /**
+     * <pre>
+     * todo: rpc per comunicare il fatto che sta
+     * </pre>
      */
-    public void changedPosition(org.example.grpc.IPC.Infos request,
+    public io.grpc.stub.StreamObserver<org.example.grpc.IPC.Infos> changedPositionStream(
         io.grpc.stub.StreamObserver<org.example.grpc.IPC.ACK> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getChangedPositionMethod(), getCallOptions()), request, responseObserver);
+      return asyncBidiStreamingCall(
+          getChannel().newCall(getChangedPositionStreamMethod(), getCallOptions()), responseObserver);
     }
 
     /**
@@ -311,23 +317,9 @@ public final class IPCServiceGrpc {
 
     /**
      */
-    public org.example.grpc.IPC.Response present(org.example.grpc.IPC.Infos request) {
+    public org.example.grpc.IPC.ACK present(org.example.grpc.IPC.Infos request) {
       return blockingUnaryCall(
           getChannel(), getPresentMethod(), getCallOptions(), request);
-    }
-
-    /**
-     */
-    public org.example.grpc.IPC.ACK compareDistances(org.example.grpc.IPC.RideCharge request) {
-      return blockingUnaryCall(
-          getChannel(), getCompareDistancesMethod(), getCallOptions(), request);
-    }
-
-    /**
-     */
-    public org.example.grpc.IPC.ACK changedPosition(org.example.grpc.IPC.Infos request) {
-      return blockingUnaryCall(
-          getChannel(), getChangedPositionMethod(), getCallOptions(), request);
     }
 
     /**
@@ -358,26 +350,10 @@ public final class IPCServiceGrpc {
 
     /**
      */
-    public com.google.common.util.concurrent.ListenableFuture<org.example.grpc.IPC.Response> present(
+    public com.google.common.util.concurrent.ListenableFuture<org.example.grpc.IPC.ACK> present(
         org.example.grpc.IPC.Infos request) {
       return futureUnaryCall(
           getChannel().newCall(getPresentMethod(), getCallOptions()), request);
-    }
-
-    /**
-     */
-    public com.google.common.util.concurrent.ListenableFuture<org.example.grpc.IPC.ACK> compareDistances(
-        org.example.grpc.IPC.RideCharge request) {
-      return futureUnaryCall(
-          getChannel().newCall(getCompareDistancesMethod(), getCallOptions()), request);
-    }
-
-    /**
-     */
-    public com.google.common.util.concurrent.ListenableFuture<org.example.grpc.IPC.ACK> changedPosition(
-        org.example.grpc.IPC.Infos request) {
-      return futureUnaryCall(
-          getChannel().newCall(getChangedPositionMethod(), getCallOptions()), request);
     }
 
     /**
@@ -390,9 +366,9 @@ public final class IPCServiceGrpc {
   }
 
   private static final int METHODID_PRESENT = 0;
-  private static final int METHODID_COMPARE_DISTANCES = 1;
-  private static final int METHODID_CHANGED_POSITION = 2;
-  private static final int METHODID_GOODBYE = 3;
+  private static final int METHODID_GOODBYE = 1;
+  private static final int METHODID_COORDINATE_RIDE_STREAM = 2;
+  private static final int METHODID_CHANGED_POSITION_STREAM = 3;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -413,14 +389,6 @@ public final class IPCServiceGrpc {
       switch (methodId) {
         case METHODID_PRESENT:
           serviceImpl.present((org.example.grpc.IPC.Infos) request,
-              (io.grpc.stub.StreamObserver<org.example.grpc.IPC.Response>) responseObserver);
-          break;
-        case METHODID_COMPARE_DISTANCES:
-          serviceImpl.compareDistances((org.example.grpc.IPC.RideCharge) request,
-              (io.grpc.stub.StreamObserver<org.example.grpc.IPC.ACK>) responseObserver);
-          break;
-        case METHODID_CHANGED_POSITION:
-          serviceImpl.changedPosition((org.example.grpc.IPC.Infos) request,
               (io.grpc.stub.StreamObserver<org.example.grpc.IPC.ACK>) responseObserver);
           break;
         case METHODID_GOODBYE:
@@ -437,6 +405,12 @@ public final class IPCServiceGrpc {
     public io.grpc.stub.StreamObserver<Req> invoke(
         io.grpc.stub.StreamObserver<Resp> responseObserver) {
       switch (methodId) {
+        case METHODID_COORDINATE_RIDE_STREAM:
+          return (io.grpc.stub.StreamObserver<Req>) serviceImpl.coordinateRideStream(
+              (io.grpc.stub.StreamObserver<org.example.grpc.IPC.ACK>) responseObserver);
+        case METHODID_CHANGED_POSITION_STREAM:
+          return (io.grpc.stub.StreamObserver<Req>) serviceImpl.changedPositionStream(
+              (io.grpc.stub.StreamObserver<org.example.grpc.IPC.ACK>) responseObserver);
         default:
           throw new AssertionError();
       }
@@ -489,8 +463,8 @@ public final class IPCServiceGrpc {
           serviceDescriptor = result = io.grpc.ServiceDescriptor.newBuilder(SERVICE_NAME)
               .setSchemaDescriptor(new IPCServiceFileDescriptorSupplier())
               .addMethod(getPresentMethod())
-              .addMethod(getCompareDistancesMethod())
-              .addMethod(getChangedPositionMethod())
+              .addMethod(getCoordinateRideStreamMethod())
+              .addMethod(getChangedPositionStreamMethod())
               .addMethod(getGoodbyeMethod())
               .build();
         }

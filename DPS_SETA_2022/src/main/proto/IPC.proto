@@ -24,8 +24,10 @@ message Goodbye {
 
 message RideCharge {
   required Infos taxi = 1;
-  repeated int32 passengerPosition = 2;
-  required double distanceToTaxi = 3;
+  repeated int32 destinationPosition = 2;
+  required double distanceToDestination = 3;
+  required bool rechargingRide = 4;
+  required int64 logicalClock = 5;
 }
 
 message ACK {
@@ -33,8 +35,10 @@ message ACK {
 }
 
 service IPCService {
-  rpc present(Infos) returns (Response);
-  rpc compareDistances(RideCharge) returns (ACK);
-  rpc changedPosition(Infos) returns (ACK);
+  rpc present(Infos) returns (ACK);
+  rpc coordinateRideStream(stream RideCharge) returns (stream ACK);
+
+  // todo: rpc per comunicare il fatto che sta
+  rpc changedPositionStream(stream Infos) returns (stream ACK);
   rpc goodbye(Goodbye) returns (Response);
 }

@@ -1,6 +1,5 @@
-package Clients.Taxi;
+package Client;
 
-import Administrator.Server.AdministratorServer;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.Invocation;
 import jakarta.ws.rs.client.WebTarget;
