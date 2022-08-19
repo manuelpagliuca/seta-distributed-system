@@ -1,10 +1,10 @@
-package Client.Menu;
+package Taxi.Menu;
 
-import Client.TaxiInfo;
+import Taxi.Data.TaxiInfo;
 
 import java.util.Scanner;
 
-import static Client.Taxi.removeTaxi;
+import static Taxi.Taxi.removeTaxi;
 
 /*
  * Command Line Interface for receiving user commands
@@ -15,12 +15,12 @@ import static Client.Taxi.removeTaxi;
  * quit: perform a DELETE request on the administrator server for the
  * removal of this taxi, then quit the process.
  */
-public class TaxiMenu implements Runnable {
+public class MenuRunnable implements Runnable {
     final Object availableCLI;
     private Thread t;
     private final TaxiInfo taxi;
 
-    public TaxiMenu(TaxiInfo taxi, Object availableCLI) {
+    public MenuRunnable(TaxiInfo taxi, Object availableCLI) {
         this.availableCLI = availableCLI;
         this.taxi = taxi;
     }

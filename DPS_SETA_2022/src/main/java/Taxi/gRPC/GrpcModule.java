@@ -1,6 +1,9 @@
-package Client;
+package Taxi.gRPC;
 
-import Schemes.TaxiSchema;
+import Taxi.Data.TaxiSchema;
+import Taxi.Data.LogicalClock;
+import Taxi.Taxi;
+import Taxi.Data.TaxiInfo;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.ServerBuilder;
@@ -12,7 +15,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
-import static Client.Taxi.*;
+import static Taxi.Taxi.*;
 
 public class GrpcModule implements Runnable {
     private final static String ADMIN_SERVER_ADDRESS = "localhost";

@@ -1,4 +1,4 @@
-package Administrator;
+package AdminClient;
 
 import com.google.common.reflect.TypeToken;
 import jakarta.ws.rs.client.*;
@@ -9,7 +9,7 @@ import java.util.Scanner;
 
 import static Utility.Utility.GSON;
 
-import Client.TaxiInfo;
+import Taxi.Data.TaxiInfo;
 
 public class AdministratorClient {
     private final static String ADMIN_SERVER_ADDRESS = "localhost";

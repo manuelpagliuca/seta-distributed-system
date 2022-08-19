@@ -2,17 +2,21 @@
  * Mat. Number 975169
  * Manuel Pagliuca
  * M.Sc. of Computer Science @UNIMI A.Y. 2021/2022 */
-package Client;
+package Taxi;
 
-import Client.Menu.CheckingLines;
-import Client.Menu.TaxiMenu;
+import Taxi.Data.LogicalClock;
+import Taxi.Data.TaxiInfo;
+import Taxi.MQTT.MQTTModule;
+import Taxi.Menu.CheckingLinesRunnable;
+import Taxi.Menu.MenuRunnable;
+import Taxi.gRPC.GrpcModule;
 import Utility.Utility;
 
 import io.grpc.stub.StreamObserver;
 import jakarta.ws.rs.client.*;
 import jakarta.ws.rs.client.Client;
 
-import Schemes.TaxiSchema;
+import Taxi.Data.TaxiSchema;
 import org.example.grpc.IPC;
 import org.example.grpc.IPCServiceGrpc;
 
@@ -42,10 +46,10 @@ public class Taxi extends IPCServiceGrpc.IPCServiceImplBase {
         postInit();
 
         Object inputAvailable = new Object();
-        TaxiMenu cli = new TaxiMenu(thisTaxi, inputAvailable);
+        MenuRunnable cli = new MenuRunnable(thisTaxi, inputAvailable);
         cli.start();
 
-        CheckingLines checkingLines = new CheckingLines(inputAvailable);
+        CheckingLinesRunnable checkingLines = new CheckingLinesRunnable(inputAvailable);
         checkingLines.start();
 
         TaxiSchema taxiSchema = new TaxiSchema();

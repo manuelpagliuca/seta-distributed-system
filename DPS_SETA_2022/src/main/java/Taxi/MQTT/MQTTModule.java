@@ -1,7 +1,9 @@
-package Client;
+package Taxi.MQTT;
 
 import SETA.RideInfo;
-import Schemes.TaxiSchema;
+import Taxi.Data.TaxiSchema;
+import Taxi.gRPC.GrpcModule;
+import Taxi.Data.TaxiInfo;
 import org.eclipse.paho.client.mqttv3.*;
 
 import java.util.ArrayList;
@@ -16,7 +18,7 @@ public class MQTTModule {
     private static ArrayList<TaxiInfo> otherTaxis;
     private final GrpcModule grpcModule = GrpcModule.getInstance();
 
-    MQTTModule(TaxiSchema taxiSchema) {
+    public MQTTModule(TaxiSchema taxiSchema) {
         thisTaxi = taxiSchema.getTaxiInfo();
         otherTaxis = taxiSchema.getTaxis();
     }

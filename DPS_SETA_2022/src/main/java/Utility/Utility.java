@@ -8,7 +8,7 @@ import jakarta.ws.rs.client.WebTarget;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
-import Client.TaxiInfo;
+import Taxi.Data.TaxiInfo;
 
 import java.util.ArrayList;
 import java.util.Random;

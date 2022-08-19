@@ -1,4 +1,4 @@
-package Client;
+package Taxi.Data;
 
 import java.util.Calendar;
 
@@ -7,7 +7,7 @@ public class LogicalClock {
     private final long RAND_CLOCK_OFFSET;
     private final Calendar calendar;
 
-    LogicalClock(long off) {
+    public LogicalClock(long off) {
         calendar = Calendar.getInstance();
         clock = System.currentTimeMillis();
         RAND_CLOCK_OFFSET = off;

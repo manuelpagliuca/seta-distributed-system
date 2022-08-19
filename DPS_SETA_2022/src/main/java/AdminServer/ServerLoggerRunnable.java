@@ -1,9 +1,11 @@
-package Administrator.Server;
+package AdminServer;
 
-public class ServerTaxisUpdater implements Runnable {
+import AdminServer.AdminServer;
+
+public class ServerLoggerRunnable implements Runnable {
     private final Object newTaxiArrived;
 
-    ServerTaxisUpdater(Object dummy) {
+    ServerLoggerRunnable(Object dummy) {
         this.newTaxiArrived = dummy;
     }
 
@@ -18,7 +20,7 @@ public class ServerTaxisUpdater implements Runnable {
                     throw new RuntimeException(e);
                 }
                 // System.out.println("Notified!");
-                AdministratorServer.getInstance().printAllTaxis();
+                AdminServer.getInstance().printAllTaxis();
             }
         }
     }

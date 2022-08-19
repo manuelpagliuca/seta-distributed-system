@@ -2,9 +2,9 @@
  * Mat. Number 975169
  * Manuel Pagliuca
  * M.Sc. of Computer Science @UNIMI A.Y. 2021/2022 */
-package Administrator.Server;
+package AdminServer;
 
-import Client.TaxiInfo;
+import Taxi.Data.TaxiInfo;
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
@@ -24,30 +24,30 @@ import java.util.*;
  * It allows to:
  * TODO: [WIP] I will add infos at the end of the project
  */
-public class AdministratorServer {
+public class AdminServer {
     private static final String HOST = "localhost";
     private static final int PORT = 9001;
-    private static AdministratorServer instance = null;
+    private static AdminServer instance = null;
     private static final ArrayList<TaxiInfo> taxis = new ArrayList<>();
     private static final Object newTaxiArrived = new Object();
 
-    public AdministratorServer() {
+    public AdminServer() {
     }
 
-    public static AdministratorServer getInstance() {
+    public static AdminServer getInstance() {
         if (instance == null) {
-            instance = new AdministratorServer();
+            instance = new AdminServer();
         }
         return instance;
     }
 
     public static void main(String[] args) {
         ResourceConfig config = new ResourceConfig();
-        config.register(Administrator.Server.AdministratorServerServices.class);
+        config.register(AdminServerServices.class);
         String serverAddress = "http://" + HOST + ":" + PORT;
         HttpServer restServer = GrizzlyHttpServerFactory.createHttpServer(URI.create(serverAddress), config);
 
-        Thread taxisUpdater = new Thread(new ServerTaxisUpdater(newTaxiArrived));
+        Thread taxisUpdater = new Thread(new ServerLoggerRunnable(newTaxiArrived));
         taxisUpdater.start();
 
         try {

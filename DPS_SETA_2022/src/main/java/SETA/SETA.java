@@ -7,7 +7,7 @@ import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.Random;
 
-public class RidesGenerator {
+public class SETA {
     private static int rideIds = -1;
     private static final Gson gson = new Gson();
 

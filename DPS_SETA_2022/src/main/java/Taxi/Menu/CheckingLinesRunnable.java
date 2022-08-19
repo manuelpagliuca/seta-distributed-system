@@ -1,12 +1,12 @@
-package Client.Menu;
+package Taxi.Menu;
 
 import java.io.IOException;
 
-public class CheckingLines implements Runnable {
+public class CheckingLinesRunnable implements Runnable {
     final Object availableCLI;
     private Thread t;
 
-    public CheckingLines(Object availableCLI) {
+    public CheckingLinesRunnable(Object availableCLI) {
         this.availableCLI = availableCLI;
     }
 

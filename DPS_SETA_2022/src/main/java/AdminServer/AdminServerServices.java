@@ -2,19 +2,20 @@
  * Mat. Number 975169
  * Manuel Pagliuca
  * M.Sc. in Computer Science @UNIMI A.Y. 2021/2022 */
-package Administrator.Server;
+package AdminServer;
 
+import AdminServer.AdminServer;
 import com.google.gson.*;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
-import Client.TaxiInfo;
-import Schemes.TaxiSchema;
+import Taxi.Data.TaxiInfo;
+import Taxi.Data.TaxiSchema;
 
 import java.util.ArrayList;
 
 @Path("/")
-public class AdministratorServerServices {
-    private final AdministratorServer administratorServer = AdministratorServer.getInstance();
+public class AdminServerServices {
+    private final AdminServer administratorServer = AdminServer.getInstance();
     private final Gson gson = new Gson();
 
     /*
@@ -61,7 +62,7 @@ public class AdministratorServerServices {
         synchronized (administratorServer) {
             // Saving the taxi list of the server first, in this way it will better approximate
             // the correct amount of taxis
-            taxiSchema.setTaxis(AdministratorServer.getTaxis());
+            taxiSchema.setTaxis(AdminServer.getTaxis());
             // The addTaxi method will return a TaxiInfo with the possible corrected ID
             taxiSchema.setTaxiInfo(administratorServer.addTaxi(inputTaxiInfo));
         }
@@ -80,7 +81,7 @@ public class AdministratorServerServices {
     @Path("get-taxis")
     @Produces("application/json")
     public Response getOtherTaxis() {
-        ArrayList<TaxiInfo> taxis = AdministratorServer.getTaxis();
+        ArrayList<TaxiInfo> taxis = AdminServer.getTaxis();
         String outputInfo;
         try {
             outputInfo = gson.toJson(taxis, ArrayList.class);
@@ -103,7 +104,7 @@ public class AdministratorServerServices {
     @Path("del-taxi/{id}")
     @Consumes("application/json")
     public Response deleteTaxi(@PathParam("id") int taxiId) {
-        boolean ans = AdministratorServer.getInstance().removeTaxi(taxiId);
+        boolean ans = AdminServer.getInstance().removeTaxi(taxiId);
 
         if (ans)
             return Response
