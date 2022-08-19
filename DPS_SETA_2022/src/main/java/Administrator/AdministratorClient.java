@@ -16,15 +16,10 @@ public class AdministratorClient {
     private final static int ADMIN_SERVER_PORT = 9001;
     private final static String ADMIN_SERVER_URL = "http://" + ADMIN_SERVER_ADDRESS + ":" + ADMIN_SERVER_PORT;
     private static final Scanner SCANNER = new Scanner(System.in);
-    private static Client client = ClientBuilder.newClient();
+    private static final Client client = ClientBuilder.newClient();
 
     public static void main(String[] args) {
-        System.out.println("Administrator client menu");
-        System.out.println("-------------------------");
-        System.out.println("1) Delete a given taxi");
-        System.out.println("2) Taxis in the smart city");
-        System.out.println("-------------------------");
-
+        printMenu();
         while (SCANNER.hasNext()) {
             int choice = SCANNER.nextInt();
 
@@ -35,8 +30,17 @@ public class AdministratorClient {
             } else {
                 System.out.println("The selected option is not valid.");
             }
+            printMenu();
         }
 
+    }
+
+    private static void printMenu() {
+        System.out.println("Administrator client menu");
+        System.out.println("-------------------------");
+        System.out.println("1) Delete a given taxi");
+        System.out.println("2) Taxis in the smart city");
+        System.out.println("-------------------------");
     }
 
     private static void removeTaxi() {

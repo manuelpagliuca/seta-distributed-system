@@ -1,33 +1,25 @@
 package Administrator.Server;
 
 public class ServerTaxisUpdater implements Runnable {
-    private Thread t;
-    private boolean updated = false;
+    private final Object newTaxiArrived;
 
-    public void start() {
-        if (t == null) {
-            t = new Thread(this);
-            t.start();
-        }
+    ServerTaxisUpdater(Object dummy) {
+        this.newTaxiArrived = dummy;
     }
 
     @Override
     public void run() {
         while (!Thread.currentThread().isInterrupted()) {
-            if (updated) {
-                clearScreen();
+            synchronized (newTaxiArrived) {
+                // System.out.println("ServerTaxisUpdater is waiting");
+                try {
+                   newTaxiArrived.wait();
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+                // System.out.println("Notified!");
                 AdministratorServer.getInstance().printAllTaxis();
-                updated = false;
             }
         }
-    }
-
-    public void clearScreen() {
-        System.out.print("\033[H\033[2J");
-        System.out.flush();
-    }
-
-    public void update() {
-        updated = true;
     }
 }

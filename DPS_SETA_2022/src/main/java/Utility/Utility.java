@@ -1,12 +1,10 @@
 package Utility;
 
-import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.client.Invocation;
 import jakarta.ws.rs.client.WebTarget;
-import jakarta.ws.rs.core.GenericType;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
@@ -17,7 +15,7 @@ import java.util.Random;
 
 public class Utility {
     private static Utility instance;
-    private static Random random = new Random();
+    private static final Random random = new Random();
     public static Gson GSON = new Gson();
 
     Utility() {
@@ -75,14 +73,23 @@ public class Utility {
 
     private static Invocation.Builder getBuilder(Client client, String url) {
         WebTarget webTarget = client.target(url);
-        Invocation.Builder builder = webTarget.request(MediaType.APPLICATION_JSON_TYPE);
-        return builder;
+        return webTarget.request(MediaType.APPLICATION_JSON_TYPE);
     }
 
     public static double euclideanDistance(int[] start, int[] end) {
         double xOffset = Math.pow((end[0] - start[1]), 2);
         double yOffset = Math.pow((end[1] - start[0]), 2);
         return Math.sqrt(xOffset + yOffset);
+    }
+
+    public static int getAvailableTaxisInDistrict(ArrayList<TaxiInfo> otherTaxis, TaxiInfo thisTaxi) {
+        int counter = 0;
+        for (TaxiInfo t : otherTaxis) {
+            final boolean tHasSameDistrict = (t.getDistrict() == thisTaxi.getDistrict());
+            final boolean tIsAvailable = !t.isRecharging() && !t.isRiding();
+            if (tHasSameDistrict && tIsAvailable) counter++;
+        }
+        return counter;
     }
 
     public static int generateRndInteger(int origin, int bound) {

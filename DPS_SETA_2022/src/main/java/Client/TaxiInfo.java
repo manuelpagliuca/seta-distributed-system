@@ -124,4 +124,5 @@ public class TaxiInfo implements Serializable {
     public void setRiding(boolean riding) {
         isRiding = riding;
     }
+
 }

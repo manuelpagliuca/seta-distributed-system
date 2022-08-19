@@ -12,7 +12,6 @@ import Schemes.TaxiSchema;
 
 import java.util.ArrayList;
 
-/// REST Services exposed from the administrator server for the taxis
 @Path("/")
 public class AdministratorServerServices {
     private final AdministratorServer administratorServer = AdministratorServer.getInstance();

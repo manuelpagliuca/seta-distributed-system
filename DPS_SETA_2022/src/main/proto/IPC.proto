@@ -16,6 +16,7 @@ message Infos {
   required bool isRecharging = 5;
   required bool isRiding = 6;
   required double battery = 7;
+  required int64 logicalClock = 8;
 }
 
 message Goodbye {
@@ -27,11 +28,11 @@ message RideCharge {
   repeated int32 destinationPosition = 2;
   required double distanceToDestination = 3;
   required bool rechargingRide = 4;
-  required int64 logicalClock = 5;
 }
 
 message ACK {
   required bool vote = 1;
+  required int64 logicalClock = 2;
 }
 
 service IPCService {

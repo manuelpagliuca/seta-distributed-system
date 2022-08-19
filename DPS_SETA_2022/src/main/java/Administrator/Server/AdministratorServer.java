@@ -4,7 +4,6 @@
  * M.Sc. of Computer Science @UNIMI A.Y. 2021/2022 */
 package Administrator.Server;
 
-
 import Client.TaxiInfo;
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
@@ -30,8 +29,8 @@ public class AdministratorServer {
     private static final int PORT = 9001;
     private static AdministratorServer instance = null;
     private static final ArrayList<TaxiInfo> taxis = new ArrayList<>();
-    private static final Administrator.Server.ServerTaxisUpdater taxisUpdater =
-            new Administrator.Server.ServerTaxisUpdater();
+    private static final Object newTaxiArrived = new Object();
+
     public AdministratorServer() {
     }
 
@@ -46,9 +45,9 @@ public class AdministratorServer {
         ResourceConfig config = new ResourceConfig();
         config.register(Administrator.Server.AdministratorServerServices.class);
         String serverAddress = "http://" + HOST + ":" + PORT;
-        HttpServer restServer = GrizzlyHttpServerFactory
-                .createHttpServer(URI.create(serverAddress), config);
+        HttpServer restServer = GrizzlyHttpServerFactory.createHttpServer(URI.create(serverAddress), config);
 
+        Thread taxisUpdater = new Thread(new ServerTaxisUpdater(newTaxiArrived));
         taxisUpdater.start();
 
         try {
@@ -102,7 +101,10 @@ public class AdministratorServer {
 
         synchronized (taxis) {
             taxis.add(newTaxi);
-            taxisUpdater.update();
+        }
+
+        synchronized (newTaxiArrived){
+            newTaxiArrived.notify();
         }
 
         return newTaxi;
@@ -164,13 +166,11 @@ public class AdministratorServer {
 
         ArrayList<Integer> ids = new ArrayList<>();
 
-        for (TaxiInfo e : taxis) {
+        for (TaxiInfo e : taxis)
             ids.add(e.getId());
-        }
 
-        while (ids.contains(newID)) {
+        while (ids.contains(newID))
             newID = random.nextInt(1, 100 + 1);
-        }
 
         return newID;
     }
