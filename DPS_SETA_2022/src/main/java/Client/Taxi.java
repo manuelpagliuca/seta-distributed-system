@@ -4,6 +4,8 @@
  * M.Sc. of Computer Science @UNIMI A.Y. 2021/2022 */
 package Client;
 
+import Client.Menu.CheckingLines;
+import Client.Menu.TaxiMenu;
 import Utility.Utility;
 
 import io.grpc.stub.StreamObserver;
@@ -39,8 +41,12 @@ public class Taxi extends IPCServiceGrpc.IPCServiceImplBase {
 
         postInit();
 
-        CLI cli = new CLI();
+        Object inputAvailable = new Object();
+        TaxiMenu cli = new TaxiMenu(thisTaxi, inputAvailable);
         cli.start();
+
+        CheckingLines checkingLines = new CheckingLines(inputAvailable);
+        checkingLines.start();
 
         TaxiSchema taxiSchema = new TaxiSchema();
         taxiSchema.setTaxiInfo(thisTaxi);

@@ -1,4 +1,6 @@
-package Client;
+package Client.Menu;
+
+import Client.TaxiInfo;
 
 import java.util.Scanner;
 
@@ -13,10 +15,14 @@ import static Client.Taxi.removeTaxi;
  * quit: perform a DELETE request on the administrator server for the
  * removal of this taxi, then quit the process.
  */
-public class CLI implements Runnable {
+public class TaxiMenu implements Runnable {
+    final Object availableCLI;
     private Thread t;
+    private final TaxiInfo taxi;
 
-    CLI() {
+    public TaxiMenu(TaxiInfo taxi, Object availableCLI) {
+        this.availableCLI = availableCLI;
+        this.taxi = taxi;
     }
 
     public void start() {
@@ -31,11 +37,22 @@ public class CLI implements Runnable {
         Scanner scanner = new Scanner(System.in);
         String userInput;
 
-        while (scanner.hasNextLine() && !Thread.currentThread().isInterrupted()) {
+        while (!Thread.currentThread().isInterrupted()) {
+            synchronized (availableCLI) {
+                try {
+                    availableCLI.wait();
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+
             userInput = scanner.nextLine();
-            if (userInput.equalsIgnoreCase("quit")) {
+
+            if (userInput.equalsIgnoreCase("quit") || userInput.equalsIgnoreCase("exit")) {
                 System.out.println("Terminating the execution");
                 removeTaxi();
+            } else if (userInput.equalsIgnoreCase("info")) {
+                System.out.println(taxi.toString());
             } else {
                 System.out.println("This command is not available.");
             }
