@@ -4,6 +4,7 @@ import SETA.RideInfo;
 import Taxi.Data.TaxiSchema;
 import Taxi.gRPC.GrpcModule;
 import Taxi.Data.TaxiInfo;
+import Taxi.gRPC.GrpcRunnable;
 import org.eclipse.paho.client.mqttv3.*;
 
 import java.util.ArrayList;
@@ -81,16 +82,10 @@ public class MQTTModule {
                 String ride = new String(message.getPayload());
                 RideInfo rideInfo = GSON.fromJson(ride, RideInfo.class);
 
-                final boolean sameDistrictOfRide = thisTaxi.getDistrict() == rideInfo.getStartingDistrict();
+                System.out.println("District " + thisTaxi.getDistrict() + ": " + rideInfo);
 
-                if (sameDistrictOfRide) {
-                    System.out.println("MQTT District " + thisTaxi.getDistrict() + " ride communication: " + rideInfo);
-
-                    final boolean thisTaxiIsFree = !thisTaxi.isRiding() && !thisTaxi.isRecharging();
-
-                    if (thisTaxiIsFree) {
-                        coordinateRide(rideInfo);
-                    }
+                if (!thisTaxi.isRiding() && !thisTaxi.isRecharging()) {
+                    coordinateRide(rideInfo);
                 }
 
                 if (message.isRetained()) {
@@ -113,31 +108,37 @@ public class MQTTModule {
 
     private void coordinateRide(RideInfo rideInfo) throws InterruptedException, MqttException {
         int[] passengerPosition = rideInfo.getStartPosition();
-        double clientDistance = euclideanDistance(thisTaxi.getPosition(), passengerPosition);
+        final double clientDistance = euclideanDistance(thisTaxi.getPosition(), passengerPosition);
 
-        int availableTaxisInDistrict = getAvailableTaxisInDistrict(otherTaxis, thisTaxi);
+        //ArrayList<TaxiInfo> availableTaxisInDistrict = getAvailableTaxisInDistrict(otherTaxis, thisTaxi);
 
-        System.out.println("Waiting for " + availableTaxisInDistrict + " ACK votes");
+        int totalAck = otherTaxis.size(); // availableTaxisInDistrict.size();
+        System.out.println("[Ride " + rideInfo.getId() + "] Waiting for " + totalAck + " ACK votes");
 
-        grpcModule.coordinateRideGrpcStream(clientDistance, rideInfo.getStartPosition(), false);
+        int receivedAck = grpcModule.coordinateRideGrpcStream(
+                clientDistance,
+                rideInfo.getStartPosition(),
+                false);
 
-        System.out.println("Received a total of " + grpcModule.getAckRides() + " ACKs");
-        if (grpcModule.getAckRides() == availableTaxisInDistrict) {
+        System.out.println("Received a total of " + receivedAck + " ACKs");
+
+        //Object waitingNewStatus = new Object();
+
+        if (receivedAck == totalAck) {
             System.out.println("I got the ownership for the ride " + rideInfo.getId());
-            grpcModule.resetAckRides();
-            performRide(rideInfo);
+            GrpcRunnable.resetACKS();
+            performRide(rideInfo/*, waitingNewStatus*/);
         } else {
             // The ride has been taken from someone else
             // It should wait of information in case of new position of the taxi
             // Thread.sleep(1000);
-            grpcModule.resetAckRides();
+            //waitingNewStatus.wait();
+            GrpcRunnable.resetACKS();
             System.out.println("I didn't got the ownership for the ride " + rideInfo.getId());
         }
     }
 
-    private void performRide(RideInfo rideInfo) throws InterruptedException, MqttException {
-        final int DELIVERY_TIME = 5000;
-
+    private void performRide(RideInfo rideInfo/*, Object waitingNewStatus*/) throws InterruptedException, MqttException {
         thisTaxi.setRiding(true);
 
         final double distToPassenger = euclideanDistance(thisTaxi.getPosition(), rideInfo.getStartPosition());
@@ -159,15 +160,36 @@ public class MQTTModule {
         thisTaxi.getPosition()[0] = rideInfo.getDestinationPosition()[0];
         thisTaxi.getPosition()[1] = rideInfo.getDestinationPosition()[1];
 
-        grpcModule.communicateNewPositionAndStatusAsync();
+        // Communicate to other that he started the ride
+        //communicateNewInfos();
+        //waitingNewStatus.notify();
 
-        Thread.sleep(DELIVERY_TIME);
+        Thread.sleep(5000);
         thisTaxi.setBattery(thisTaxi.getBattery() - totalKm);
         System.out.printf("I reached the destination and after %,.2f Km the battery levels are %,.2f %%\n",
                 totalKm, thisTaxi.getBattery());
 
         thisTaxi.setRiding(false);
+
+        // Communicate to other that he finished the ride
+        //communicateNewInfos();
     }
+
+    /*private void communicateNewInfos() throws InterruptedException {
+        int receivedAck = grpcModule.grpcNewInfosAsync();
+
+        int totalAck = otherTaxis.size();
+        System.out.println("totalAck to wait : " + totalAck + ", receivedAck: " + receivedAck);
+
+        if (receivedAck == totalAck) {
+            System.out.println("The remaining " + totalAck + " taxi/s know your new position.");
+        } else {
+            System.out.println("Not all the other taxis received correctly your position!");
+            removeTaxi();
+        }
+
+        StatusRunnable.resetAckNewPosition();
+    }*/
 
     // Close the MQTT connection of this client toward the broker
     /*private void closingMqttConnection(MqttClient mqttClient) throws MqttException {

@@ -4,10 +4,11 @@ import Taxi.Data.TaxiSchema;
 import Taxi.Data.LogicalClock;
 import Taxi.Taxi;
 import Taxi.Data.TaxiInfo;
+
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.ServerBuilder;
-import io.grpc.stub.StreamObserver;
+
 import org.example.grpc.IPC;
 import org.example.grpc.IPCServiceGrpc;
 
@@ -24,8 +25,6 @@ public class GrpcModule implements Runnable {
     private ArrayList<TaxiInfo> otherTaxis;
     private int grpcPort = -1;
     private static GrpcModule instance;
-    private static int ackRides = 0;
-    private static int ackNewPosition = 0;
     private LogicalClock taxiLogicalClock;
 
     GrpcModule() {
@@ -102,123 +101,93 @@ public class GrpcModule implements Runnable {
         }
     }
 
+    // TODO: should be an async communication
     private int sendHelloInBroadcast() {
         IPC.Infos presentMsg = getIPCInfos();
         int ackS = 0;
-        for (TaxiInfo t : otherTaxis) {
-            ManagedChannel channel = ManagedChannelBuilder
-                    .forTarget(ADMIN_SERVER_ADDRESS + ":" + t.getGrpcPort()).usePlaintext().build();
-            IPCServiceGrpc.IPCServiceBlockingStub stub = IPCServiceGrpc.newBlockingStub(channel);
-            System.out.println("Sending to " + t.getId() + " the presentation at time " + logicalClock.printCalendar());
-            IPC.ACK ans = stub.present(presentMsg);
 
-            if (ans.getVote())
+        for (TaxiInfo t : otherTaxis) {
+            ManagedChannel channel = getManagedChannel(t.getGrpcPort());
+            IPCServiceGrpc.IPCServiceBlockingStub stub = IPCServiceGrpc.newBlockingStub(channel);
+            //System.out.println("Sending to " + t.getId() + " the presentation at time " + logicalClock.printCalendar());
+            IPC.ACK answer = stub.present(presentMsg);
+
+            if (answer.getVote())
                 ackS++;
 
             // Synchronize and increment the logical clock
-            syncLogicalClock(ans, t);
+            syncLogicalClock(answer, t);
             channel.shutdown();
         }
 
         return ackS;
     }
 
-    public void communicateNewPositionAndStatusAsync() {
-        IPC.Infos presentMsg = getIPCInfos();
+    // TODO : Should be an async communication
+    public void removeTaxiAsync() throws InterruptedException {
+        int totalAck = otherTaxis.size();
+        int receivedAck = sendGoodbyeBroadcastAsync();
+        GrpcRunnable.resetACKS();
+
+        if (totalAck == receivedAck) {
+            System.out.println("The other taxis removed me correctly from their list");
+        } else {
+            System.out.println("An error occurred during the removal of this taxi from the" +
+                    "entries of the other taxis");
+        }
+    }
+
+    private int sendGoodbyeBroadcastAsync() throws InterruptedException {
+        IPC.Infos goodByeMsg = getIPCInfos();
+
+        int i = 0;
+        Thread[] threads = new Thread[otherTaxis.size()];
 
         for (TaxiInfo t : otherTaxis) {
-            ManagedChannel channel = ManagedChannelBuilder.forTarget(ADMIN_SERVER_ADDRESS + ":" + t.getGrpcPort())
-                    .usePlaintext().build();
+            ManagedChannel channel = getManagedChannel(t.getGrpcPort());
             IPCServiceGrpc.IPCServiceStub stub = IPCServiceGrpc.newStub(channel);
-            StreamObserver<IPC.Infos> infosStreamObserver = countAckNewPosition(stub, t);
-            infosStreamObserver.onNext(presentMsg);
-            awaitChannelTermination(channel);
-        }
 
-        if (ackNewPosition == otherTaxis.size()) {
-            System.out.println("The remaining " + otherTaxis.size() + " taxi/s know your new position.");
-        } else {
-            System.out.println("Not all the other taxis received correctly your position!");
-            removeTaxi();
-        }
-
-        ackNewPosition = 0;
-    }
-
-    private static StreamObserver<IPC.Infos> countAckNewPosition(
-            IPCServiceGrpc.IPCServiceStub stub, TaxiInfo t) {
-        return stub.changedPositionStream(new StreamObserver<>() {
-            @Override
-            public void onNext(IPC.ACK value) {
-                if (value.getVote())
-                    ackNewPosition++;
-                syncLogicalClock(value, t);
-            }
-
-            @Override
-            public void onError(Throwable t) {
-
-            }
-
-            @Override
-            public void onCompleted() {
-
-            }
-        });
-    }
-
-    private static void awaitChannelTermination(ManagedChannel channel) {
-        try {
+            threads[i] = new Thread(new GrpcRunnable(t, goodByeMsg, stub));
+            threads[i].start();
             channel.awaitTermination(2, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+            // Synchronize and increment the logical clock
+            //syncLogicalClock(answer, t);
+            channel.shutdown();
+            i++;
         }
+
+        for (Thread thread : threads) {
+            thread.join();
+        }
+
+        return GrpcRunnable.getACKs();
     }
 
-    public void coordinateRideGrpcStream(double distanceToDestination, int[] destination, boolean isRechargeRide)
-            throws InterruptedException {
+    private ManagedChannel getManagedChannel(int grpcPort) {
+        return ManagedChannelBuilder.forTarget(ADMIN_SERVER_ADDRESS + ":" + grpcPort).usePlaintext().build();
+    }
+
+    public int coordinateRideGrpcStream(double distanceToDestination, int[] destination,
+                                        boolean isRechargeRide) throws InterruptedException {
         IPC.RideCharge rideCharge = getRideCharge(distanceToDestination, destination, isRechargeRide);
 
+        Thread[] msg = new Thread[otherTaxis.size()];
+        int i = 0;
+
         for (TaxiInfo t : otherTaxis) {
-            final boolean sameDistrict = (t.getDistrict() == thisTaxi.getDistrict());
-            final boolean isFree = (!t.isRecharging() && !t.isRiding());
-
-            if (sameDistrict && isFree) {
-                String target = ADMIN_SERVER_ADDRESS + ":" + t.getGrpcPort();
-                ManagedChannel channel = ManagedChannelBuilder.forTarget(target).usePlaintext().build();
-                IPCServiceGrpc.IPCServiceStub stub = IPCServiceGrpc.newStub(channel);
-                StreamObserver<IPC.RideCharge> rideChargeStreamObserver = getRideChargeStreamObserver(t, stub);
-                rideChargeStreamObserver.onNext(rideCharge);
-                channel.awaitTermination(2, TimeUnit.SECONDS);
-            }
+            ManagedChannel channel = getManagedChannel(t.getGrpcPort());
+            IPCServiceGrpc.IPCServiceStub stub = IPCServiceGrpc.newStub(channel);
+            msg[i] = new Thread(new GrpcRunnable(t, rideCharge, stub));
+            msg[i].start();
+            channel.awaitTermination(2, TimeUnit.SECONDS);
+            i++;
         }
-    }
 
-    private static StreamObserver<IPC.RideCharge> getRideChargeStreamObserver(TaxiInfo t,
-                                                                              IPCServiceGrpc.IPCServiceStub stub) {
-        return stub.coordinateRideStream(new StreamObserver<>() {
-            @Override
-            public void onNext(IPC.ACK value) {
-                if (value.getVote()) {
-                    ackRides++;
-                    System.out.println("[Ride] Received an ACK from " + t.getId());
-                } else {
-                    System.out.println("[Ride] Received a NACK from " + t.getId());
-                }
+        for (Thread thread : msg) {
+            thread.join();
+        }
 
-                syncLogicalClock(value, t);
-            }
-
-            @Override
-            public void onError(Throwable t1) {
-
-            }
-
-            @Override
-            public void onCompleted() {
-
-            }
-        });
+        return GrpcRunnable.getACKs();
     }
 
     public static void syncLogicalClock(IPC.ACK value, TaxiInfo t) {
@@ -230,17 +199,9 @@ public class GrpcModule implements Runnable {
 
         logicalClock.increment();
 
-        System.out.println("ACK/NACK sent from " + t.getId()
-                + " at " + serverClock.printCalendar()
-                + ", received at " + logicalClock.printCalendar());
-    }
-
-    public int getAckRides() {
-        return ackRides;
-    }
-
-    public void resetAckRides() {
-        ackRides = 0;
+        //System.out.println("ACK/NACK sent from " + t.getId()
+        //      + " at " + serverClock.printCalendar()
+        //    + ", received at " + logicalClock.printCalendar());
     }
 
     private IPC.RideCharge getRideCharge(double distanceToDestination, int[] destination, boolean isRechargeRide) {

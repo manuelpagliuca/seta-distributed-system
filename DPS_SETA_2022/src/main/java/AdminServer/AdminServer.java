@@ -103,7 +103,7 @@ public class AdminServer {
             taxis.add(newTaxi);
         }
 
-        synchronized (newTaxiArrived){
+        synchronized (newTaxiArrived) {
             newTaxiArrived.notify();
         }
 
@@ -123,6 +123,9 @@ public class AdminServer {
             if (e.getId() == taxiID) {
                 // Could be used a gRPC to the taxi for signaling him to quit the process
                 taxis.remove(e);
+                synchronized (newTaxiArrived) {
+                    newTaxiArrived.notify();
+                }
                 return true;
             }
         }
@@ -134,11 +137,12 @@ public class AdminServer {
     // Print all the taxis ID each one with the list of the other taxis on the smart city (debug)
     public void printAllTaxis() {
         Timestamp timestamp = new Timestamp(System.currentTimeMillis());
-        System.out.println(timestamp);
         System.out.println("---" + timestamp + "---");
 
         for (TaxiInfo e : taxis)
             System.out.println("id=" + e.getId() + ", gRPC=" + e.getGrpcPort());
+
+        System.out.println("-----------------------");
     }
 
     // Generate a random district inside the integer range [1,4]

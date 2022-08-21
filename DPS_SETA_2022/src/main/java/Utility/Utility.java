@@ -82,14 +82,16 @@ public class Utility {
         return Math.sqrt(xOffset + yOffset);
     }
 
-    public static int getAvailableTaxisInDistrict(ArrayList<TaxiInfo> otherTaxis, TaxiInfo thisTaxi) {
-        int counter = 0;
+    public static ArrayList<TaxiInfo> getAvailableTaxisInDistrict(ArrayList<TaxiInfo> otherTaxis, TaxiInfo thisTaxi) {
+        ArrayList<TaxiInfo> availableTaxisInDistrict = new ArrayList<>();
+
         for (TaxiInfo t : otherTaxis) {
             final boolean tHasSameDistrict = (t.getDistrict() == thisTaxi.getDistrict());
             final boolean tIsAvailable = !t.isRecharging() && !t.isRiding();
-            if (tHasSameDistrict && tIsAvailable) counter++;
+            if (tHasSameDistrict && tIsAvailable)
+                availableTaxisInDistrict.add(t);
         }
-        return counter;
+        return availableTaxisInDistrict;
     }
 
     public static int generateRndInteger(int origin, int bound) {

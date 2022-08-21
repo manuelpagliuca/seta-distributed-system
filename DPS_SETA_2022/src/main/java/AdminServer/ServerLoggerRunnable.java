@@ -13,13 +13,11 @@ public class ServerLoggerRunnable implements Runnable {
     public void run() {
         while (!Thread.currentThread().isInterrupted()) {
             synchronized (newTaxiArrived) {
-                // System.out.println("ServerTaxisUpdater is waiting");
                 try {
                    newTaxiArrived.wait();
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
-                // System.out.println("Notified!");
                 AdminServer.getInstance().printAllTaxis();
             }
         }

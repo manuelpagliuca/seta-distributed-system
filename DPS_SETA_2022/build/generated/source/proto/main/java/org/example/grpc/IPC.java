@@ -4797,15 +4797,16 @@ public final class IPC {
       "example.grpc.Infos\022\033\n\023destinationPositio" +
       "n\030\002 \003(\005\022\035\n\025distanceToDestination\030\003 \002(\001\022\026" +
       "\n\016rechargingRide\030\004 \002(\010\")\n\003ACK\022\014\n\004vote\030\001 " +
-      "\002(\010\022\024\n\014logicalClock\030\002 \002(\0032\247\002\n\nIPCService" +
+      "\002(\010\022\024\n\014logicalClock\030\002 \002(\0032\347\002\n\nIPCService" +
       "\0229\n\007present\022\027.org.example.grpc.Infos\032\025.o" +
-      "rg.example.grpc.ACK\022O\n\024coordinateRideStr" +
-      "eam\022\034.org.example.grpc.RideCharge\032\025.org." +
-      "example.grpc.ACK(\0010\001\022K\n\025changedPositionS" +
-      "tream\022\027.org.example.grpc.Infos\032\025.org.exa" +
-      "mple.grpc.ACK(\0010\001\022@\n\007goodbye\022\031.org.examp" +
-      "le.grpc.Goodbye\032\032.org.example.grpc.Respo" +
-      "nse"
+      "rg.example.grpc.ACK\022>\n\010removeMe\022\027.org.ex" +
+      "ample.grpc.Infos\032\025.org.example.grpc.ACK(" +
+      "\0010\001\022O\n\024coordinateRideStream\022\034.org.exampl" +
+      "e.grpc.RideCharge\032\025.org.example.grpc.ACK" +
+      "(\0010\001\022K\n\025changedPositionStream\022\027.org.exam" +
+      "ple.grpc.Infos\032\025.org.example.grpc.ACK(\0010" +
+      "\001\022@\n\007goodbye\022\031.org.example.grpc.Goodbye\032" +
+      "\032.org.example.grpc.Response"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,

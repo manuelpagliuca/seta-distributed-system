@@ -58,6 +58,37 @@ public final class IPCServiceGrpc {
     return getPresentMethod;
   }
 
+  private static volatile io.grpc.MethodDescriptor<org.example.grpc.IPC.Infos,
+      org.example.grpc.IPC.ACK> getRemoveMeMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "removeMe",
+      requestType = org.example.grpc.IPC.Infos.class,
+      responseType = org.example.grpc.IPC.ACK.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.BIDI_STREAMING)
+  public static io.grpc.MethodDescriptor<org.example.grpc.IPC.Infos,
+      org.example.grpc.IPC.ACK> getRemoveMeMethod() {
+    io.grpc.MethodDescriptor<org.example.grpc.IPC.Infos, org.example.grpc.IPC.ACK> getRemoveMeMethod;
+    if ((getRemoveMeMethod = IPCServiceGrpc.getRemoveMeMethod) == null) {
+      synchronized (IPCServiceGrpc.class) {
+        if ((getRemoveMeMethod = IPCServiceGrpc.getRemoveMeMethod) == null) {
+          IPCServiceGrpc.getRemoveMeMethod = getRemoveMeMethod =
+              io.grpc.MethodDescriptor.<org.example.grpc.IPC.Infos, org.example.grpc.IPC.ACK>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.BIDI_STREAMING)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "removeMe"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.example.grpc.IPC.Infos.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.example.grpc.IPC.ACK.getDefaultInstance()))
+              .setSchemaDescriptor(new IPCServiceMethodDescriptorSupplier("removeMe"))
+              .build();
+        }
+      }
+    }
+    return getRemoveMeMethod;
+  }
+
   private static volatile io.grpc.MethodDescriptor<org.example.grpc.IPC.RideCharge,
       org.example.grpc.IPC.ACK> getCoordinateRideStreamMethod;
 
@@ -187,6 +218,13 @@ public final class IPCServiceGrpc {
 
     /**
      */
+    public io.grpc.stub.StreamObserver<org.example.grpc.IPC.Infos> removeMe(
+        io.grpc.stub.StreamObserver<org.example.grpc.IPC.ACK> responseObserver) {
+      return asyncUnimplementedStreamingCall(getRemoveMeMethod(), responseObserver);
+    }
+
+    /**
+     */
     public io.grpc.stub.StreamObserver<org.example.grpc.IPC.RideCharge> coordinateRideStream(
         io.grpc.stub.StreamObserver<org.example.grpc.IPC.ACK> responseObserver) {
       return asyncUnimplementedStreamingCall(getCoordinateRideStreamMethod(), responseObserver);
@@ -218,6 +256,13 @@ public final class IPCServiceGrpc {
                 org.example.grpc.IPC.Infos,
                 org.example.grpc.IPC.ACK>(
                   this, METHODID_PRESENT)))
+          .addMethod(
+            getRemoveMeMethod(),
+            asyncBidiStreamingCall(
+              new MethodHandlers<
+                org.example.grpc.IPC.Infos,
+                org.example.grpc.IPC.ACK>(
+                  this, METHODID_REMOVE_ME)))
           .addMethod(
             getCoordinateRideStreamMethod(),
             asyncBidiStreamingCall(
@@ -267,6 +312,14 @@ public final class IPCServiceGrpc {
         io.grpc.stub.StreamObserver<org.example.grpc.IPC.ACK> responseObserver) {
       asyncUnaryCall(
           getChannel().newCall(getPresentMethod(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     */
+    public io.grpc.stub.StreamObserver<org.example.grpc.IPC.Infos> removeMe(
+        io.grpc.stub.StreamObserver<org.example.grpc.IPC.ACK> responseObserver) {
+      return asyncBidiStreamingCall(
+          getChannel().newCall(getRemoveMeMethod(), getCallOptions()), responseObserver);
     }
 
     /**
@@ -367,8 +420,9 @@ public final class IPCServiceGrpc {
 
   private static final int METHODID_PRESENT = 0;
   private static final int METHODID_GOODBYE = 1;
-  private static final int METHODID_COORDINATE_RIDE_STREAM = 2;
-  private static final int METHODID_CHANGED_POSITION_STREAM = 3;
+  private static final int METHODID_REMOVE_ME = 2;
+  private static final int METHODID_COORDINATE_RIDE_STREAM = 3;
+  private static final int METHODID_CHANGED_POSITION_STREAM = 4;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -405,6 +459,9 @@ public final class IPCServiceGrpc {
     public io.grpc.stub.StreamObserver<Req> invoke(
         io.grpc.stub.StreamObserver<Resp> responseObserver) {
       switch (methodId) {
+        case METHODID_REMOVE_ME:
+          return (io.grpc.stub.StreamObserver<Req>) serviceImpl.removeMe(
+              (io.grpc.stub.StreamObserver<org.example.grpc.IPC.ACK>) responseObserver);
         case METHODID_COORDINATE_RIDE_STREAM:
           return (io.grpc.stub.StreamObserver<Req>) serviceImpl.coordinateRideStream(
               (io.grpc.stub.StreamObserver<org.example.grpc.IPC.ACK>) responseObserver);
@@ -463,6 +520,7 @@ public final class IPCServiceGrpc {
           serviceDescriptor = result = io.grpc.ServiceDescriptor.newBuilder(SERVICE_NAME)
               .setSchemaDescriptor(new IPCServiceFileDescriptorSupplier())
               .addMethod(getPresentMethod())
+              .addMethod(getRemoveMeMethod())
               .addMethod(getCoordinateRideStreamMethod())
               .addMethod(getChangedPositionStreamMethod())
               .addMethod(getGoodbyeMethod())

@@ -2,6 +2,7 @@ package Taxi.Menu;
 
 import Taxi.Data.TaxiInfo;
 
+import java.util.ArrayList;
 import java.util.Scanner;
 
 import static Taxi.Taxi.removeTaxi;
@@ -19,10 +20,12 @@ public class MenuRunnable implements Runnable {
     final Object availableCLI;
     private Thread t;
     private final TaxiInfo taxi;
+    private final ArrayList<TaxiInfo> otherTaxis;
 
-    public MenuRunnable(TaxiInfo taxi, Object availableCLI) {
+    public MenuRunnable(TaxiInfo taxi, ArrayList<TaxiInfo> otherTaxis, Object availableCLI) {
         this.availableCLI = availableCLI;
         this.taxi = taxi;
+        this.otherTaxis = otherTaxis;
     }
 
     public void start() {
@@ -50,9 +53,14 @@ public class MenuRunnable implements Runnable {
 
             if (userInput.equalsIgnoreCase("quit") || userInput.equalsIgnoreCase("exit")) {
                 System.out.println("Terminating the execution");
-                removeTaxi();
+                try {
+                    removeTaxi();
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
             } else if (userInput.equalsIgnoreCase("info")) {
                 System.out.println(taxi.toString());
+                System.out.println(otherTaxis);
             } else {
                 System.out.println("This command is not available.");
             }

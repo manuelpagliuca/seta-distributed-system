@@ -46,7 +46,7 @@ public class Taxi extends IPCServiceGrpc.IPCServiceImplBase {
         postInit();
 
         Object inputAvailable = new Object();
-        MenuRunnable cli = new MenuRunnable(thisTaxi, inputAvailable);
+        MenuRunnable cli = new MenuRunnable(thisTaxi, otherTaxis, inputAvailable);
         cli.start();
 
         CheckingLinesRunnable checkingLines = new CheckingLinesRunnable(inputAvailable);
@@ -75,16 +75,16 @@ public class Taxi extends IPCServiceGrpc.IPCServiceImplBase {
                 LogicalClock requestLogicalClock = new LogicalClock(RAND_CLOCK_OFFSET);
 
                 requestLogicalClock.setLogicalClock(request.getTaxi().getLogicalClock());
-                System.out.println(request.getTaxi().getId()
-                        + " sent the request at "
-                        + requestLogicalClock.printCalendar());
+                // System.out.println(request.getTaxi().getId()
+                // + " sent the request at "
+                // + requestLogicalClock.printCalendar());
 
                 if (logicalClock.getLogicalClock() <= request.getTaxi().getLogicalClock()) {
                     logicalClock.setLogicalClock(request.getTaxi().getLogicalClock());
                 }
 
                 logicalClock.increment();
-                System.out.println(thisTaxi.getId() + " received the request at " + logicalClock.printCalendar());
+                //System.out.println(thisTaxi.getId() + " received the request at " + logicalClock.printCalendar());
 
                 // From Client Stream
                 // Check the distance between the server taxi and the received distance
@@ -92,22 +92,63 @@ public class Taxi extends IPCServiceGrpc.IPCServiceImplBase {
                 passengerPos[0] = request.getDestinationPosition(0);
                 passengerPos[1] = request.getDestinationPosition(1);
 
-                final double clientDistance = request.getDistanceToDestination();
-                final double serverDistance = Utility.euclideanDistance(thisTaxi.getPosition(), passengerPos);
+                final double clientTaxiDistance = request.getDistanceToDestination();
+                final double serverTaxiDistance = Utility.euclideanDistance(thisTaxi.getPosition(), passengerPos);
 
-                if (!request.getRechargingRide()) {
-                    if (thisTaxi.isRecharging() || thisTaxi.isRiding()) {
-                        // This taxi is recharging or on a ride
-                        System.out.println("This taxi is recharging or on a ride, sends ACK to "
-                                + request.getTaxi().getId());
-                        responseObserver.onNext(IPC.ACK.newBuilder()
-                                .setVote(true).setLogicalClock(logicalClock.getLogicalClock()).build());
-                        responseObserver.onCompleted();
-                        return;
-                    }
+                final boolean differentDistrict = thisTaxi.getDistrict() != request.getTaxi().getDistrict();
+                final boolean isRecharging = thisTaxi.isRecharging();
+                final boolean isRiding = thisTaxi.isRiding();
+                final boolean tripleCondition = differentDistrict || isRecharging || isRiding;
+
+                if (tripleCondition) {
+                    responseObserver.onNext(IPC.ACK.newBuilder()
+                            .setVote(true)
+                            .setLogicalClock(logicalClock.getLogicalClock()).build());
+                    responseObserver.onCompleted();
+                    return;
                 }
 
-                discriminateRequest(request, clientDistance, serverDistance, responseObserver);
+                if (serverTaxiDistance > clientTaxiDistance) {
+                    // The client taxi has a smaller distance to the passenger than this, ACK
+                    responseObserver.onNext(IPC.ACK.newBuilder()
+                            .setVote(true).setLogicalClock(logicalClock.getLogicalClock()).build());
+                    // System.out.println(thisTaxi.getId()
+                    //        + " has a smaller distance than "
+                    //        + request.getTaxi().getId());
+                    responseObserver.onCompleted();
+                    return;
+                } else if (serverTaxiDistance == clientTaxiDistance) {
+                    if (thisTaxi.getBattery() < request.getTaxi().getBattery()) {
+                        // Requester has more battery than this, ACK
+                        // System.out.println(thisTaxi.getId()
+                        //        + " has less battery than "
+                        //        + request.getTaxi().getId());
+                        responseObserver.onNext(IPC.ACK.newBuilder()
+                                .setVote(true)
+                                .setLogicalClock(logicalClock.getLogicalClock()).build());
+                        responseObserver.onCompleted();
+                        return;
+                    } else if (thisTaxi.getBattery() == request.getTaxi().getBattery()) {
+                        if (thisTaxi.getId() < request.getTaxi().getId()) {
+                            // The requesting taxi has a greater ID than this taxi, ACK
+                            // System.out.println(thisTaxi.getId()
+                            //        + " has a smaller ID than "
+                            //        + request.getTaxi().getId());
+                            responseObserver.onNext(IPC.ACK.newBuilder()
+                                    .setVote(true)
+                                    .setLogicalClock(logicalClock.getLogicalClock()).build());
+                            responseObserver.onCompleted();
+                            return;
+                        }
+                    }
+                }
+                // This taxi has a better distance, battery level or ID value than the requester,
+                // sends NACK to him
+                responseObserver
+                        .onNext(IPC.ACK.newBuilder()
+                                .setVote(false)
+                                .setLogicalClock(logicalClock.getLogicalClock()).build());
+                responseObserver.onCompleted();
             }
 
             @Override
@@ -120,36 +161,6 @@ public class Taxi extends IPCServiceGrpc.IPCServiceImplBase {
 
             }
         };
-    }
-
-    private static void discriminateRequest(IPC.RideCharge request, double clientDistance, double serverDistance, StreamObserver<IPC.ACK> responseObserver) {
-        if (serverDistance > clientDistance) {
-            // The client taxi has a smaller distance to the passenger than this, ACK
-            responseObserver.onNext(IPC.ACK.newBuilder()
-                    .setVote(true).setLogicalClock(logicalClock.getLogicalClock()).build());
-            responseObserver.onCompleted();
-            return;
-        } else if (serverDistance == clientDistance) {
-            if (thisTaxi.getBattery() < request.getTaxi().getBattery()) {
-                // Requester has more battery than this, ACK
-                responseObserver.onNext(IPC.ACK.newBuilder()
-                        .setVote(true).setLogicalClock(logicalClock.getLogicalClock()).build());
-                responseObserver.onCompleted();
-                return;
-            } else if (thisTaxi.getBattery() == request.getTaxi().getBattery()) {
-                if (thisTaxi.getId() < request.getTaxi().getId()) {
-                    // The requesting taxi has a greater ID than this taxi, ACK
-                    responseObserver.onNext(IPC.ACK.newBuilder()
-                            .setVote(true).setLogicalClock(logicalClock.getLogicalClock()).build());
-                    responseObserver.onCompleted();
-                    return;
-                }
-            }
-        }
-        // This taxi has a better distance, battery level or ID value than the requester, sends NACK to him
-        responseObserver.onNext(IPC.ACK.newBuilder()
-                .setVote(false).setLogicalClock(logicalClock.getLogicalClock()).build());
-        responseObserver.onCompleted();
     }
 
     // todo handle the logical clock
@@ -200,8 +211,8 @@ public class Taxi extends IPCServiceGrpc.IPCServiceImplBase {
         LogicalClock clientClock = new LogicalClock(RAND_CLOCK_OFFSET);
         clientClock.setLogicalClock(request.getLogicalClock());
 
-        System.out.println("Received the presentation from " + request.getId()
-                + " at time " + clientClock.printCalendar());
+        // System.out.println("Received the presentation from " + request.getId() +
+        // " at time " + clientClock.printCalendar());
 
         if (logicalClock.getLogicalClock() <= request.getLogicalClock()) {
             logicalClock.setLogicalClock(request.getLogicalClock());
@@ -213,12 +224,53 @@ public class Taxi extends IPCServiceGrpc.IPCServiceImplBase {
             responseObserver.onNext(IPC.ACK.newBuilder()
                     .setVote(true)
                     .setLogicalClock(logicalClock.getLogicalClock()).build());
-        } else {
-            responseObserver.onNext(IPC.ACK.newBuilder()
-                    .setVote(false)
-                    .setLogicalClock(logicalClock.getLogicalClock()).build());
+            responseObserver.onCompleted();
+            return;
         }
+
+        responseObserver.onNext(IPC.ACK.newBuilder()
+                .setVote(false)
+                .setLogicalClock(logicalClock.getLogicalClock()).build());
         responseObserver.onCompleted();
+    }
+
+    @Override
+    public StreamObserver<IPC.Infos> removeMe(StreamObserver<IPC.ACK> responseObserver) {
+
+        return new StreamObserver<IPC.Infos>() {
+            @Override
+            public void onNext(IPC.Infos request) {
+                TaxiInfo clientTaxi = new TaxiInfo(request);
+
+                LogicalClock clientClock = new LogicalClock(RAND_CLOCK_OFFSET);
+                clientClock.setLogicalClock(request.getLogicalClock());
+
+                // System.out.println("Received the presentation from " + request.getId() +
+                // " at time " + clientClock.printCalendar());
+
+                if (logicalClock.getLogicalClock() <= request.getLogicalClock()) {
+                    logicalClock.setLogicalClock(request.getLogicalClock());
+                }
+                logicalClock.increment();
+
+                otherTaxis.removeIf(t -> clientTaxi.getId() == t.getId());
+
+                responseObserver.onNext(IPC.ACK.newBuilder()
+                        .setVote(true)
+                        .setLogicalClock(logicalClock.getLogicalClock()).build());
+                responseObserver.onCompleted();
+            }
+
+            @Override
+            public void onError(Throwable t) {
+
+            }
+
+            @Override
+            public void onCompleted() {
+
+            }
+        };
     }
 
     /*
@@ -264,12 +316,14 @@ public class Taxi extends IPCServiceGrpc.IPCServiceImplBase {
      * Build the specific URL path for performing the DELETE request on the
      * administrator server.
      */
-    public static void removeTaxi() {
+    public static void removeTaxi() throws InterruptedException {
+        grpcModule.removeTaxiAsync();
         final String INIT_PATH = "/del-taxi/" + thisTaxi.getId();
         String serverInitInfos = delRequest(client, ADMIN_SERVER_URL + INIT_PATH);
         System.out.println(serverInitInfos);
         // todo goodbye procedure
         System.exit(0);
     }
+
 
 }

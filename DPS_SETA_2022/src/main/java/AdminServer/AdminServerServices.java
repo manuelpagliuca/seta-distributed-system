@@ -108,12 +108,13 @@ public class AdminServerServices {
 
         if (ans)
             return Response
-                    .ok("Deletion completed successfully.")
+                    .ok("Removal from the administrator server completed successfully.")
                     .build();
         else
             return Response
                     .status(Response.Status.NOT_FOUND)
-                    .entity("The given ID was not found in the administrator server").build();
+                    .entity("The given ID was not found in the administrator server.")
+                    .build();
     }
 
 }

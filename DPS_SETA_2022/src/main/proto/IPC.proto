@@ -37,6 +37,7 @@ message ACK {
 
 service IPCService {
   rpc present(Infos) returns (ACK);
+  rpc removeMe(stream Infos) returns (stream ACK);
   rpc coordinateRideStream(stream RideCharge) returns (stream ACK);
 
   // todo: rpc per comunicare il fatto che sta
