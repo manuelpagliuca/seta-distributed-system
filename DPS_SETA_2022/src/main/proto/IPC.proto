@@ -1,13 +1,5 @@
 package org.example.grpc;
 
-message Proposal {
-  required string stringRequest = 1;
-}
-
-message Response {
-  required string stringResponse = 1;
-}
-
 message Infos {
   required int32 id = 1;
   required int32 district = 2;
@@ -17,10 +9,6 @@ message Infos {
   required bool isRiding = 6;
   required double battery = 7;
   required int64 logicalClock = 8;
-}
-
-message Goodbye {
-  required int32 grpcPort = 1;
 }
 
 message RideCharge {
@@ -37,10 +25,6 @@ message ACK {
 
 service IPCService {
   rpc present(Infos) returns (ACK);
-  rpc removeMe(stream Infos) returns (stream ACK);
+  rpc goodbye(stream Infos) returns (stream ACK);
   rpc coordinateRideStream(stream RideCharge) returns (stream ACK);
-
-  // todo: rpc per comunicare il fatto che sta
-  rpc changedPositionStream(stream Infos) returns (stream ACK);
-  rpc goodbye(Goodbye) returns (Response);
 }

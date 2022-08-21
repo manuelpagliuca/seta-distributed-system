@@ -8,6 +8,7 @@ import Taxi.gRPC.GrpcRunnable;
 import org.eclipse.paho.client.mqttv3.*;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import static Utility.Utility.*;
 
@@ -82,16 +83,18 @@ public class MQTTModule {
                 String ride = new String(message.getPayload());
                 RideInfo rideInfo = GSON.fromJson(ride, RideInfo.class);
 
-                System.out.println("District " + thisTaxi.getDistrict() + ": " + rideInfo);
+                if (rideInfo.getStartingDistrict() == thisTaxi.getDistrict()) {
+                    System.out.println("District " + thisTaxi.getDistrict() + ": " + rideInfo);
 
-                if (!thisTaxi.isRiding() && !thisTaxi.isRecharging()) {
-                    coordinateRide(rideInfo);
-                }
+                    if (!thisTaxi.isRiding() && !thisTaxi.isRecharging()) {
+                        coordinateRide(rideInfo);
+                    }
 
-                if (message.isRetained()) {
-                    // Delete the retained message on the topic
-                    System.out.println("This message was retained, I will delete it.");
-                    mqttClient.publish(topic, null);
+                    if (message.isRetained()) {
+                        // Delete the retained message on the topic
+                        System.out.println("This message was retained, I will delete it.");
+                        mqttClient.publish(topic, null);
+                    }
                 }
             }
 
@@ -166,9 +169,11 @@ public class MQTTModule {
 
         Thread.sleep(5000);
         thisTaxi.setBattery(thisTaxi.getBattery() - totalKm);
-        System.out.printf("I reached the destination and after %,.2f Km the battery levels are %,.2f %%\n",
-                totalKm, thisTaxi.getBattery());
-
+        System.out.printf("I reached the destination " +
+                Arrays.toString(rideInfo.getDestinationPosition()) +
+                " at district " +
+                rideInfo.getDestinationDistrict() +
+                "and after %,.2f Km the battery levels are %,.2f %%\n", totalKm, thisTaxi.getBattery());
         thisTaxi.setRiding(false);
 
         // Communicate to other that he finished the ride

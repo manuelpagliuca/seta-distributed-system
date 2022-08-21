@@ -7,17 +7,18 @@ public class RideInfo implements Serializable {
     private int[] startPosition = new int[2];
     private int[] destinationPosition = new int[2];
 
-    // Utility.Utility
-    public int getDistrict(int[] position) {
+    private int getDistrict(int[] position) {
         if (position.length != 2)
             return -1;
+
         if (position[0] < 5 && position[1] < 5)
             return 1;
-        else if (position[0] > 5 && position[1] < 5)
+        else if (position[0] >= 5 && position[1] < 5)
             return 2;
-        else if (position[0] < 5 && position[1] > 5)
+        else if (position[0] < 5)
+            return 4;
+        else
             return 3;
-        return 4;
     }
 
     public int getStartingDistrict() {

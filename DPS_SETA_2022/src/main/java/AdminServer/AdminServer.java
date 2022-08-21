@@ -153,8 +153,8 @@ public class AdminServer {
 
         int district = rnd.nextInt(lowerBound, upperBound + 1);
         // TODO: revert back to original functioning
-        return 2; // for testing gRPC
-        //return district;
+        //return 2; // for testing gRPC
+        return district;
     }
 
     /*

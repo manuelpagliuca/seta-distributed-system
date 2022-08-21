@@ -71,7 +71,7 @@ public class GrpcRunnable implements Runnable {
     }
 
     private static StreamObserver<IPC.Infos> getInfosStreamObserver(IPCServiceGrpc.IPCServiceStub stub) {
-        return stub.removeMe(new StreamObserver<IPC.ACK>() {
+        return stub.goodbye(new StreamObserver<IPC.ACK>() {
             @Override
             public void onNext(IPC.ACK value) {
                 if (value.getVote()) {
