@@ -13,9 +13,9 @@ public class RideInfo implements Serializable {
 
         if (position[0] < 5 && position[1] < 5)
             return 1;
-        else if (position[0] >= 5 && position[1] < 5)
-            return 2;
         else if (position[0] < 5)
+            return 2;
+        else if (position[1] < 5)
             return 4;
         else
             return 3;

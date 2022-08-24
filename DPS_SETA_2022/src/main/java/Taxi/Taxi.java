@@ -9,6 +9,9 @@ import Taxi.Data.TaxiInfo;
 import Taxi.MQTT.MQTTModule;
 import Taxi.Menu.CheckingLinesRunnable;
 import Taxi.Menu.MenuRunnable;
+import Taxi.Statistics.LocalStatisticsRunnable;
+import Taxi.Statistics.PollutionBuffer;
+import Taxi.Statistics.Simulators.PM10Simulator;
 import Taxi.gRPC.GrpcModule;
 
 import Utility.Utility;
@@ -25,8 +28,7 @@ import org.example.grpc.IPCServiceGrpc;
 
 import java.util.ArrayList;
 
-import static Utility.Utility.GSON;
-import static Utility.Utility.delRequest;
+import static Utility.Utility.*;
 
 public class Taxi extends IPCServiceGrpc.IPCServiceImplBase {
     private final static String ADMIN_SERVER_ADDRESS = "localhost";
@@ -41,12 +43,25 @@ public class Taxi extends IPCServiceGrpc.IPCServiceImplBase {
     private static Client client;
     private static ArrayList<TaxiInfo> otherTaxis = new ArrayList<>();
 
+    // Threads
+    private static Thread batteryThread;
+    private static PM10Simulator pm10SimulatorThread;
+
     public static void main(String[] args) {
         logicalClock = new LogicalClock(RAND_CLOCK_OFFSET);
         logicalClock.increment();
         System.out.println("Logical clock initial value " + logicalClock.printCalendar());
 
         postInit();
+
+        PollutionBuffer pollutionBuffer = new PollutionBuffer();
+
+        Thread localStatistics = new Thread(new LocalStatisticsRunnable(pollutionBuffer,
+                thisTaxi, ADMIN_SERVER_URL, client));
+        localStatistics.start();
+
+        pm10SimulatorThread = new PM10Simulator(Integer.toString(generateRndInteger(0, 10)), pollutionBuffer);
+        pm10SimulatorThread.start();
 
         Object inputAvailable = new Object();
         MenuRunnable cli = new MenuRunnable(thisTaxi, otherTaxis, inputAvailable);
@@ -64,9 +79,15 @@ public class Taxi extends IPCServiceGrpc.IPCServiceImplBase {
         grpcModule.startServer();
         grpcModule.presentToOtherTaxis();
 
-        MQTTModule mqttModule = new MQTTModule(taxiSchema);
+        Object checkBattery = new Object();
+        //batteryThread = new Thread(new RechargeRunnable(thisTaxi, checkBattery));
+
+        MQTTModule mqttModule = new MQTTModule(taxiSchema, checkBattery);
         mqttModule.startMqttClient();
 
+        //batteryThread.start();
+
+        // TODO: Function for terminating correctly all the threads.
     }
 
 
@@ -122,9 +143,7 @@ public class Taxi extends IPCServiceGrpc.IPCServiceImplBase {
         System.exit(0);
     }
 
-
-    // gRPC Services
-
+    /// gRPC Services
     // TODO Logical Clock
     @Override
     public StreamObserver<IPC.RideCharge> coordinateRideStream(StreamObserver<IPC.ACK> responseObserver) {
@@ -255,8 +274,7 @@ public class Taxi extends IPCServiceGrpc.IPCServiceImplBase {
 
     @Override
     public StreamObserver<IPC.Infos> goodbye(StreamObserver<IPC.ACK> responseObserver) {
-
-        return new StreamObserver<IPC.Infos>() {
+        return new StreamObserver<>() {
             @Override
             public void onNext(IPC.Infos request) {
                 TaxiInfo clientTaxi = new TaxiInfo(request);

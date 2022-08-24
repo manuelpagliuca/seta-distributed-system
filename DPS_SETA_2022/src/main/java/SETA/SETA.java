@@ -1,7 +1,6 @@
 package SETA;
 
 import Utility.Utility;
-import com.google.gson.Gson;
 import org.eclipse.paho.client.mqttv3.*;
 
 import java.sql.Timestamp;
@@ -10,19 +9,18 @@ import java.util.Random;
 
 public class SETA {
     private static int rideIds = 0;
+    private static final int QOS = 2;
 
     public static void main(String[] args) {
         org.eclipse.paho.client.mqttv3.MqttClient client;
         String broker = "tcp://localhost:1883";
         String clientId = org.eclipse.paho.client.mqttv3.MqttClient.generateClientId();
 
-        int pubQos = 2;
-
         try {
             // New client with no persistence of the messages
-            client = new MqttClient(broker, clientId, null);
+            client = new MqttClient(broker, clientId);
             MqttConnectOptions connectOptions = new MqttConnectOptions();
-            connectOptions.setCleanSession(true);
+            connectOptions.setCleanSession(false);
 
             // Connect to client
             client.connect(connectOptions);
@@ -60,7 +58,7 @@ public class SETA {
                     }
                 }
             });
-            rideGeneration(client, pubQos);
+            rideGeneration(client, QOS);
             // TODO: Insert some thread for handling the reading from console,
             // todo: so that it is possible to interact with the broker
             /*
@@ -90,6 +88,7 @@ public class SETA {
      * This method generate 2 rides each 5 seconds on the relative topics (this will
      * depend on the district of the generated rides).
      */
+    @SuppressWarnings("BusyWait")
     private static void rideGeneration(MqttClient client, int pubQos) throws
             MqttException, InterruptedException {
         while (!Thread.currentThread().isInterrupted()) {
@@ -103,6 +102,7 @@ public class SETA {
             String topic1 = "seta/smartcity/rides/district" + ride1.getStartingDistrict();
             client.publish(topic1, message);
             System.out.println(topic1 + ", " + message);
+            client.isConnected();
 
             MqttMessage message2 = new MqttMessage(Utility.GSON.toJson(ride2).getBytes());
             message2.setQos(pubQos);
@@ -112,7 +112,8 @@ public class SETA {
             client.publish(topic2, message2);
             System.out.println(topic2 + ", " + message2);
 
-            Thread.sleep(5000);
+            // TODO revert to 5000 !!
+            Thread.sleep(10000);
         }
     }
 

@@ -11,6 +11,7 @@ import jakarta.ws.rs.core.Response;
 import Taxi.Data.TaxiInfo;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Random;
 
 public class Utility {
@@ -42,19 +43,31 @@ public class Utility {
         return responseJson;
     }
 
-    public static String getRequest(Client client, String url) {
+    public static String getJsonString(Response response) {
+        String json = "";
+        try {
+            json = response.readEntity(String.class);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        return json;
+    }
+
+    public static Response getRequest(Client client, String url) {
         Invocation.Builder builder = getBuilder(client, url);
         Response response = builder.get();
         response.bufferEntity();
 
-        String responseJson = null;
-        try {
-            responseJson = response.readEntity(String.class);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
+        return response;
+    }
 
-        return responseJson;
+    public static String printCalendar(long timestamp) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(timestamp);
+        return String.format(calendar.get(Calendar.HOUR_OF_DAY) + ":" +
+                calendar.get(Calendar.MINUTE) + ":" +
+                calendar.get(Calendar.SECOND) + ":" +
+                calendar.get(Calendar.MILLISECOND));
     }
 
     public static String delRequest(Client client, String url) {
@@ -92,6 +105,32 @@ public class Utility {
                 availableTaxisInDistrict.add(t);
         }
         return availableTaxisInDistrict;
+    }
+
+    /*
+     * Generate the taxi initial position
+     * ---------------------------------------------------------------------------------
+     * Given the district the function will generate the taxi coordinate of the relative
+     * recharge station (assignment requirement).
+     */
+    public static int[] genTaxiInitialPosition(int district) {
+        int[] position = new int[2];
+
+        switch (district) {
+            case 1:
+                break;
+            case 2:
+                position[1] = 9;
+                break;
+            case 3:
+                position[0] = 9;
+                position[1] = 9;
+                break;
+            case 4:
+                position[0] = 9;
+                break;
+        }
+        return position;
     }
 
     public static int generateRndInteger(int origin, int bound) {

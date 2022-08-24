@@ -1,15 +1,20 @@
 package AdminClient;
 
+import Taxi.Statistics.AvgStatisticsInfo;
+import Taxi.Statistics.StatisticsInfo;
 import com.google.common.reflect.TypeToken;
 import jakarta.ws.rs.client.*;
 import Utility.Utility;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Scanner;
 
 import static Utility.Utility.GSON;
+import static Utility.Utility.getJsonString;
 
 import Taxi.Data.TaxiInfo;
+import jakarta.ws.rs.core.Response;
 
 public class AdministratorClient {
     private final static String ADMIN_SERVER_ADDRESS = "localhost";
@@ -27,6 +32,12 @@ public class AdministratorClient {
                 removeTaxi();
             } else if (choice == 2) {
                 getTaxis();
+            } else if (choice == 3) {
+                getLocalStats();
+            } else if (choice == 4) {
+                getLocalStatsTimestamps();
+            } else if (choice == 5) {
+                quit();
             } else {
                 System.out.println("The selected option is not valid.");
             }
@@ -36,16 +47,84 @@ public class AdministratorClient {
     }
 
     private static void printMenu() {
-        System.out.println("Administrator client menu");
-        System.out.println("-------------------------");
-        System.out.println("1) Delete a given taxi");
-        System.out.println("2) Taxis in the smart city");
-        System.out.println("-------------------------");
+        System.out.println("*--------------------------------------------*");
+        System.out.println("|      Administrator client menu             |");
+        System.out.println("*--------------------------------------------*");
+        System.out.println("| 1) Delete a given taxi                     |");
+        System.out.println("| 2) Taxis in the smart city                 |");
+        System.out.println("| 3) Last n local statistics of a taxi       |");
+        System.out.println("| 4) Local statistics between two timestamps |");
+        System.out.println("| 5) Quit                                    |");
+        System.out.println("*--------------------------------------------*");
+    }
+
+    private static void getLocalStatsTimestamps() {
+        Calendar calendar = Calendar.getInstance();
+        System.out.println("Timestamp 1");
+        System.out.println("*--------------------------------------------*");
+        final long timeStamp1 = getTimestampFromUser(calendar);
+        System.out.println("Timestamp 1");
+        System.out.println("*--------------------------------------------*");
+        final long timeStamp2 = getTimestampFromUser(calendar);
+
+        final String PATH = "/stats/" + timeStamp1 + "_" + timeStamp2;
+
+        Response response = Utility.getRequest(client, ADMIN_SERVER_URL + PATH);
+        String json = getJsonString(response);
+
+        if (response.getStatus() == Response.Status.OK.getStatusCode()) {
+            AvgStatisticsInfo avgTimestampStats = new AvgStatisticsInfo(GSON.fromJson(json, StatisticsInfo.class));
+            System.out.println(avgTimestampStats);
+        } else {
+            System.out.println(json);
+        }
+
+    }
+
+    private static long getTimestampFromUser(Calendar calendar) {
+        System.out.println("Insert year: ");
+        final int year = SCANNER.nextInt();
+        System.out.println("Insert month: ");
+        final int month = SCANNER.nextInt();
+        System.out.println("Insert hour: ");
+        final int hour = SCANNER.nextInt();
+        System.out.println("Insert minute: ");
+        final int minute = SCANNER.nextInt();
+        System.out.println("Insert second: ");
+        final int second = SCANNER.nextInt();
+
+        calendar.set(Calendar.YEAR, year);
+        calendar.set(Calendar.MONTH, month);
+        calendar.set(Calendar.HOUR, hour);
+        calendar.set(Calendar.MINUTE, minute);
+        calendar.set(Calendar.SECOND, second);
+
+        return calendar.getTimeInMillis();
+    }
+
+    private static void getLocalStats() {
+        System.out.println("Which taxi do you want to receive the statistics?");
+        final int taxiID = SCANNER.nextInt();
+        System.out.println("Starting from the last timestamp, how many statistics do you" +
+                "want to consider?");
+        final int n = SCANNER.nextInt();
+        final String PATH = "/stats/" + taxiID + "_" + n;
+
+        Response response = Utility.getRequest(client, ADMIN_SERVER_URL + PATH);
+
+        String json = getJsonString(response);
+
+        if (response.getStatus() == Response.Status.OK.getStatusCode()) {
+            AvgStatisticsInfo avgStats = new AvgStatisticsInfo(GSON.fromJson(json, StatisticsInfo.class));
+            System.out.println(avgStats);
+        } else {
+            System.out.println(json);
+        }
     }
 
     private static void removeTaxi() {
         System.out.println("Which taxi do you want to remove? (Insert the ID): ");
-        int taxiID = SCANNER.nextInt();
+        final int taxiID = SCANNER.nextInt();
 
         final String PATH = "/del-taxi/" + taxiID;
 
@@ -55,11 +134,26 @@ public class AdministratorClient {
 
     private static void getTaxis() {
         final String PATH = "/get-taxis";
-        String json = Utility.getRequest(client, ADMIN_SERVER_URL + PATH);
+        Response response = Utility.getRequest(client, ADMIN_SERVER_URL + PATH);
 
-        ArrayList<TaxiInfo> taxis = GSON.fromJson(json, new TypeToken<ArrayList<TaxiInfo>>(){}.getType());
+        String json = getJsonString(response);
 
-        for (TaxiInfo t : taxis)
-            System.out.println(t);
+        if (response.getStatus() == Response.Status.OK.getStatusCode()) {
+            ArrayList<TaxiInfo> taxis = GSON.fromJson(json, new TypeToken<ArrayList<TaxiInfo>>() {
+            }.getType());
+
+            assert taxis != null;
+            for (TaxiInfo t : taxis)
+                System.out.println(t);
+        } else {
+            System.out.println(json);
+        }
     }
+
+    private static void quit() {
+        System.out.println("Good Bye");
+        client.close();
+        System.exit(1);
+    }
+
 }

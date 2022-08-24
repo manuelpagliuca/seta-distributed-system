@@ -15,14 +15,22 @@ import static Utility.Utility.*;
 public class MQTTModule {
     private final static String MQTT_BROKER_URL = "tcp://localhost:1883";
     private static MqttClient mqttClient = null;
+    private final static int QOS = 2;
     private static final String clientID = MqttClient.generateClientId();
     private static TaxiInfo thisTaxi;
     private static ArrayList<TaxiInfo> otherTaxis;
     private final GrpcModule grpcModule = GrpcModule.getInstance();
+    private final Object checkBattery;
+    private final ArrayList<Integer> IDcompletedRides = new ArrayList<>(10);
+    private static MqttConnectOptions connectOptions = new MqttConnectOptions();
 
-    public MQTTModule(TaxiSchema taxiSchema) {
+    private final static String completedRides = "seta/smartcity/rides/completed";
+
+
+    public MQTTModule(TaxiSchema taxiSchema, Object checkBattery) {
         thisTaxi = taxiSchema.getTaxiInfo();
         otherTaxis = taxiSchema.getTaxis();
+        this.checkBattery = checkBattery;
     }
 
     /*
@@ -43,29 +51,26 @@ public class MQTTModule {
             throw new RuntimeException(e);
         }
 
-        String topic = "seta/smartcity/rides/district" + thisTaxi.getDistrict();
-        int qos = 2;
-        System.out.println("Subscribed on topic: " + topic);
+        String initialDistrict = "seta/smartcity/rides/district" + thisTaxi.getDistrict();
+        System.out.println("Subscribed on topic: " + initialDistrict);
 
-        MqttConnectOptions connectOptions = new MqttConnectOptions();
-        connectOptions.setCleanSession(true);
+        connectOptions = new MqttConnectOptions();
+        connectOptions.setCleanSession(false);
 
-        connectToMqttBroker(connectOptions);
-        setMqttCallback();
-        subscribeTopic(topic, qos);
-    }
-
-    private void connectToMqttBroker(MqttConnectOptions connectOptions) {
         try {
             mqttClient.connect(connectOptions);
         } catch (MqttException e) {
             throw new RuntimeException(e);
         }
+
+        setMqttCallback();
+        subscribeTopic(initialDistrict);
+        subscribeTopic(completedRides);
     }
 
-    private void subscribeTopic(String topic, int qos) {
+    private void subscribeTopic(String topic) {
         try {
-            mqttClient.subscribe(topic, qos);
+            mqttClient.subscribe(topic, QOS);
         } catch (MqttException e) {
             throw new RuntimeException(e);
         }
@@ -83,17 +88,24 @@ public class MQTTModule {
                 String ride = new String(message.getPayload());
                 RideInfo rideInfo = GSON.fromJson(ride, RideInfo.class);
 
-                if (rideInfo.getStartingDistrict() == thisTaxi.getDistrict()) {
-                    System.out.println("District " + thisTaxi.getDistrict() + ": " + rideInfo);
+                if (topic.equals("seta/smartcity/rides/completed")) {
+                    IDcompletedRides.add(rideInfo.getId());
+                } else {
+                    if (rideInfo.getStartingDistrict() == thisTaxi.getDistrict()) {
+                        if (!IDcompletedRides.contains(rideInfo.getId())) {
+                            System.out.println("District " + thisTaxi.getDistrict() + ": " + rideInfo);
 
-                    if (!thisTaxi.isRiding() && !thisTaxi.isRecharging()) {
-                        coordinateRide(rideInfo);
-                    }
+                            if (!thisTaxi.isRiding() && !thisTaxi.isRecharging()) {
+                                coordinateRide(rideInfo, checkBattery);
+                            }
 
-                    if (message.isRetained()) {
-                        // Delete the retained message on the topic
-                        System.out.println("This message was retained, I will delete it.");
-                        mqttClient.publish(topic, null);
+                            if (message.isRetained()) {
+                                MqttMessage nullPayload = new MqttMessage();
+                                nullPayload.setRetained(true);
+                                nullPayload.setQos(QOS);
+                                mqttClient.publish(topic, nullPayload);
+                            }
+                        }
                     }
                 }
             }
@@ -109,11 +121,9 @@ public class MQTTModule {
         });
     }
 
-    private void coordinateRide(RideInfo rideInfo) throws InterruptedException, MqttException {
+    private void coordinateRide(RideInfo rideInfo, Object checkBattery) throws InterruptedException, MqttException {
         int[] passengerPosition = rideInfo.getStartPosition();
         final double clientDistance = euclideanDistance(thisTaxi.getPosition(), passengerPosition);
-
-        //ArrayList<TaxiInfo> availableTaxisInDistrict = getAvailableTaxisInDistrict(otherTaxis, thisTaxi);
 
         int totalAck = otherTaxis.size(); // availableTaxisInDistrict.size();
         System.out.println("[Ride " + rideInfo.getId() + "] Waiting for " + totalAck + " ACK votes");
@@ -125,29 +135,46 @@ public class MQTTModule {
 
         System.out.println("Received a total of " + receivedAck + " ACKs");
 
-        //Object waitingNewStatus = new Object();
-
         if (receivedAck == totalAck) {
             System.out.println("I got the ownership for the ride " + rideInfo.getId());
             GrpcRunnable.resetACKS();
-            performRide(rideInfo/*, waitingNewStatus*/);
+            performRide(rideInfo, checkBattery);
         } else {
-            // The ride has been taken from someone else
-            // It should wait of information in case of new position of the taxi
-            // Thread.sleep(1000);
-            //waitingNewStatus.wait();
             GrpcRunnable.resetACKS();
             System.out.println("I didn't got the ownership for the ride " + rideInfo.getId());
         }
     }
 
-    private void performRide(RideInfo rideInfo/*, Object waitingNewStatus*/) throws InterruptedException, MqttException {
+    private void performRide(RideInfo rideInfo, Object checkBattery) throws InterruptedException, MqttException {
         thisTaxi.setRiding(true);
 
         final double distToPassenger = euclideanDistance(thisTaxi.getPosition(), rideInfo.getStartPosition());
         final double rideDistance = euclideanDistance(rideInfo.getStartPosition(), rideInfo.getDestinationPosition());
         final double totalKm = distToPassenger + rideDistance;
 
+
+        thisTaxi.getPosition()[0] = rideInfo.getDestinationPosition()[0];
+        thisTaxi.getPosition()[1] = rideInfo.getDestinationPosition()[1];
+
+        Thread.sleep(5000);
+
+
+        thisTaxi.setBattery(thisTaxi.getBattery() - totalKm);
+        System.out.printf("I reached the destination " +
+                Arrays.toString(rideInfo.getDestinationPosition()) +
+                " at district " +
+                rideInfo.getDestinationDistrict() +
+                " and after %,.2f Km the battery levels are %,.2f %%", totalKm, thisTaxi.getBattery());
+        thisTaxi.setRiding(false);
+        thisTaxi.addTotalKm(totalKm);
+        thisTaxi.incrementTotalRides();
+
+        // Send the completed ride on the "completed" topic
+        MqttMessage rideCompletionMsg = new MqttMessage(GSON.toJson(rideInfo).getBytes());
+        rideCompletionMsg.setQos(QOS);
+        mqttClient.publish("seta/smartcity/rides/completed", rideCompletionMsg);
+
+        // Change the subscription district if necessary
         if (thisTaxi.getDistrict() != rideInfo.getDestinationDistrict()) {
             String topic = "seta/smartcity/rides/district" + thisTaxi.getDistrict();
             mqttClient.unsubscribe(topic);
@@ -156,45 +183,10 @@ public class MQTTModule {
             thisTaxi.setDistrict(rideInfo.getDestinationDistrict());
             topic = "seta/smartcity/rides/district" + thisTaxi.getDistrict();
 
-            mqttClient.subscribe(topic);
+            mqttClient.subscribe(topic, QOS);
             System.out.println("Subscribed on topic: " + topic);
         }
-
-        thisTaxi.getPosition()[0] = rideInfo.getDestinationPosition()[0];
-        thisTaxi.getPosition()[1] = rideInfo.getDestinationPosition()[1];
-
-        // Communicate to other that he started the ride
-        //communicateNewInfos();
-        //waitingNewStatus.notify();
-
-        Thread.sleep(5000);
-        thisTaxi.setBattery(thisTaxi.getBattery() - totalKm);
-        System.out.printf("I reached the destination " +
-                Arrays.toString(rideInfo.getDestinationPosition()) +
-                " at district " +
-                rideInfo.getDestinationDistrict() +
-                "and after %,.2f Km the battery levels are %,.2f %%\n", totalKm, thisTaxi.getBattery());
-        thisTaxi.setRiding(false);
-
-        // Communicate to other that he finished the ride
-        //communicateNewInfos();
     }
-
-    /*private void communicateNewInfos() throws InterruptedException {
-        int receivedAck = grpcModule.grpcNewInfosAsync();
-
-        int totalAck = otherTaxis.size();
-        System.out.println("totalAck to wait : " + totalAck + ", receivedAck: " + receivedAck);
-
-        if (receivedAck == totalAck) {
-            System.out.println("The remaining " + totalAck + " taxi/s know your new position.");
-        } else {
-            System.out.println("Not all the other taxis received correctly your position!");
-            removeTaxi();
-        }
-
-        StatusRunnable.resetAckNewPosition();
-    }*/
 
     // Close the MQTT connection of this client toward the broker
     /*private void closingMqttConnection(MqttClient mqttClient) throws MqttException {

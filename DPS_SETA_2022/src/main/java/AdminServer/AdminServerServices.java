@@ -4,7 +4,8 @@
  * M.Sc. in Computer Science @UNIMI A.Y. 2021/2022 */
 package AdminServer;
 
-import AdminServer.AdminServer;
+import Taxi.Statistics.StatisticsInfo;
+import Utility.Utility;
 import com.google.gson.*;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
@@ -117,4 +118,72 @@ public class AdminServerServices {
                     .build();
     }
 
+    @POST
+    @Path("stats")
+    @Consumes("application/json")
+    public Response addLocalStats(String json) {
+        if (json.isEmpty()) {
+            return Response
+                    .status(Response.Status.BAD_REQUEST)
+                    .entity("Bad request or wrong formatting")
+                    .build();
+        }
+
+        StatisticsInfo statInfo;
+        try {
+            statInfo = gson.fromJson(json, StatisticsInfo.class);
+        } catch (JsonParseException e) {
+            e.printStackTrace();
+            return Response
+                    .status(Response.Status.BAD_REQUEST)
+                    .entity("Bad request or wrong formatting")
+                    .build();
+        }
+
+        administratorServer.addLocalStatistics(statInfo);
+
+        return Response
+                .status(Response.Status.OK)
+                .entity("The local statistics of the taxi " + statInfo.getTaxiID()
+                        + " have been added correctly on the administrator server.")
+                .build();
+    }
+
+    @GET
+    @Path("stats/{id}_{n}")
+    @Produces("application/json")
+    public Response getTaxiLocalStats(@PathParam("id") int taxiId,
+                                      @PathParam(("n")) int n) {
+        System.out.println("Received " + taxiId + " and " + n);
+
+        if (!administratorServer.taxiIsPresent(taxiId)) {
+            return Response
+                    .status(Response.Status.BAD_REQUEST)
+                    .entity("The requested ID is not present in the smart city.")
+                    .build();
+        }
+
+        if (administratorServer.getLocalTaxiStats(taxiId).size() < n) {
+            return Response
+                    .status(Response.Status.BAD_REQUEST)
+                    .entity("The quantity of chosen measurements is bigger than the" +
+                            "actual measurements, use a smaller number.")
+                    .build();
+        }
+
+        StatisticsInfo avgTaxiStats = administratorServer.getAveragesStats(taxiId, n);
+        String output = Utility.GSON.toJson(avgTaxiStats);
+
+        return Response.ok().entity(output).build();
+    }
+
+
+    @GET
+    @Path("stats/{timestamp1}_{timestamp2}")
+    @Produces("application/json")
+    public Response getTaxiLocalStatsTimestamp(@PathParam("timestamp1") long timestamp1,
+                                               @PathParam(("timestamp2")) long timestamp2) {
+
+        return Response.ok().entity("").build();
+    }
 }

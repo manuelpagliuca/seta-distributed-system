@@ -5,6 +5,7 @@
 package AdminServer;
 
 import Taxi.Data.TaxiInfo;
+import Taxi.Statistics.StatisticsInfo;
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
@@ -13,6 +14,8 @@ import java.io.IOException;
 import java.net.URI;
 import java.sql.Timestamp;
 import java.util.*;
+
+import static Utility.Utility.genTaxiInitialPosition;
 
 /*
  * The administrator server class manages the taxis (clients)
@@ -30,6 +33,8 @@ public class AdminServer {
     private static AdminServer instance = null;
     private static final ArrayList<TaxiInfo> taxis = new ArrayList<>();
     private static final Object newTaxiArrived = new Object();
+
+    private static final Map<Integer, ArrayList<StatisticsInfo>> taxiLocalStatistics = new HashMap<>();
 
     public AdminServer() {
     }
@@ -49,6 +54,7 @@ public class AdminServer {
 
         Thread taxisUpdater = new Thread(new ServerLoggerRunnable(newTaxiArrived));
         taxisUpdater.start();
+
 
         try {
             restServer.start();
@@ -88,7 +94,7 @@ public class AdminServer {
         }
 
         if (genNewID) {
-            int validID = genValidID();
+            final int validID = genValidID();
             newTaxi.setId(validID);
         } else {
             newTaxi.setId(newID);
@@ -142,7 +148,7 @@ public class AdminServer {
         for (TaxiInfo e : taxis)
             System.out.println("id=" + e.getId() + ", gRPC=" + e.getGrpcPort());
 
-        System.out.println("-----------------------");
+        System.out.println("-----------------------------");
     }
 
     // Generate a random district inside the integer range [1,4]
@@ -179,30 +185,64 @@ public class AdminServer {
         return newID;
     }
 
-    /*
-     * Generate the taxi initial position
-     * ---------------------------------------------------------------------------------
-     * Given the district the function will generate the taxi coordinate of the relative
-     * recharge station (assignment requirement).
-     */
-    private int[] genTaxiInitialPosition(int district) {
-        int[] position = new int[2];
+    public synchronized boolean taxiIsPresent(int taxiID) {
+        for (TaxiInfo t : taxis)
+            if (t.getId() == taxiID)
+                return true;
+        return false;
+    }
 
-        switch (district) {
-            case 1:
-                break;
-            case 2:
-                position[1] = 9;
-                break;
-            case 3:
-                position[0] = 9;
-                break;
-            case 4:
-                position[0] = 9;
-                position[1] = 9;
-                break;
+
+    public synchronized void addLocalStatistics(StatisticsInfo info) {
+        if (taxiLocalStatistics.get(info.getTaxiID()) == null) {
+            taxiLocalStatistics.put(info.getTaxiID(), new ArrayList<>());
         }
-        return position;
+        taxiLocalStatistics.get(info.getTaxiID()).add(info);
+    }
+
+    // TODO CHECK if the semantic of this function is correct!
+    public StatisticsInfo getAveragesStats(int taxiID, int lastNstats) {
+        ArrayList<StatisticsInfo> taxiStats = getLocalTaxiStats(taxiID);
+        taxiStats.sort(Comparator.comparingLong(StatisticsInfo::getTimestamp));
+        ArrayList<StatisticsInfo> lastStats = new ArrayList<>();
+
+        for (int i = 0; i < lastNstats; i++)
+            lastStats.add(taxiStats.get(i));
+
+        double avgPollution = 0.0;
+        double avgTraveledKms = 0.0;
+        int avgAccomplishedRides = 0;
+        double avgBatteryLevel = 0.0;
+
+        for (StatisticsInfo statisticsInfo : lastStats) {
+            avgPollution += statisticsInfo.getAvgPollutionLevels();
+            avgTraveledKms += statisticsInfo.getTraveledKms();
+            avgAccomplishedRides += statisticsInfo.getAccomplishedRides();
+            avgBatteryLevel += statisticsInfo.getTaxiBattery();
+        }
+
+        avgPollution /= lastStats.size();
+        avgTraveledKms /= lastStats.size();
+        avgAccomplishedRides /= lastStats.size();
+        avgBatteryLevel /= lastStats.size();
+
+        StatisticsInfo avgLastNstats = new StatisticsInfo(avgPollution,
+                avgTraveledKms, avgAccomplishedRides,
+                taxiID, avgBatteryLevel);
+
+        System.out.println(avgLastNstats.toString());
+
+        return avgLastNstats;
+    }
+
+    public ArrayList<StatisticsInfo> getLocalTaxiStats(int taxiID) {
+        ArrayList<StatisticsInfo> taxiStats = new ArrayList<>();
+        synchronized (taxiLocalStatistics) {
+            for (Map.Entry<Integer, ArrayList<StatisticsInfo>> e : taxiLocalStatistics.entrySet())
+                if (e.getKey() == taxiID)
+                    taxiStats = e.getValue();
+        }
+        return taxiStats;
     }
 
     /// Getters & Setters

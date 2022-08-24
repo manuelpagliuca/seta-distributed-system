@@ -19,6 +19,9 @@ public class TaxiInfo implements Serializable {
     private boolean isRiding = false;
     private double battery = -1;
 
+    private int accomplishedRides = 0;
+    private double kmTraveled = 0.0;
+
     public TaxiInfo(TaxiInfo info) {
         this.id = info.id;
         this.district = info.district;
@@ -125,4 +128,19 @@ public class TaxiInfo implements Serializable {
         isRiding = riding;
     }
 
+    public int getAccomplishedRides() {
+        return accomplishedRides;
+    }
+
+    public void incrementTotalRides() {
+        this.accomplishedRides += 1;
+    }
+
+    public double getKmTraveled() {
+        return kmTraveled;
+    }
+
+    public void addTotalKm(double kmTraveled) {
+        this.kmTraveled += kmTraveled;
+    }
 }
