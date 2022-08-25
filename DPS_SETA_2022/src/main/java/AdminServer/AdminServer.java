@@ -278,58 +278,62 @@ public class AdminServer {
         int totalAvgAccomplishedRides = 0;
         double totalBatteryLevels = 0.0;
 
-        for (Map.Entry<Integer, ArrayList<StatisticsInfo>> e : taxiLocalStatistics.entrySet()) {
-            double avgPollutionTaxi = 0.0;
-            double avgTraveledKmsTaxi = 0.0;
-            int avgAccomplishedRidesTaxi = 0;
-            double avgBatteryLevelsTaxi = 0.0;
+        int numberOfTaxis = 0;
+        synchronized (taxiLocalStatistics) {
+            numberOfTaxis = taxiLocalStatistics.size();
+            for (Map.Entry<Integer, ArrayList<StatisticsInfo>> e : taxiLocalStatistics.entrySet()) {
+                double avgPollutionTaxi = 0.0;
+                double avgTraveledKmsTaxi = 0.0;
+                int avgAccomplishedRidesTaxi = 0;
+                double avgBatteryLevelsTaxi = 0.0;
 
-            ArrayList<StatisticsInfo> listOfAllStats = e.getValue();
-            int consideredMeasurements = 0;
+                ArrayList<StatisticsInfo> listOfAllStats = e.getValue();
+                int consideredMeasurements = 0;
 
-            for (StatisticsInfo statsTaxi : listOfAllStats) {
-                double avgPollutionMeasurement = 0.0;
-                if (statsTaxi.getTimestamp() >= timestamp1 && statsTaxi.getTimestamp() <= timestamp2) {
-                    // Avg. Pollution level for a single measurement list
-                    for (Double m : statsTaxi.getListAvgPollutionLevels()) {
-                        avgPollutionMeasurement += m;
+                for (StatisticsInfo statsTaxi : listOfAllStats) {
+                    double avgPollutionMeasurement = 0.0;
+                    if (statsTaxi.getTimestamp() >= timestamp1 && statsTaxi.getTimestamp() <= timestamp2) {
+                        // Avg. Pollution level for a single measurement list
+                        for (Double m : statsTaxi.getListAvgPollutionLevels()) {
+                            avgPollutionMeasurement += m;
+                        }
+                        avgPollutionMeasurement /= statsTaxi.getListAvgPollutionLevels().size();
+                        avgPollutionTaxi += avgPollutionMeasurement;
+                        avgTraveledKmsTaxi += statsTaxi.getTraveledKms();
+                        avgAccomplishedRidesTaxi += statsTaxi.getAccomplishedRides();
+                        avgBatteryLevelsTaxi += statsTaxi.getTaxiBattery();
+                        consideredMeasurements++;
+                        //System.out.println("Avg. Pollution measurement " + avgPollutionMeasurement);
                     }
-                    avgPollutionMeasurement /= statsTaxi.getListAvgPollutionLevels().size();
-                    avgPollutionTaxi += avgPollutionMeasurement;
-                    avgTraveledKmsTaxi += statsTaxi.getTraveledKms();
-                    avgAccomplishedRidesTaxi += statsTaxi.getAccomplishedRides();
-                    avgBatteryLevelsTaxi += statsTaxi.getTaxiBattery();
-                    consideredMeasurements++;
-                    //System.out.println("Avg. Pollution measurement " + avgPollutionMeasurement);
                 }
+
+                // Compute the average for each taxi
+                avgPollutionTaxi /= consideredMeasurements;
+                avgTraveledKmsTaxi /= consideredMeasurements;
+                avgAccomplishedRidesTaxi /= consideredMeasurements;
+                avgBatteryLevelsTaxi /= consideredMeasurements;
+
+                //System.out.println("Avg. Pollution Taxi " + e.getKey() + avgPollutionTaxi);
+                //System.out.println("Number of considered measurements (timestamp valid) " + consideredMeasurements);
+                // Add each taxi average to the total
+                totalAvgPollution += avgPollutionTaxi;
+                totalAvgTraveledKms += avgTraveledKmsTaxi;
+                totalAvgAccomplishedRides += avgAccomplishedRidesTaxi;
+                totalBatteryLevels += avgBatteryLevelsTaxi;
             }
 
-            // Compute the average for each taxi
-            avgPollutionTaxi /= consideredMeasurements;
-            avgTraveledKmsTaxi /= consideredMeasurements;
-            avgAccomplishedRidesTaxi /= consideredMeasurements;
-            avgBatteryLevelsTaxi /= consideredMeasurements;
-
-            //System.out.println("Avg. Pollution Taxi " + e.getKey() + avgPollutionTaxi);
-            //System.out.println("Number of considered measurements (timestamp valid) " + consideredMeasurements);
-            // Add each taxi average to the total
-            totalAvgPollution += avgPollutionTaxi;
-            totalAvgTraveledKms += avgTraveledKmsTaxi;
-            totalAvgAccomplishedRides += avgAccomplishedRidesTaxi;
-            totalBatteryLevels += avgBatteryLevelsTaxi;
         }
 
 
         /// Compute the total averages
         // Single valued list for total pollutions
-        totalAvgPollution /= taxiLocalStatistics.size();
+        totalAvgPollution /= numberOfTaxis;
         //System.out.println("Total Avg. Pollution " + totalAvgPollution + ", over all the " + taxiLocalStatistics.size() + " taxis");
         ArrayList<Double> singleValuedAvg = new ArrayList<>();
         singleValuedAvg.add(totalAvgPollution);
-        totalAvgAccomplishedRides /= taxiLocalStatistics.size();
-        totalAvgTraveledKms /= taxiLocalStatistics.size();
-        totalBatteryLevels /= taxiLocalStatistics.size();
-
+        totalAvgAccomplishedRides /= numberOfTaxis;
+        totalAvgTraveledKms /= numberOfTaxis;
+        totalBatteryLevels /= numberOfTaxis;
         // Re-use the taxiID as error code (-1, means fine)
         int errorCode = -1;
         if (totalAvgPollution == 0.0) {
@@ -342,7 +346,7 @@ public class AdminServer {
                 errorCode, totalBatteryLevels);
     }
 
-    private static TotalStatisticsInfo checkMeasurementsPresence() {
+    private synchronized static TotalStatisticsInfo checkMeasurementsPresence() {
         if (taxiLocalStatistics.isEmpty()) {
             int errorCode = -7777;
             return new TotalStatisticsInfo(null, 0, 0,
