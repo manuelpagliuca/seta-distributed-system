@@ -1,21 +1,21 @@
 package Taxi.Statistics;
 
 import java.io.Serializable;
-import java.util.Calendar;
+import java.util.List;
 
 import static Utility.Utility.printCalendar;
 
 public class StatisticsInfo implements Serializable {
-    protected double avgPollutionLevels;
+    protected List<Double> listAvgPollutionLevels;
     protected double traveledKms;
     protected int accomplishedRides;
     protected long timestamp;
     protected int taxiID;
     protected double taxiBattery;
 
-    public StatisticsInfo(double avgMeasurements, double traveledKms, int accomplishedRides,
+    public StatisticsInfo(List<Double> avgMeasurements, double traveledKms, int accomplishedRides,
                           int taxiID, double taxiBattery) {
-        this.avgPollutionLevels = avgMeasurements;
+        this.listAvgPollutionLevels = avgMeasurements;
         this.traveledKms = traveledKms;
         this.accomplishedRides = accomplishedRides;
         this.taxiID = taxiID;
@@ -24,7 +24,7 @@ public class StatisticsInfo implements Serializable {
     }
 
     public StatisticsInfo(StatisticsInfo info) {
-        this.avgPollutionLevels = info.avgPollutionLevels;
+        this.listAvgPollutionLevels = info.listAvgPollutionLevels;
         this.traveledKms = info.traveledKms;
         this.accomplishedRides = info.accomplishedRides;
         this.taxiID = info.taxiID;
@@ -32,12 +32,12 @@ public class StatisticsInfo implements Serializable {
         this.timestamp = info.timestamp;
     }
 
-    public double getAvgPollutionLevels() {
-        return avgPollutionLevels;
+    public List<Double> getListAvgPollutionLevels() {
+        return listAvgPollutionLevels;
     }
 
-    public void setAvgPollutionLevels(double avgPollutionLevels) {
-        this.avgPollutionLevels = avgPollutionLevels;
+    public void setListAvgPollutionLevels(List<Double> listAvgPollutionLevels) {
+        this.listAvgPollutionLevels = listAvgPollutionLevels;
     }
 
     public double getTraveledKms() {
@@ -83,11 +83,11 @@ public class StatisticsInfo implements Serializable {
     @Override
     public String toString() {
         return String.format("Taxi ID: %d\n" +
-                        "Average pollution measurements: %.2f\n" +
+                        "Average pollution measurements: " + listAvgPollutionLevels.toString() + "\n" +
                         "Traveled Kilometers: %.2f\n" +
                         "Accomplished rides: %d\n" +
                         "Battery levels: %.2f\n" +
                         "Record took at: " + printCalendar(timestamp),
-                taxiID, avgPollutionLevels, traveledKms, accomplishedRides, taxiBattery);
+                taxiID, traveledKms, accomplishedRides, taxiBattery);
     }
 }

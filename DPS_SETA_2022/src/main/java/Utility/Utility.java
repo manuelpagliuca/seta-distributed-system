@@ -70,6 +70,7 @@ public class Utility {
                 calendar.get(Calendar.MILLISECOND));
     }
 
+
     public static String delRequest(Client client, String url) {
         Invocation.Builder builder = getBuilder(client, url);
         Response response = builder.delete();

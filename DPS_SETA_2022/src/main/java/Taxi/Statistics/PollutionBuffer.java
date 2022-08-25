@@ -8,6 +8,7 @@ import java.util.List;
 
 public class PollutionBuffer implements Buffer {
     private static final Measurement[] measurements = new Measurement[8];
+    private static final List<Double> listOfAverages = new ArrayList<>();
     private static int index = 0;
     private final Object windowIsFull = new Object();
 
@@ -24,6 +25,7 @@ public class PollutionBuffer implements Buffer {
         index++;
 
         if (index > 7) {
+
             synchronized (windowIsFull) {
                 windowIsFull.notify();
             }
@@ -40,17 +42,14 @@ public class PollutionBuffer implements Buffer {
             }
         }
 
-        Measurement[] window = new Measurement[4];
 
-        System.arraycopy(measurements, 0, window, 0, window.length);
-        printInputData();
-        printArray(window);
+        List<Measurement> slidingWindow = new ArrayList<>(List.of(measurements));
+        printSlidingWindow();
         leftShift();
-
-        return new ArrayList<>(List.of(window));
+        return slidingWindow;
     }
 
-    private void printInputData() {
+    private void printSlidingWindow() {
         System.out.println("input: ");
         for (Measurement m : measurements) {
             System.out.printf("%.2f ", m.getValue());
@@ -58,20 +57,15 @@ public class PollutionBuffer implements Buffer {
         System.out.println();
     }
 
-    private void printArray(Measurement[] array) {
-        for (Measurement measurement : array) {
-            System.out.printf("%.2f ", measurement.getValue());
-        }
-        System.out.println();
-    }
-
     private void leftShift() {
-        measurements[0] = measurements[2];
-        measurements[1] = measurements[3];
-        measurements[2] = measurements[4];
-        measurements[3] = measurements[5];
-        measurements[4] = measurements[6];
-        measurements[5] = measurements[7];
+        measurements[0] = measurements[4];
+        measurements[1] = measurements[5];
+        measurements[2] = measurements[6];
+        measurements[3] = measurements[7];
+        measurements[4] = null;
+        measurements[5] = null;
+        measurements[6] = null;
+        measurements[7] = null;
         index = 4;
     }
 }

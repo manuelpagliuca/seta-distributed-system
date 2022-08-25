@@ -2,6 +2,7 @@ package AdminClient;
 
 import Taxi.Statistics.AvgStatisticsInfo;
 import Taxi.Statistics.StatisticsInfo;
+import Taxi.Statistics.TotalStatisticsInfo;
 import com.google.common.reflect.TypeToken;
 import jakarta.ws.rs.client.*;
 import Utility.Utility;
@@ -63,17 +64,17 @@ public class AdministratorClient {
         System.out.println("Timestamp 1");
         System.out.println("*--------------------------------------------*");
         final long timeStamp1 = getTimestampFromUser(calendar);
-        System.out.println("Timestamp 1");
+        System.out.println("Timestamp 2");
         System.out.println("*--------------------------------------------*");
         final long timeStamp2 = getTimestampFromUser(calendar);
 
-        final String PATH = "/stats/" + timeStamp1 + "_" + timeStamp2;
+        final String PATH = "/stats/" + timeStamp1 + "+" + timeStamp2;
 
         Response response = Utility.getRequest(client, ADMIN_SERVER_URL + PATH);
         String json = getJsonString(response);
 
         if (response.getStatus() == Response.Status.OK.getStatusCode()) {
-            AvgStatisticsInfo avgTimestampStats = new AvgStatisticsInfo(GSON.fromJson(json, StatisticsInfo.class));
+            TotalStatisticsInfo avgTimestampStats = new TotalStatisticsInfo(GSON.fromJson(json, TotalStatisticsInfo.class));
             System.out.println(avgTimestampStats);
         } else {
             System.out.println(json);
@@ -82,30 +83,34 @@ public class AdministratorClient {
     }
 
     private static long getTimestampFromUser(Calendar calendar) {
-        System.out.println("Insert year: ");
-        final int year = SCANNER.nextInt();
-        System.out.println("Insert month: ");
-        final int month = SCANNER.nextInt();
-        System.out.println("Insert hour: ");
-        final int hour = SCANNER.nextInt();
+        //System.out.println("Insert year: ");
+        //final int year = SCANNER.nextInt();
+        //System.out.println("Insert month: ");
+        //final int day = SCANNER.nextInt();
+        //System.out.println("Insert day: ");
+        //final int month = SCANNER.nextInt();
+        //System.out.println("Insert hour: ");
+        //final int hour = SCANNER.nextInt();
         System.out.println("Insert minute: ");
         final int minute = SCANNER.nextInt();
         System.out.println("Insert second: ");
         final int second = SCANNER.nextInt();
 
-        calendar.set(Calendar.YEAR, year);
-        calendar.set(Calendar.MONTH, month);
-        calendar.set(Calendar.HOUR, hour);
+        //calendar.set(Calendar.YEAR, year);
+        //calendar.set(Calendar.MONTH, month);
+        //calendar.set(Calendar.HOUR, hour);
+        //calendar.set(Calendar.DAY_OF_MONTH, day);
         calendar.set(Calendar.MINUTE, minute);
         calendar.set(Calendar.SECOND, second);
-
+        calendar.set(Calendar.MILLISECOND, 0);
+        System.out.println(Utility.printCalendar(calendar.getTimeInMillis()));
         return calendar.getTimeInMillis();
     }
 
     private static void getLocalStats() {
         System.out.println("Which taxi do you want to receive the statistics?");
         final int taxiID = SCANNER.nextInt();
-        System.out.println("Starting from the last timestamp, how many statistics do you" +
+        System.out.println("Starting from the last measurement, how many statistics do you" +
                 "want to consider?");
         final int n = SCANNER.nextInt();
         final String PATH = "/stats/" + taxiID + "_" + n;
@@ -115,7 +120,7 @@ public class AdministratorClient {
         String json = getJsonString(response);
 
         if (response.getStatus() == Response.Status.OK.getStatusCode()) {
-            AvgStatisticsInfo avgStats = new AvgStatisticsInfo(GSON.fromJson(json, StatisticsInfo.class));
+            AvgStatisticsInfo avgStats = new AvgStatisticsInfo(GSON.fromJson(json, AvgStatisticsInfo.class));
             System.out.println(avgStats);
         } else {
             System.out.println(json);

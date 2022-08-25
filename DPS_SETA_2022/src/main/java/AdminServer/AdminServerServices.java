@@ -4,13 +4,16 @@
  * M.Sc. in Computer Science @UNIMI A.Y. 2021/2022 */
 package AdminServer;
 
+import Taxi.Statistics.AvgStatisticsInfo;
 import Taxi.Statistics.StatisticsInfo;
+import Taxi.Statistics.TotalStatisticsInfo;
 import Utility.Utility;
 import com.google.gson.*;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
 import Taxi.Data.TaxiInfo;
 import Taxi.Data.TaxiSchema;
+import jdk.jshell.execution.Util;
 
 import java.util.ArrayList;
 
@@ -152,10 +155,7 @@ public class AdminServerServices {
     @GET
     @Path("stats/{id}_{n}")
     @Produces("application/json")
-    public Response getTaxiLocalStats(@PathParam("id") int taxiId,
-                                      @PathParam(("n")) int n) {
-        System.out.println("Received " + taxiId + " and " + n);
-
+    public Response getTaxiLocalStats(@PathParam("id") int taxiId, @PathParam(("n")) int n) {
         if (!administratorServer.taxiIsPresent(taxiId)) {
             return Response
                     .status(Response.Status.BAD_REQUEST)
@@ -171,19 +171,34 @@ public class AdminServerServices {
                     .build();
         }
 
-        StatisticsInfo avgTaxiStats = administratorServer.getAveragesStats(taxiId, n);
+        AvgStatisticsInfo avgTaxiStats = administratorServer.getAveragesStats(taxiId, n);
         String output = Utility.GSON.toJson(avgTaxiStats);
 
         return Response.ok().entity(output).build();
     }
 
-
     @GET
-    @Path("stats/{timestamp1}_{timestamp2}")
+    @Path("stats/{timestamp1}+{timestamp2}")
     @Produces("application/json")
     public Response getTaxiLocalStatsTimestamp(@PathParam("timestamp1") long timestamp1,
                                                @PathParam(("timestamp2")) long timestamp2) {
+        System.out.println("t1: " + Utility.printCalendar(timestamp1) +
+                " t2:" + Utility.printCalendar(timestamp2));
 
-        return Response.ok().entity("").build();
+        TotalStatisticsInfo allTaxisAvgStats = administratorServer.getAllTaxisAvgStats(timestamp1, timestamp2);
+
+        if (allTaxisAvgStats.getTaxiID() == -1) {
+            String output = Utility.GSON.toJson(allTaxisAvgStats);
+            return Response.ok().entity(output).build();
+        } else if (allTaxisAvgStats.getTaxiID() == -7777) {
+            return Response
+                    .status(Response.Status.NOT_FOUND)
+                    .entity("There are no measurements for any taxi in the administrator server.")
+                    .build();
+        }
+        return Response
+                .status(Response.Status.BAD_REQUEST)
+                .entity("The server couldn't perform the computations, some data is missing.")
+                .build();
     }
 }

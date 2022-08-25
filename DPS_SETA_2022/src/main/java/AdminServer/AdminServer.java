@@ -5,7 +5,9 @@
 package AdminServer;
 
 import Taxi.Data.TaxiInfo;
+import Taxi.Statistics.AvgStatisticsInfo;
 import Taxi.Statistics.StatisticsInfo;
+import Taxi.Statistics.TotalStatisticsInfo;
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
@@ -157,10 +159,9 @@ public class AdminServer {
         final int lowerBound = 1;
         final int upperBound = 4;
 
-        int district = rnd.nextInt(lowerBound, upperBound + 1);
         // TODO: revert back to original functioning
         //return 2; // for testing gRPC
-        return district;
+        return rnd.nextInt(lowerBound, upperBound + 1);
     }
 
     /*
@@ -192,49 +193,71 @@ public class AdminServer {
         return false;
     }
 
-
     public synchronized void addLocalStatistics(StatisticsInfo info) {
         if (taxiLocalStatistics.get(info.getTaxiID()) == null) {
             taxiLocalStatistics.put(info.getTaxiID(), new ArrayList<>());
         }
+
         taxiLocalStatistics.get(info.getTaxiID()).add(info);
+        //System.out.println(taxiLocalStatistics);
     }
 
     // TODO CHECK if the semantic of this function is correct!
-    public StatisticsInfo getAveragesStats(int taxiID, int lastNstats) {
+    //
+    public AvgStatisticsInfo getAveragesStats(int taxiID, int lastNstats) {
+        // Stats list of a given taxi ID
         ArrayList<StatisticsInfo> taxiStats = getLocalTaxiStats(taxiID);
+        // Sort the list by timestamp
         taxiStats.sort(Comparator.comparingLong(StatisticsInfo::getTimestamp));
-        ArrayList<StatisticsInfo> lastStats = new ArrayList<>();
 
+        // Create the list from the most recent timestamp (the highest value)
+        ArrayList<StatisticsInfo> lastNstatsList = new ArrayList<>();
         for (int i = 0; i < lastNstats; i++)
-            lastStats.add(taxiStats.get(i));
+            lastNstatsList.add(taxiStats.get(i));
 
+
+        // Get the average of each list of measurement averages, and then take the averages of all these averages
         double avgPollution = 0.0;
+        for (StatisticsInfo statisticsInfo : lastNstatsList) {
+            List<Double> listAvgPollutionLevels = statisticsInfo.getListAvgPollutionLevels();
+            double avgList = 0.0;
+            for (Double avg : listAvgPollutionLevels) {
+                avgList += avg;
+            }
+            avgList /= listAvgPollutionLevels.size();
+            avgPollution += avgList;
+        }
+        avgPollution /= lastNstatsList.size();
+
+        // Take the averages of the other
         double avgTraveledKms = 0.0;
         int avgAccomplishedRides = 0;
         double avgBatteryLevel = 0.0;
 
-        for (StatisticsInfo statisticsInfo : lastStats) {
-            avgPollution += statisticsInfo.getAvgPollutionLevels();
+        for (StatisticsInfo statisticsInfo : lastNstatsList) {
             avgTraveledKms += statisticsInfo.getTraveledKms();
             avgAccomplishedRides += statisticsInfo.getAccomplishedRides();
             avgBatteryLevel += statisticsInfo.getTaxiBattery();
         }
 
-        avgPollution /= lastStats.size();
-        avgTraveledKms /= lastStats.size();
-        avgAccomplishedRides /= lastStats.size();
-        avgBatteryLevel /= lastStats.size();
+        // Pollution value will be sent as a single valued list
+        ArrayList<Double> singlePollutionAvg = new ArrayList<>();
+        singlePollutionAvg.add(avgPollution);
+        avgTraveledKms /= lastNstatsList.size();
+        avgAccomplishedRides /= lastNstatsList.size();
+        avgBatteryLevel /= lastNstatsList.size();
 
-        StatisticsInfo avgLastNstats = new StatisticsInfo(avgPollution,
+        AvgStatisticsInfo avgLastNstats = new AvgStatisticsInfo(
+                singlePollutionAvg,
                 avgTraveledKms, avgAccomplishedRides,
                 taxiID, avgBatteryLevel);
 
-        System.out.println(avgLastNstats.toString());
+        System.out.println(avgLastNstats);
 
         return avgLastNstats;
     }
 
+    // Return the list of statistics given a taxi ID
     public ArrayList<StatisticsInfo> getLocalTaxiStats(int taxiID) {
         ArrayList<StatisticsInfo> taxiStats = new ArrayList<>();
         synchronized (taxiLocalStatistics) {
@@ -243,6 +266,89 @@ public class AdminServer {
                     taxiStats = e.getValue();
         }
         return taxiStats;
+    }
+
+
+    public TotalStatisticsInfo getAllTaxisAvgStats(long timestamp1, long timestamp2) {
+        TotalStatisticsInfo noMeasurements = checkMeasurementsPresence();
+        if (noMeasurements != null) return noMeasurements;
+
+        double totalAvgPollution = 0.0;
+        double totalAvgTraveledKms = 0.0;
+        int totalAvgAccomplishedRides = 0;
+        double totalBatteryLevels = 0.0;
+
+        for (Map.Entry<Integer, ArrayList<StatisticsInfo>> e : taxiLocalStatistics.entrySet()) {
+            double avgPollutionTaxi = 0.0;
+            double avgTraveledKmsTaxi = 0.0;
+            int avgAccomplishedRidesTaxi = 0;
+            double avgBatteryLevelsTaxi = 0.0;
+
+            ArrayList<StatisticsInfo> listOfAllStats = e.getValue();
+            int consideredMeasurements = 0;
+
+            for (StatisticsInfo statsTaxi : listOfAllStats) {
+                double avgPollutionMeasurement = 0.0;
+                if (statsTaxi.getTimestamp() >= timestamp1 && statsTaxi.getTimestamp() <= timestamp2) {
+                    // Avg. Pollution level for a single measurement list
+                    for (Double m : statsTaxi.getListAvgPollutionLevels()) {
+                        avgPollutionMeasurement += m;
+                    }
+                    avgPollutionMeasurement /= statsTaxi.getListAvgPollutionLevels().size();
+                    avgPollutionTaxi += avgPollutionMeasurement;
+                    avgTraveledKmsTaxi += statsTaxi.getTraveledKms();
+                    avgAccomplishedRidesTaxi += statsTaxi.getAccomplishedRides();
+                    avgBatteryLevelsTaxi += statsTaxi.getTaxiBattery();
+                    consideredMeasurements++;
+                    //System.out.println("Avg. Pollution measurement " + avgPollutionMeasurement);
+                }
+            }
+
+            // Compute the average for each taxi
+            avgPollutionTaxi /= consideredMeasurements;
+            avgTraveledKmsTaxi /= consideredMeasurements;
+            avgAccomplishedRidesTaxi /= consideredMeasurements;
+            avgBatteryLevelsTaxi /= consideredMeasurements;
+
+            //System.out.println("Avg. Pollution Taxi " + e.getKey() + avgPollutionTaxi);
+            //System.out.println("Number of considered measurements (timestamp valid) " + consideredMeasurements);
+            // Add each taxi average to the total
+            totalAvgPollution += avgPollutionTaxi;
+            totalAvgTraveledKms += avgTraveledKmsTaxi;
+            totalAvgAccomplishedRides += avgAccomplishedRidesTaxi;
+            totalBatteryLevels += avgBatteryLevelsTaxi;
+        }
+
+
+        /// Compute the total averages
+        // Single valued list for total pollutions
+        totalAvgPollution /= taxiLocalStatistics.size();
+        //System.out.println("Total Avg. Pollution " + totalAvgPollution + ", over all the " + taxiLocalStatistics.size() + " taxis");
+        ArrayList<Double> singleValuedAvg = new ArrayList<>();
+        singleValuedAvg.add(totalAvgPollution);
+        totalAvgAccomplishedRides /= taxiLocalStatistics.size();
+        totalAvgTraveledKms /= taxiLocalStatistics.size();
+        totalBatteryLevels /= taxiLocalStatistics.size();
+
+        // Re-use the taxiID as error code (-1, means fine)
+        int errorCode = -1;
+        if (totalAvgPollution == 0.0) {
+            errorCode = -9999;
+        }
+
+        return new TotalStatisticsInfo(singleValuedAvg,
+                totalAvgTraveledKms,
+                totalAvgAccomplishedRides,
+                errorCode, totalBatteryLevels);
+    }
+
+    private static TotalStatisticsInfo checkMeasurementsPresence() {
+        if (taxiLocalStatistics.isEmpty()) {
+            int errorCode = -7777;
+            return new TotalStatisticsInfo(null, 0, 0,
+                    errorCode, 0);
+        }
+        return null;
     }
 
     /// Getters & Setters
