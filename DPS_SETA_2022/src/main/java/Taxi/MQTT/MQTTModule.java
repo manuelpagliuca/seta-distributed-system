@@ -59,7 +59,7 @@ public class MQTTModule {
     }
 
     private static MqttClient createNewClient() {
-        MqttClient mqttClient = null;
+        MqttClient mqttClient;
         String clientID = MqttClient.generateClientId();
 
         try {
@@ -73,7 +73,6 @@ public class MQTTModule {
     private static void connectToBroker(MqttClient mqttClient, MqttConnectOptions connectOptions) {
         try {
             mqttClient.connect(connectOptions);
-            mqttClient.disconnect();
         } catch (MqttException e) {
             throw new RuntimeException(e);
         }
@@ -83,7 +82,6 @@ public class MQTTModule {
         try {
             mqttClient.subscribe(topic, QUALITY_OF_SERVICE);
         } catch (MqttException e) {
-            mqttClient.disconnect();
             throw new RuntimeException(e);
         }
         System.out.println("Subscribed on topic: " + topic);

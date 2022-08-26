@@ -57,8 +57,12 @@ public class Taxi extends IPCServiceGrpc.IPCServiceImplBase {
         PM10Simulator pm10SimulatorThread = new PM10Simulator(Integer.toString(generateRndInteger(0, 10)), pollutionBuffer);
         pm10SimulatorThread.start();
 
+        // Battery Thread
+        Object checkBattery = new Object();
+        RechargeThread rechargeThread = new RechargeThread(thisTaxi, otherTaxis, checkBattery, grpcModule);
+
         // User Input
-        Object inputAvailable = startCLIthread();
+        Object inputAvailable = startCLIthread(rechargeThread);
         startInputChecker(inputAvailable);
 
         // GRPC
@@ -71,10 +75,12 @@ public class Taxi extends IPCServiceGrpc.IPCServiceImplBase {
         grpcModule.startServer();
         grpcModule.presentToOtherTaxis();
 
-        // Battery Thread
-        Object checkBattery = new Object();
-        Thread batteryThread = new Thread(new RechargeRunnable(thisTaxi, otherTaxis, checkBattery, grpcModule));
-        batteryThread.start();
+
+        rechargeThread.start();
+        //Thread batteryThread = new Thread(new RechargeRunnable(thisTaxi, otherTaxis, checkBattery, grpcModule));
+        //batteryThread.start();
+        //RechargeRunnable
+
 
         // MQTT
         MQTTModule mqttModule = new MQTTModule(taxiSchema, checkBattery);
@@ -100,9 +106,9 @@ public class Taxi extends IPCServiceGrpc.IPCServiceImplBase {
         checkingLines.start();
     }
 
-    private static Object startCLIthread() {
+    private static Object startCLIthread(RechargeThread rechargeThread) {
         Object inputAvailable = new Object();
-        MenuRunnable cli = new MenuRunnable(thisTaxi, otherTaxis, inputAvailable);
+        MenuRunnable cli = new MenuRunnable(thisTaxi, otherTaxis, inputAvailable, rechargeThread);
         cli.start();
         return inputAvailable;
     }

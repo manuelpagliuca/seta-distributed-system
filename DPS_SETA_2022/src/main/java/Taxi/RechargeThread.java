@@ -9,14 +9,14 @@ import java.util.Arrays;
 import static Utility.Utility.euclideanDistance;
 import static Utility.Utility.genTaxiInitialPosition;
 
-public class RechargeRunnable implements Runnable {
+public class RechargeThread extends Thread {
     private final TaxiInfo thisTaxi;
     private final ArrayList<TaxiInfo> otherTaxis;
     private final Object checkBattery;
     private final GrpcModule grpcModule;
     private boolean isRunning = true;
 
-    public RechargeRunnable(TaxiInfo thisTaxi, ArrayList<TaxiInfo> otherTaxis, Object checkBattery, GrpcModule grpcModule) {
+    public RechargeThread(TaxiInfo thisTaxi, ArrayList<TaxiInfo> otherTaxis, Object checkBattery, GrpcModule grpcModule) {
         this.thisTaxi = thisTaxi;
         this.otherTaxis = otherTaxis;
         this.checkBattery = checkBattery;
@@ -86,7 +86,5 @@ public class RechargeRunnable implements Runnable {
         thisTaxi.setRecharging(false);
     }
 
-    public void stop() {
-        isRunning = false;
-    }
+
 }

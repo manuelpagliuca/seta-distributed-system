@@ -1,5 +1,7 @@
 package Taxi.Menu;
 
+import Taxi.RechargeThread;
+
 import java.io.IOException;
 
 public class InputCheckerThread implements Runnable {
