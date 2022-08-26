@@ -1,8 +1,7 @@
 package AdminClient;
 
-import Taxi.Statistics.AvgStatisticsInfo;
-import Taxi.Statistics.StatisticsInfo;
-import Taxi.Statistics.TotalStatisticsInfo;
+import Taxi.Statistics.Statistics.AvgStatisticsInfo;
+import Taxi.Statistics.Statistics.TotalStatisticsInfo;
 import com.google.common.reflect.TypeToken;
 import jakarta.ws.rs.client.*;
 import Utility.Utility;
@@ -48,15 +47,15 @@ public class AdministratorClient {
     }
 
     private static void printMenu() {
-        System.out.println("*--------------------------------------------*");
-        System.out.println("|      Administrator client menu             |");
-        System.out.println("*--------------------------------------------*");
-        System.out.println("| 1) Delete a given taxi                     |");
-        System.out.println("| 2) Taxis in the smart city                 |");
-        System.out.println("| 3) Last n local statistics of a taxi       |");
-        System.out.println("| 4) Local statistics between two timestamps |");
-        System.out.println("| 5) Quit                                    |");
-        System.out.println("*--------------------------------------------*");
+        System.out.println("*------------------------------------------------------------*");
+        System.out.println("|                 Administrator client menu                  |");
+        System.out.println("*------------------------------------------------------------*");
+        System.out.println("| 1) Delete a given taxi                                     |");
+        System.out.println("| 2) Taxis in the smart city                                 |");
+        System.out.println("| 3) Average of the last n local statistics for a given taxi |");
+        System.out.println("| 4) Average statistics of all taxis (given two timestamps)  |");
+        System.out.println("| 5) Quit                                                    |");
+        System.out.println("*------------------------------------------------------------*");
     }
 
     private static void getLocalStatsTimestamps() {
@@ -158,7 +157,7 @@ public class AdministratorClient {
     private static void quit() {
         System.out.println("Good Bye");
         client.close();
-        System.exit(1);
+        System.exit(0);
     }
 
 }

@@ -5,9 +5,9 @@
 package AdminServer;
 
 import Taxi.Data.TaxiInfo;
-import Taxi.Statistics.AvgStatisticsInfo;
-import Taxi.Statistics.StatisticsInfo;
-import Taxi.Statistics.TotalStatisticsInfo;
+import Taxi.Statistics.Statistics.AvgStatisticsInfo;
+import Taxi.Statistics.Statistics.StatisticsInfo;
+import Taxi.Statistics.Statistics.TotalStatisticsInfo;
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
@@ -145,12 +145,12 @@ public class AdminServer {
     // Print all the taxis ID each one with the list of the other taxis on the smart city (debug)
     public void printAllTaxis() {
         Timestamp timestamp = new Timestamp(System.currentTimeMillis());
-        System.out.println("---" + timestamp + "---");
+        System.out.println("*--" + timestamp + "--*");
 
         for (TaxiInfo e : taxis)
-            System.out.println("id=" + e.getId() + ", gRPC=" + e.getGrpcPort());
+            System.out.println("| id=" + e.getId() + ", gRPC=" + e.getGrpcPort() + "\t\t\t|");
 
-        System.out.println("-----------------------------");
+        System.out.println("*---------------------------*");
     }
 
     // Generate a random district inside the integer range [1,4]

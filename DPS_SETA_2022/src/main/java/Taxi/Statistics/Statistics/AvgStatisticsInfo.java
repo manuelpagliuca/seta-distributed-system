@@ -1,11 +1,12 @@
-package Taxi.Statistics;
+package Taxi.Statistics.Statistics;
 
 import java.util.List;
 
 import static Utility.Utility.printCalendar;
 
 public class AvgStatisticsInfo extends StatisticsInfo {
-    public AvgStatisticsInfo(List<Double> avgMeasurements, double traveledKms, int accomplishedRides, int taxiID, double taxiBattery) {
+    public AvgStatisticsInfo(List<Double> avgMeasurements, double traveledKms,
+                             int accomplishedRides, int taxiID, double taxiBattery) {
         super(avgMeasurements, traveledKms, accomplishedRides, taxiID, taxiBattery);
     }
 

@@ -1,6 +1,7 @@
 package Taxi.Statistics;
 
 import Taxi.Data.TaxiInfo;
+import Taxi.Statistics.Statistics.StatisticsInfo;
 import Taxi.Statistics.Simulators.Measurement;
 import Utility.Utility;
 import jakarta.ws.rs.client.Client;
@@ -18,8 +19,8 @@ public class LocalStatisticsRunnable implements Runnable {
     private static final String STAT_PATH = "/stats";
     private final String ADMIN_SERVER_URL;
     private final Client client;
-    AtomicBoolean sendData = new AtomicBoolean(false);
-
+    private final AtomicBoolean sendData = new AtomicBoolean(false);
+    private final Thread postRequestClock = new Thread(this::sendEach15sec);
 
     public LocalStatisticsRunnable(PollutionBuffer pollutionBuffer, TaxiInfo thisTaxi, String adminServerUrl,
                                    Client client) {
@@ -33,16 +34,6 @@ public class LocalStatisticsRunnable implements Runnable {
     public void run() {
         List<Measurement> slidingWindow;
 
-        Thread postRequestClock = new Thread(() -> {
-            while (!Thread.currentThread().isInterrupted()) {
-                try {
-                    Thread.sleep(15000);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-                sendData.set(true);
-            }
-        });
         postRequestClock.start();
 
         while (!Thread.currentThread().isInterrupted()) {
@@ -72,6 +63,18 @@ public class LocalStatisticsRunnable implements Runnable {
                 sendData.set(false);
                 listAvgPollution.clear();
             }
+        }
+    }
+
+    @SuppressWarnings("BusyWait")
+    private void sendEach15sec() {
+        while (!Thread.currentThread().isInterrupted()) {
+            try {
+                Thread.sleep(15000);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            sendData.set(true);
         }
     }
 

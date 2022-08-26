@@ -4,16 +4,15 @@
  * M.Sc. in Computer Science @UNIMI A.Y. 2021/2022 */
 package AdminServer;
 
-import Taxi.Statistics.AvgStatisticsInfo;
-import Taxi.Statistics.StatisticsInfo;
-import Taxi.Statistics.TotalStatisticsInfo;
+import Taxi.Statistics.Statistics.AvgStatisticsInfo;
+import Taxi.Statistics.Statistics.StatisticsInfo;
+import Taxi.Statistics.Statistics.TotalStatisticsInfo;
 import Utility.Utility;
 import com.google.gson.*;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
 import Taxi.Data.TaxiInfo;
 import Taxi.Data.TaxiSchema;
-import jdk.jshell.execution.Util;
 
 import java.util.ArrayList;
 

@@ -1,4 +1,4 @@
-package Taxi.Statistics;
+package Taxi.Statistics.Statistics;
 
 import java.util.List;
 
