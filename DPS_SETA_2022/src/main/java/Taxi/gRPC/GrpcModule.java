@@ -167,6 +167,24 @@ public class GrpcModule implements Runnable {
         return ManagedChannelBuilder.forTarget(ADMIN_SERVER_ADDRESS + ":" + grpcPort).usePlaintext().build();
     }
 
+    public int coordinateRechargeGrpcStream() throws InterruptedException {
+        IPC.Infos infos = getIPCInfos();
+
+        Thread[] msg = new Thread[otherTaxis.size()];
+        int i = 0;
+
+        for (TaxiInfo t : otherTaxis) {
+            ManagedChannel channel = getManagedChannel(t.getGrpcPort());
+            IPCServiceGrpc.IPCServiceStub stub = IPCServiceGrpc.newStub(channel);
+            msg[i] = new Thread(new GrpcRunnable(t, infos, stub));
+            msg[i].start();
+            channel.awaitTermination(2, TimeUnit.SECONDS);
+            i++;
+        }
+
+        return GrpcRunnable.getACKs();
+    }
+
     public int coordinateRideGrpcStream(double distanceToDestination, int[] destination,
                                         boolean isRechargeRide) throws InterruptedException {
         IPC.RideCharge rideCharge = getRideCharge(distanceToDestination, destination, isRechargeRide);

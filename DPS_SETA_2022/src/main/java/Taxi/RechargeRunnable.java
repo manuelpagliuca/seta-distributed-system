@@ -1,7 +1,9 @@
 package Taxi;
 
 import Taxi.Data.TaxiInfo;
+import Taxi.gRPC.GrpcModule;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 import static Utility.Utility.euclideanDistance;
@@ -9,13 +11,16 @@ import static Utility.Utility.genTaxiInitialPosition;
 
 public class RechargeRunnable implements Runnable {
     private final TaxiInfo thisTaxi;
+    private final ArrayList<TaxiInfo> otherTaxis;
     private final Object checkBattery;
-
+    private final GrpcModule grpcModule;
     private boolean isRunning = true;
 
-    public RechargeRunnable(TaxiInfo thisTaxi, Object checkBattery) {
+    public RechargeRunnable(TaxiInfo thisTaxi, ArrayList<TaxiInfo> otherTaxis, Object checkBattery, GrpcModule grpcModule) {
         this.thisTaxi = thisTaxi;
+        this.otherTaxis = otherTaxis;
         this.checkBattery = checkBattery;
+        this.grpcModule = grpcModule;
     }
 
     @Override
@@ -29,6 +34,7 @@ public class RechargeRunnable implements Runnable {
                 }
             }
 
+            System.out.println("Notified!");
             if (thisTaxi.getBattery() < 30.0) {
                 try {
                     moveToRechargeStation();
@@ -45,8 +51,10 @@ public class RechargeRunnable implements Runnable {
                 + thisTaxi.getDistrict());
 
         thisTaxi.setRiding(true);
+
         int[] rechargeStationPos = genTaxiInitialPosition(thisTaxi.getDistrict());
         final double totalKm = euclideanDistance(thisTaxi.getPosition(), rechargeStationPos);
+
 
         thisTaxi.getPosition()[0] = rechargeStationPos[0];
         thisTaxi.getPosition()[1] = rechargeStationPos[1];
@@ -57,8 +65,26 @@ public class RechargeRunnable implements Runnable {
                 Arrays.toString(rechargeStationPos) +
                 " at district " +
                 thisTaxi.getDistrict() +
-                "and after %,.2f Km the battery levels are %,.2f %%\n", totalKm, thisTaxi.getBattery());
+                "and after %,.2f Km the battery levels are %,.2f%%\n", totalKm, thisTaxi.getBattery());
         thisTaxi.setRiding(false);
+
+        int totalAck = otherTaxis.size();
+        int receivedAck = grpcModule.coordinateRechargeGrpcStream();
+
+        // Keep asking until he doesn't get the ACK from everybody
+        // TODO: al momento quello che sto utilizzando e' il Bully Algorithm
+        // TODO: Ricart and Agrawala algorithm uses a stack, doesn't keep asking
+        while (totalAck != receivedAck) {
+            receivedAck = grpcModule.coordinateRechargeGrpcStream();
+        }
+        thisTaxi.setRecharging(true);
+        // do the recharging
+        System.out.printf("The taxi is recharging... (current battery levels %,.2f%%)\n", thisTaxi.getBattery());
+        Thread.sleep(8000);
+        thisTaxi.setBattery(100.0);
+        System.out.printf("The taxi has been successfully recharged, now the battery levels are at the %,.2f%%\n",
+                thisTaxi.getBattery());
+        thisTaxi.setRecharging(false);
     }
 
     public void stop() {

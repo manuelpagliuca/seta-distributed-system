@@ -120,6 +120,37 @@ public final class IPCServiceGrpc {
     return getCoordinateRideStreamMethod;
   }
 
+  private static volatile io.grpc.MethodDescriptor<org.example.grpc.IPC.RechargeProposal,
+      org.example.grpc.IPC.ACK> getCoordinateRechargeStreamMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "coordinateRechargeStream",
+      requestType = org.example.grpc.IPC.RechargeProposal.class,
+      responseType = org.example.grpc.IPC.ACK.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.BIDI_STREAMING)
+  public static io.grpc.MethodDescriptor<org.example.grpc.IPC.RechargeProposal,
+      org.example.grpc.IPC.ACK> getCoordinateRechargeStreamMethod() {
+    io.grpc.MethodDescriptor<org.example.grpc.IPC.RechargeProposal, org.example.grpc.IPC.ACK> getCoordinateRechargeStreamMethod;
+    if ((getCoordinateRechargeStreamMethod = IPCServiceGrpc.getCoordinateRechargeStreamMethod) == null) {
+      synchronized (IPCServiceGrpc.class) {
+        if ((getCoordinateRechargeStreamMethod = IPCServiceGrpc.getCoordinateRechargeStreamMethod) == null) {
+          IPCServiceGrpc.getCoordinateRechargeStreamMethod = getCoordinateRechargeStreamMethod =
+              io.grpc.MethodDescriptor.<org.example.grpc.IPC.RechargeProposal, org.example.grpc.IPC.ACK>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.BIDI_STREAMING)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "coordinateRechargeStream"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.example.grpc.IPC.RechargeProposal.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.example.grpc.IPC.ACK.getDefaultInstance()))
+              .setSchemaDescriptor(new IPCServiceMethodDescriptorSupplier("coordinateRechargeStream"))
+              .build();
+        }
+      }
+    }
+    return getCoordinateRechargeStreamMethod;
+  }
+
   /**
    * Creates a new async stub that supports all call types for the service
    */
@@ -168,6 +199,13 @@ public final class IPCServiceGrpc {
       return asyncUnimplementedStreamingCall(getCoordinateRideStreamMethod(), responseObserver);
     }
 
+    /**
+     */
+    public io.grpc.stub.StreamObserver<org.example.grpc.IPC.RechargeProposal> coordinateRechargeStream(
+        io.grpc.stub.StreamObserver<org.example.grpc.IPC.ACK> responseObserver) {
+      return asyncUnimplementedStreamingCall(getCoordinateRechargeStreamMethod(), responseObserver);
+    }
+
     @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
       return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
           .addMethod(
@@ -191,6 +229,13 @@ public final class IPCServiceGrpc {
                 org.example.grpc.IPC.RideCharge,
                 org.example.grpc.IPC.ACK>(
                   this, METHODID_COORDINATE_RIDE_STREAM)))
+          .addMethod(
+            getCoordinateRechargeStreamMethod(),
+            asyncBidiStreamingCall(
+              new MethodHandlers<
+                org.example.grpc.IPC.RechargeProposal,
+                org.example.grpc.IPC.ACK>(
+                  this, METHODID_COORDINATE_RECHARGE_STREAM)))
           .build();
     }
   }
@@ -235,6 +280,14 @@ public final class IPCServiceGrpc {
         io.grpc.stub.StreamObserver<org.example.grpc.IPC.ACK> responseObserver) {
       return asyncBidiStreamingCall(
           getChannel().newCall(getCoordinateRideStreamMethod(), getCallOptions()), responseObserver);
+    }
+
+    /**
+     */
+    public io.grpc.stub.StreamObserver<org.example.grpc.IPC.RechargeProposal> coordinateRechargeStream(
+        io.grpc.stub.StreamObserver<org.example.grpc.IPC.ACK> responseObserver) {
+      return asyncBidiStreamingCall(
+          getChannel().newCall(getCoordinateRechargeStreamMethod(), getCallOptions()), responseObserver);
     }
   }
 
@@ -294,6 +347,7 @@ public final class IPCServiceGrpc {
   private static final int METHODID_PRESENT = 0;
   private static final int METHODID_GOODBYE = 1;
   private static final int METHODID_COORDINATE_RIDE_STREAM = 2;
+  private static final int METHODID_COORDINATE_RECHARGE_STREAM = 3;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -331,6 +385,9 @@ public final class IPCServiceGrpc {
               (io.grpc.stub.StreamObserver<org.example.grpc.IPC.ACK>) responseObserver);
         case METHODID_COORDINATE_RIDE_STREAM:
           return (io.grpc.stub.StreamObserver<Req>) serviceImpl.coordinateRideStream(
+              (io.grpc.stub.StreamObserver<org.example.grpc.IPC.ACK>) responseObserver);
+        case METHODID_COORDINATE_RECHARGE_STREAM:
+          return (io.grpc.stub.StreamObserver<Req>) serviceImpl.coordinateRechargeStream(
               (io.grpc.stub.StreamObserver<org.example.grpc.IPC.ACK>) responseObserver);
         default:
           throw new AssertionError();
@@ -386,6 +443,7 @@ public final class IPCServiceGrpc {
               .addMethod(getPresentMethod())
               .addMethod(getGoodbyeMethod())
               .addMethod(getCoordinateRideStreamMethod())
+              .addMethod(getCoordinateRechargeStreamMethod())
               .build();
         }
       }

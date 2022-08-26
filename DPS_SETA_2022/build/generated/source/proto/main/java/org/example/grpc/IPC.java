@@ -2371,6 +2371,752 @@ public final class IPC {
 
   }
 
+  public interface RechargeProposalOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:org.example.grpc.RechargeProposal)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>required .org.example.grpc.Infos taxi = 1;</code>
+     * @return Whether the taxi field is set.
+     */
+    boolean hasTaxi();
+    /**
+     * <code>required .org.example.grpc.Infos taxi = 1;</code>
+     * @return The taxi.
+     */
+    org.example.grpc.IPC.Infos getTaxi();
+    /**
+     * <code>required .org.example.grpc.Infos taxi = 1;</code>
+     */
+    org.example.grpc.IPC.InfosOrBuilder getTaxiOrBuilder();
+
+    /**
+     * <code>required int64 logicalClock = 2;</code>
+     * @return Whether the logicalClock field is set.
+     */
+    boolean hasLogicalClock();
+    /**
+     * <code>required int64 logicalClock = 2;</code>
+     * @return The logicalClock.
+     */
+    long getLogicalClock();
+  }
+  /**
+   * Protobuf type {@code org.example.grpc.RechargeProposal}
+   */
+  public  static final class RechargeProposal extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:org.example.grpc.RechargeProposal)
+      RechargeProposalOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use RechargeProposal.newBuilder() to construct.
+    private RechargeProposal(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private RechargeProposal() {
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new RechargeProposal();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private RechargeProposal(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+              org.example.grpc.IPC.Infos.Builder subBuilder = null;
+              if (((bitField0_ & 0x00000001) != 0)) {
+                subBuilder = taxi_.toBuilder();
+              }
+              taxi_ = input.readMessage(org.example.grpc.IPC.Infos.PARSER, extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(taxi_);
+                taxi_ = subBuilder.buildPartial();
+              }
+              bitField0_ |= 0x00000001;
+              break;
+            }
+            case 16: {
+              bitField0_ |= 0x00000002;
+              logicalClock_ = input.readInt64();
+              break;
+            }
+            default: {
+              if (!parseUnknownField(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return org.example.grpc.IPC.internal_static_org_example_grpc_RechargeProposal_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return org.example.grpc.IPC.internal_static_org_example_grpc_RechargeProposal_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              org.example.grpc.IPC.RechargeProposal.class, org.example.grpc.IPC.RechargeProposal.Builder.class);
+    }
+
+    private int bitField0_;
+    public static final int TAXI_FIELD_NUMBER = 1;
+    private org.example.grpc.IPC.Infos taxi_;
+    /**
+     * <code>required .org.example.grpc.Infos taxi = 1;</code>
+     * @return Whether the taxi field is set.
+     */
+    public boolean hasTaxi() {
+      return ((bitField0_ & 0x00000001) != 0);
+    }
+    /**
+     * <code>required .org.example.grpc.Infos taxi = 1;</code>
+     * @return The taxi.
+     */
+    public org.example.grpc.IPC.Infos getTaxi() {
+      return taxi_ == null ? org.example.grpc.IPC.Infos.getDefaultInstance() : taxi_;
+    }
+    /**
+     * <code>required .org.example.grpc.Infos taxi = 1;</code>
+     */
+    public org.example.grpc.IPC.InfosOrBuilder getTaxiOrBuilder() {
+      return taxi_ == null ? org.example.grpc.IPC.Infos.getDefaultInstance() : taxi_;
+    }
+
+    public static final int LOGICALCLOCK_FIELD_NUMBER = 2;
+    private long logicalClock_;
+    /**
+     * <code>required int64 logicalClock = 2;</code>
+     * @return Whether the logicalClock field is set.
+     */
+    public boolean hasLogicalClock() {
+      return ((bitField0_ & 0x00000002) != 0);
+    }
+    /**
+     * <code>required int64 logicalClock = 2;</code>
+     * @return The logicalClock.
+     */
+    public long getLogicalClock() {
+      return logicalClock_;
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      if (!hasTaxi()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      if (!hasLogicalClock()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      if (!getTaxi().isInitialized()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (((bitField0_ & 0x00000001) != 0)) {
+        output.writeMessage(1, getTaxi());
+      }
+      if (((bitField0_ & 0x00000002) != 0)) {
+        output.writeInt64(2, logicalClock_);
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (((bitField0_ & 0x00000001) != 0)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(1, getTaxi());
+      }
+      if (((bitField0_ & 0x00000002) != 0)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(2, logicalClock_);
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof org.example.grpc.IPC.RechargeProposal)) {
+        return super.equals(obj);
+      }
+      org.example.grpc.IPC.RechargeProposal other = (org.example.grpc.IPC.RechargeProposal) obj;
+
+      if (hasTaxi() != other.hasTaxi()) return false;
+      if (hasTaxi()) {
+        if (!getTaxi()
+            .equals(other.getTaxi())) return false;
+      }
+      if (hasLogicalClock() != other.hasLogicalClock()) return false;
+      if (hasLogicalClock()) {
+        if (getLogicalClock()
+            != other.getLogicalClock()) return false;
+      }
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      if (hasTaxi()) {
+        hash = (37 * hash) + TAXI_FIELD_NUMBER;
+        hash = (53 * hash) + getTaxi().hashCode();
+      }
+      if (hasLogicalClock()) {
+        hash = (37 * hash) + LOGICALCLOCK_FIELD_NUMBER;
+        hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+            getLogicalClock());
+      }
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static org.example.grpc.IPC.RechargeProposal parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.example.grpc.IPC.RechargeProposal parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.example.grpc.IPC.RechargeProposal parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.example.grpc.IPC.RechargeProposal parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.example.grpc.IPC.RechargeProposal parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.example.grpc.IPC.RechargeProposal parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.example.grpc.IPC.RechargeProposal parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static org.example.grpc.IPC.RechargeProposal parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static org.example.grpc.IPC.RechargeProposal parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static org.example.grpc.IPC.RechargeProposal parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static org.example.grpc.IPC.RechargeProposal parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static org.example.grpc.IPC.RechargeProposal parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(org.example.grpc.IPC.RechargeProposal prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code org.example.grpc.RechargeProposal}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:org.example.grpc.RechargeProposal)
+        org.example.grpc.IPC.RechargeProposalOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return org.example.grpc.IPC.internal_static_org_example_grpc_RechargeProposal_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return org.example.grpc.IPC.internal_static_org_example_grpc_RechargeProposal_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                org.example.grpc.IPC.RechargeProposal.class, org.example.grpc.IPC.RechargeProposal.Builder.class);
+      }
+
+      // Construct using org.example.grpc.IPC.RechargeProposal.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+          getTaxiFieldBuilder();
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        if (taxiBuilder_ == null) {
+          taxi_ = null;
+        } else {
+          taxiBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x00000001);
+        logicalClock_ = 0L;
+        bitField0_ = (bitField0_ & ~0x00000002);
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return org.example.grpc.IPC.internal_static_org_example_grpc_RechargeProposal_descriptor;
+      }
+
+      @java.lang.Override
+      public org.example.grpc.IPC.RechargeProposal getDefaultInstanceForType() {
+        return org.example.grpc.IPC.RechargeProposal.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public org.example.grpc.IPC.RechargeProposal build() {
+        org.example.grpc.IPC.RechargeProposal result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public org.example.grpc.IPC.RechargeProposal buildPartial() {
+        org.example.grpc.IPC.RechargeProposal result = new org.example.grpc.IPC.RechargeProposal(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          if (taxiBuilder_ == null) {
+            result.taxi_ = taxi_;
+          } else {
+            result.taxi_ = taxiBuilder_.build();
+          }
+          to_bitField0_ |= 0x00000001;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.logicalClock_ = logicalClock_;
+          to_bitField0_ |= 0x00000002;
+        }
+        result.bitField0_ = to_bitField0_;
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof org.example.grpc.IPC.RechargeProposal) {
+          return mergeFrom((org.example.grpc.IPC.RechargeProposal)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(org.example.grpc.IPC.RechargeProposal other) {
+        if (other == org.example.grpc.IPC.RechargeProposal.getDefaultInstance()) return this;
+        if (other.hasTaxi()) {
+          mergeTaxi(other.getTaxi());
+        }
+        if (other.hasLogicalClock()) {
+          setLogicalClock(other.getLogicalClock());
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        if (!hasTaxi()) {
+          return false;
+        }
+        if (!hasLogicalClock()) {
+          return false;
+        }
+        if (!getTaxi().isInitialized()) {
+          return false;
+        }
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        org.example.grpc.IPC.RechargeProposal parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (org.example.grpc.IPC.RechargeProposal) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      private org.example.grpc.IPC.Infos taxi_;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          org.example.grpc.IPC.Infos, org.example.grpc.IPC.Infos.Builder, org.example.grpc.IPC.InfosOrBuilder> taxiBuilder_;
+      /**
+       * <code>required .org.example.grpc.Infos taxi = 1;</code>
+       * @return Whether the taxi field is set.
+       */
+      public boolean hasTaxi() {
+        return ((bitField0_ & 0x00000001) != 0);
+      }
+      /**
+       * <code>required .org.example.grpc.Infos taxi = 1;</code>
+       * @return The taxi.
+       */
+      public org.example.grpc.IPC.Infos getTaxi() {
+        if (taxiBuilder_ == null) {
+          return taxi_ == null ? org.example.grpc.IPC.Infos.getDefaultInstance() : taxi_;
+        } else {
+          return taxiBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>required .org.example.grpc.Infos taxi = 1;</code>
+       */
+      public Builder setTaxi(org.example.grpc.IPC.Infos value) {
+        if (taxiBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          taxi_ = value;
+          onChanged();
+        } else {
+          taxiBuilder_.setMessage(value);
+        }
+        bitField0_ |= 0x00000001;
+        return this;
+      }
+      /**
+       * <code>required .org.example.grpc.Infos taxi = 1;</code>
+       */
+      public Builder setTaxi(
+          org.example.grpc.IPC.Infos.Builder builderForValue) {
+        if (taxiBuilder_ == null) {
+          taxi_ = builderForValue.build();
+          onChanged();
+        } else {
+          taxiBuilder_.setMessage(builderForValue.build());
+        }
+        bitField0_ |= 0x00000001;
+        return this;
+      }
+      /**
+       * <code>required .org.example.grpc.Infos taxi = 1;</code>
+       */
+      public Builder mergeTaxi(org.example.grpc.IPC.Infos value) {
+        if (taxiBuilder_ == null) {
+          if (((bitField0_ & 0x00000001) != 0) &&
+              taxi_ != null &&
+              taxi_ != org.example.grpc.IPC.Infos.getDefaultInstance()) {
+            taxi_ =
+              org.example.grpc.IPC.Infos.newBuilder(taxi_).mergeFrom(value).buildPartial();
+          } else {
+            taxi_ = value;
+          }
+          onChanged();
+        } else {
+          taxiBuilder_.mergeFrom(value);
+        }
+        bitField0_ |= 0x00000001;
+        return this;
+      }
+      /**
+       * <code>required .org.example.grpc.Infos taxi = 1;</code>
+       */
+      public Builder clearTaxi() {
+        if (taxiBuilder_ == null) {
+          taxi_ = null;
+          onChanged();
+        } else {
+          taxiBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x00000001);
+        return this;
+      }
+      /**
+       * <code>required .org.example.grpc.Infos taxi = 1;</code>
+       */
+      public org.example.grpc.IPC.Infos.Builder getTaxiBuilder() {
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return getTaxiFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>required .org.example.grpc.Infos taxi = 1;</code>
+       */
+      public org.example.grpc.IPC.InfosOrBuilder getTaxiOrBuilder() {
+        if (taxiBuilder_ != null) {
+          return taxiBuilder_.getMessageOrBuilder();
+        } else {
+          return taxi_ == null ?
+              org.example.grpc.IPC.Infos.getDefaultInstance() : taxi_;
+        }
+      }
+      /**
+       * <code>required .org.example.grpc.Infos taxi = 1;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          org.example.grpc.IPC.Infos, org.example.grpc.IPC.Infos.Builder, org.example.grpc.IPC.InfosOrBuilder> 
+          getTaxiFieldBuilder() {
+        if (taxiBuilder_ == null) {
+          taxiBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              org.example.grpc.IPC.Infos, org.example.grpc.IPC.Infos.Builder, org.example.grpc.IPC.InfosOrBuilder>(
+                  getTaxi(),
+                  getParentForChildren(),
+                  isClean());
+          taxi_ = null;
+        }
+        return taxiBuilder_;
+      }
+
+      private long logicalClock_ ;
+      /**
+       * <code>required int64 logicalClock = 2;</code>
+       * @return Whether the logicalClock field is set.
+       */
+      public boolean hasLogicalClock() {
+        return ((bitField0_ & 0x00000002) != 0);
+      }
+      /**
+       * <code>required int64 logicalClock = 2;</code>
+       * @return The logicalClock.
+       */
+      public long getLogicalClock() {
+        return logicalClock_;
+      }
+      /**
+       * <code>required int64 logicalClock = 2;</code>
+       * @param value The logicalClock to set.
+       * @return This builder for chaining.
+       */
+      public Builder setLogicalClock(long value) {
+        bitField0_ |= 0x00000002;
+        logicalClock_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required int64 logicalClock = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearLogicalClock() {
+        bitField0_ = (bitField0_ & ~0x00000002);
+        logicalClock_ = 0L;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:org.example.grpc.RechargeProposal)
+    }
+
+    // @@protoc_insertion_point(class_scope:org.example.grpc.RechargeProposal)
+    private static final org.example.grpc.IPC.RechargeProposal DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new org.example.grpc.IPC.RechargeProposal();
+    }
+
+    public static org.example.grpc.IPC.RechargeProposal getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    @java.lang.Deprecated public static final com.google.protobuf.Parser<RechargeProposal>
+        PARSER = new com.google.protobuf.AbstractParser<RechargeProposal>() {
+      @java.lang.Override
+      public RechargeProposal parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new RechargeProposal(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<RechargeProposal> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<RechargeProposal> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public org.example.grpc.IPC.RechargeProposal getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
   public interface ACKOrBuilder extends
       // @@protoc_insertion_point(interface_extends:org.example.grpc.ACK)
       com.google.protobuf.MessageOrBuilder {
@@ -3012,6 +3758,11 @@ public final class IPC {
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_org_example_grpc_RideCharge_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_org_example_grpc_RechargeProposal_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_org_example_grpc_RechargeProposal_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_org_example_grpc_ACK_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
@@ -3033,13 +3784,17 @@ public final class IPC {
       "%\n\004taxi\030\001 \002(\0132\027.org.example.grpc.Infos\022\033" +
       "\n\023destinationPosition\030\002 \003(\005\022\035\n\025distanceT" +
       "oDestination\030\003 \002(\001\022\026\n\016rechargingRide\030\004 \002" +
-      "(\010\")\n\003ACK\022\014\n\004vote\030\001 \002(\010\022\024\n\014logicalClock\030" +
-      "\002 \002(\0032\327\001\n\nIPCService\0229\n\007present\022\027.org.ex" +
-      "ample.grpc.Infos\032\025.org.example.grpc.ACK\022" +
-      "=\n\007goodbye\022\027.org.example.grpc.Infos\032\025.or" +
-      "g.example.grpc.ACK(\0010\001\022O\n\024coordinateRide" +
-      "Stream\022\034.org.example.grpc.RideCharge\032\025.o" +
-      "rg.example.grpc.ACK(\0010\001"
+      "(\010\"O\n\020RechargeProposal\022%\n\004taxi\030\001 \002(\0132\027.o" +
+      "rg.example.grpc.Infos\022\024\n\014logicalClock\030\002 " +
+      "\002(\003\")\n\003ACK\022\014\n\004vote\030\001 \002(\010\022\024\n\014logicalClock" +
+      "\030\002 \002(\0032\262\002\n\nIPCService\0229\n\007present\022\027.org.e" +
+      "xample.grpc.Infos\032\025.org.example.grpc.ACK" +
+      "\022=\n\007goodbye\022\027.org.example.grpc.Infos\032\025.o" +
+      "rg.example.grpc.ACK(\0010\001\022O\n\024coordinateRid" +
+      "eStream\022\034.org.example.grpc.RideCharge\032\025." +
+      "org.example.grpc.ACK(\0010\001\022Y\n\030coordinateRe" +
+      "chargeStream\022\".org.example.grpc.Recharge" +
+      "Proposal\032\025.org.example.grpc.ACK(\0010\001"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -3057,8 +3812,14 @@ public final class IPC {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_example_grpc_RideCharge_descriptor,
         new java.lang.String[] { "Taxi", "DestinationPosition", "DistanceToDestination", "RechargingRide", });
-    internal_static_org_example_grpc_ACK_descriptor =
+    internal_static_org_example_grpc_RechargeProposal_descriptor =
       getDescriptor().getMessageTypes().get(2);
+    internal_static_org_example_grpc_RechargeProposal_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_org_example_grpc_RechargeProposal_descriptor,
+        new java.lang.String[] { "Taxi", "LogicalClock", });
+    internal_static_org_example_grpc_ACK_descriptor =
+      getDescriptor().getMessageTypes().get(3);
     internal_static_org_example_grpc_ACK_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_example_grpc_ACK_descriptor,

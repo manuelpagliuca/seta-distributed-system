@@ -18,6 +18,11 @@ message RideCharge {
   required bool rechargingRide = 4;
 }
 
+message RechargeProposal{
+  required Infos taxi = 1;
+  required int64 logicalClock = 2;
+}
+
 message ACK {
   required bool vote = 1;
   required int64 logicalClock = 2;
@@ -27,4 +32,5 @@ service IPCService {
   rpc present(Infos) returns (ACK);
   rpc goodbye(stream Infos) returns (stream ACK);
   rpc coordinateRideStream(stream RideCharge) returns (stream ACK);
+  rpc coordinateRechargeStream(stream RechargeProposal) returns (stream ACK);
 }

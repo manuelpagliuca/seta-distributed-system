@@ -141,11 +141,14 @@ public class AdminServer {
     }
 
     /// Utility.Utility
-
     // Print all the taxis ID each one with the list of the other taxis on the smart city (debug)
     public void printAllTaxis() {
         Timestamp timestamp = new Timestamp(System.currentTimeMillis());
         System.out.println("*--" + timestamp + "--*");
+
+        if (taxis.isEmpty()) {
+            System.out.println("| There are no taxi.\t\t|");
+        }
 
         for (TaxiInfo e : taxis)
             System.out.println("| id=" + e.getId() + ", gRPC=" + e.getGrpcPort() + "\t\t\t|");
@@ -252,7 +255,7 @@ public class AdminServer {
                 avgTraveledKms, avgAccomplishedRides,
                 taxiID, avgBatteryLevel);
 
-        System.out.println(avgLastNstats);
+        //System.out.println(avgLastNstats);
 
         return avgLastNstats;
     }

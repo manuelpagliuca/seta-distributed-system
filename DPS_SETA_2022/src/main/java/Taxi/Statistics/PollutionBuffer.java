@@ -8,7 +8,6 @@ import java.util.List;
 
 public class PollutionBuffer implements Buffer {
     private static final Measurement[] measurements = new Measurement[8];
-    private static final List<Double> listOfAverages = new ArrayList<>();
     private static int index = 0;
     private final Object windowIsFull = new Object();
 
@@ -44,7 +43,7 @@ public class PollutionBuffer implements Buffer {
 
 
         List<Measurement> slidingWindow = new ArrayList<>(List.of(measurements));
-        printSlidingWindow();
+        //printSlidingWindow();
         leftShift();
         return slidingWindow;
     }

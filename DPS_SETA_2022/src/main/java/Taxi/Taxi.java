@@ -7,7 +7,7 @@ package Taxi;
 import Taxi.Data.LogicalClock;
 import Taxi.Data.TaxiInfo;
 import Taxi.MQTT.MQTTModule;
-import Taxi.Menu.CheckingLinesRunnable;
+import Taxi.Menu.InputCheckerThread;
 import Taxi.Menu.MenuRunnable;
 import Taxi.Statistics.LocalStatisticsRunnable;
 import Taxi.Statistics.PollutionBuffer;
@@ -23,6 +23,7 @@ import jakarta.ws.rs.client.Client;
 
 import Taxi.Data.TaxiSchema;
 
+import org.eclipse.paho.client.mqttv3.MqttException;
 import org.example.grpc.IPC;
 import org.example.grpc.IPCServiceGrpc;
 
@@ -43,33 +44,24 @@ public class Taxi extends IPCServiceGrpc.IPCServiceImplBase {
     private static Client client;
     private static ArrayList<TaxiInfo> otherTaxis = new ArrayList<>();
 
-    // Threads
-    private static Thread batteryThread;
-    private static PM10Simulator pm10SimulatorThread;
-
-    public static void main(String[] args) {
-        logicalClock = new LogicalClock(RAND_CLOCK_OFFSET);
-        logicalClock.increment();
-        System.out.println("Logical clock initial value " + logicalClock.printCalendar());
+    public static void main(String[] args) throws MqttException {
+        logicalClockInit();
 
         postInit();
 
+        // Local Stats & Sensor Data
         PollutionBuffer pollutionBuffer = new PollutionBuffer();
 
-        Thread localStatistics = new Thread(new LocalStatisticsRunnable(pollutionBuffer,
-                thisTaxi, ADMIN_SERVER_URL, client));
-        localStatistics.start();
+        startLocalStatsThread(pollutionBuffer);
 
-        pm10SimulatorThread = new PM10Simulator(Integer.toString(generateRndInteger(0, 10)), pollutionBuffer);
+        PM10Simulator pm10SimulatorThread = new PM10Simulator(Integer.toString(generateRndInteger(0, 10)), pollutionBuffer);
         pm10SimulatorThread.start();
 
-        Object inputAvailable = new Object();
-        MenuRunnable cli = new MenuRunnable(thisTaxi, otherTaxis, inputAvailable);
-        cli.start();
+        // User Input
+        Object inputAvailable = startCLIthread();
+        startInputChecker(inputAvailable);
 
-        CheckingLinesRunnable checkingLines = new CheckingLinesRunnable(inputAvailable);
-        checkingLines.start();
-
+        // GRPC
         TaxiSchema taxiSchema = new TaxiSchema();
         taxiSchema.setTaxiInfo(thisTaxi);
         taxiSchema.setTaxis(otherTaxis);
@@ -79,15 +71,40 @@ public class Taxi extends IPCServiceGrpc.IPCServiceImplBase {
         grpcModule.startServer();
         grpcModule.presentToOtherTaxis();
 
+        // Battery Thread
         Object checkBattery = new Object();
-        //batteryThread = new Thread(new RechargeRunnable(thisTaxi, checkBattery));
+        Thread batteryThread = new Thread(new RechargeRunnable(thisTaxi, otherTaxis, checkBattery, grpcModule));
+        batteryThread.start();
 
+        // MQTT
         MQTTModule mqttModule = new MQTTModule(taxiSchema, checkBattery);
         mqttModule.startMqttClient();
 
-        //batteryThread.start();
-
         // TODO: Function for terminating correctly all the threads.
+    }
+
+    private static void logicalClockInit() {
+        logicalClock = new LogicalClock(RAND_CLOCK_OFFSET);
+        logicalClock.increment();
+        System.out.println("Logical clock initial value " + logicalClock.printCalendar());
+    }
+
+    private static void startLocalStatsThread(PollutionBuffer pollutionBuffer) {
+        Thread localStatistics = new Thread(new LocalStatisticsRunnable(pollutionBuffer,
+                thisTaxi, ADMIN_SERVER_URL, client));
+        localStatistics.start();
+    }
+
+    private static void startInputChecker(Object inputAvailable) {
+        InputCheckerThread checkingLines = new InputCheckerThread(inputAvailable);
+        checkingLines.start();
+    }
+
+    private static Object startCLIthread() {
+        Object inputAvailable = new Object();
+        MenuRunnable cli = new MenuRunnable(thisTaxi, otherTaxis, inputAvailable);
+        cli.start();
+        return inputAvailable;
     }
 
 
@@ -144,6 +161,64 @@ public class Taxi extends IPCServiceGrpc.IPCServiceImplBase {
     }
 
     /// gRPC Services
+
+    // Ricart & Agrawala
+    @Override
+    public StreamObserver<IPC.RechargeProposal> coordinateRechargeStream(StreamObserver<IPC.ACK> responseObserver) {
+        return new StreamObserver<>() {
+            @Override
+            public void onNext(IPC.RechargeProposal request) {
+                LogicalClock requestLogicalClock = new LogicalClock(RAND_CLOCK_OFFSET);
+
+                // TODO: Lamport
+                requestLogicalClock.setLogicalClock(request.getTaxi().getLogicalClock());
+                // System.out.println(request.getTaxi().getId()
+                // + " sent the request at "
+                // + requestLogicalClock.printCalendar());
+
+                if (logicalClock.getLogicalClock() <= request.getTaxi().getLogicalClock()) {
+                    logicalClock.setLogicalClock(request.getTaxi().getLogicalClock());
+                }
+
+                logicalClock.increment();
+
+                // il server e' interessato alla corsa?
+                if (thisTaxi.getDistrict() == request.getTaxi().getDistrict()) {
+                    if (!thisTaxi.wantToRecharge()) {
+                        responseObserver.onNext(IPC.ACK.newBuilder()
+                                .setVote(true)
+                                .setLogicalClock(-9999).build());
+                        responseObserver.onCompleted();
+                        return;
+                    } else {
+                        // If also the server taxi wants the recharge, TODO discriminate by logical clock?
+                        if (logicalClock.getLogicalClock() < request.getLogicalClock()) {
+                            responseObserver.onNext(IPC.ACK.newBuilder()
+                                    .setVote(false)
+                                    .setLogicalClock(-9999).build());
+                            responseObserver.onCompleted();
+                        }
+                    }
+                }
+                // The server taxi is from a different district /TODO or bigger logical clock? -> ACK
+                responseObserver.onNext(IPC.ACK.newBuilder()
+                        .setVote(true)
+                        .setLogicalClock(-9999).build());
+                responseObserver.onCompleted();
+            }
+
+            @Override
+            public void onError(Throwable t) {
+
+            }
+
+            @Override
+            public void onCompleted() {
+
+            }
+        };
+    }
+
     // TODO Logical Clock
     @Override
     public StreamObserver<IPC.RideCharge> coordinateRideStream(StreamObserver<IPC.ACK> responseObserver) {

@@ -16,9 +16,9 @@ public class TaxiInfo implements Serializable {
     private int[] position = new int[2];
     private String administratorServerAddress = null;
     private boolean isRecharging = false;
+    private boolean wantToRecharge;
     private boolean isRiding = false;
     private double battery = -1;
-
     private int accomplishedRides = 0;
     private double kmTraveled = 0.0;
 
@@ -31,12 +31,14 @@ public class TaxiInfo implements Serializable {
         this.isRiding = info.isRiding;
         this.battery = info.battery;
         this.administratorServerAddress = info.administratorServerAddress;
+        this.wantToRecharge = info.wantToRecharge;
     }
 
     public TaxiInfo(int id, int grpcPort, String admServer) {
         this.id = id;
         this.grpcPort = grpcPort;
         this.administratorServerAddress = admServer;
+        wantToRecharge = false;
     }
 
     public TaxiInfo(IPC.Infos infos) {
@@ -52,10 +54,11 @@ public class TaxiInfo implements Serializable {
         isRecharging = infos.getIsRecharging();
         isRiding = infos.getIsRiding();
         battery = infos.getBattery();
+        wantToRecharge = false;
     }
 
     public TaxiInfo() {
-
+        wantToRecharge = false;
     }
 
     @Override
@@ -142,5 +145,13 @@ public class TaxiInfo implements Serializable {
 
     public void addTotalKm(double kmTraveled) {
         this.kmTraveled += kmTraveled;
+    }
+
+    public boolean wantToRecharge() {
+        return wantToRecharge;
+    }
+
+    public void setWantToRecharge(boolean wantToRecharge) {
+        this.wantToRecharge = wantToRecharge;
     }
 }

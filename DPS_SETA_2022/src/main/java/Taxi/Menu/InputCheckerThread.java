@@ -2,11 +2,11 @@ package Taxi.Menu;
 
 import java.io.IOException;
 
-public class CheckingLinesRunnable implements Runnable {
+public class InputCheckerThread implements Runnable {
     final Object availableCLI;
     private Thread t;
 
-    public CheckingLinesRunnable(Object availableCLI) {
+    public InputCheckerThread(Object availableCLI) {
         this.availableCLI = availableCLI;
     }
 

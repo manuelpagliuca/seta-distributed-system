@@ -49,8 +49,7 @@ public class LocalStatisticsRunnable implements Runnable {
 
             avgMeasurements /= 8;
             listAvgPollution.add(avgMeasurements);
-            System.out.println("Added measurement. measurements: " + avgMeasurements);
-
+            //System.out.println("Added measurement. measurements: " + avgMeasurements);
             if (sendData.get()) {
                 StatisticsInfo statisticsInfo = new StatisticsInfo(
                         listAvgPollution,
@@ -58,7 +57,7 @@ public class LocalStatisticsRunnable implements Runnable {
                         thisTaxi.getAccomplishedRides(),
                         thisTaxi.getId(),
                         thisTaxi.getBattery());
-                System.out.println("Send the info to the server");
+                //System.out.println("Send the info to the server");
                 postStatistics(statisticsInfo);
                 sendData.set(false);
                 listAvgPollution.clear();
@@ -81,6 +80,6 @@ public class LocalStatisticsRunnable implements Runnable {
     private void postStatistics(StatisticsInfo statisticsInfo) {
         String serverInitInfos = Utility.postRequest(client,
                 ADMIN_SERVER_URL + STAT_PATH, GSON.toJson(statisticsInfo));
-        System.out.println(serverInitInfos);
+        //System.out.println(serverInitInfos);
     }
 }
