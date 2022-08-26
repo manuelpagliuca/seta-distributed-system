@@ -4,16 +4,16 @@ import Taxi.Statistics.Statistics.AvgStatisticsInfo;
 import Taxi.Statistics.Statistics.TotalStatisticsInfo;
 import com.google.common.reflect.TypeToken;
 import jakarta.ws.rs.client.*;
-import Utility.Utility;
+import Misc.Utility;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Scanner;
 
-import static Utility.Utility.GSON;
-import static Utility.Utility.getJsonString;
+import static Misc.Utility.GSON;
+import static Misc.Utility.getJsonString;
 
-import Taxi.Data.TaxiInfo;
+import Taxi.Structures.TaxiInfo;
 import jakarta.ws.rs.core.Response;
 
 public class AdministratorClient {

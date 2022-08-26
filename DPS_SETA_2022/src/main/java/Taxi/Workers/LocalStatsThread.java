@@ -1,18 +1,19 @@
-package Taxi.Statistics;
+package Taxi.Workers;
 
-import Taxi.Data.TaxiInfo;
+import Taxi.Structures.TaxiInfo;
+import Taxi.Statistics.PollutionBuffer;
 import Taxi.Statistics.Statistics.StatisticsInfo;
 import Taxi.Statistics.Simulators.Measurement;
-import Utility.Utility;
+import Misc.Utility;
 import jakarta.ws.rs.client.Client;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static Utility.Utility.GSON;
+import static Misc.Utility.GSON;
 
-public class LocalStatisticsRunnable implements Runnable {
+public class LocalStatsThread extends Thread {
     private final PollutionBuffer pollutionBuffer;
     private final ArrayList<Double> listAvgPollution = new ArrayList<>();
     private final TaxiInfo thisTaxi;
@@ -22,8 +23,8 @@ public class LocalStatisticsRunnable implements Runnable {
     private final AtomicBoolean sendData = new AtomicBoolean(false);
     private final Thread postRequestClock = new Thread(this::sendEach15sec);
 
-    public LocalStatisticsRunnable(PollutionBuffer pollutionBuffer, TaxiInfo thisTaxi, String adminServerUrl,
-                                   Client client) {
+    public LocalStatsThread(TaxiInfo thisTaxi, String adminServerUrl,
+                            Client client, PollutionBuffer pollutionBuffer) {
         this.pollutionBuffer = pollutionBuffer;
         this.thisTaxi = thisTaxi;
         this.ADMIN_SERVER_URL = adminServerUrl;

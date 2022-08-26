@@ -3,7 +3,7 @@ package Taxi.Statistics.Statistics;
 import java.io.Serializable;
 import java.util.List;
 
-import static Utility.Utility.printCalendar;
+import static Misc.Utility.printCalendar;
 
 public class StatisticsInfo implements Serializable {
     protected List<Double> listAvgPollutionLevels;

@@ -1,9 +1,9 @@
 package Taxi.gRPC;
 
-import Taxi.Data.TaxiSchema;
-import Taxi.Data.LogicalClock;
+import Taxi.Structures.TaxiSchema;
+import Taxi.Structures.LogicalClock;
 import Taxi.Taxi;
-import Taxi.Data.TaxiInfo;
+import Taxi.Structures.TaxiInfo;
 
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;

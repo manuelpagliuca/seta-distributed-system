@@ -1,6 +1,6 @@
 package Taxi.gRPC;
 
-import Taxi.Data.TaxiInfo;
+import Taxi.Structures.TaxiInfo;
 import io.grpc.stub.StreamObserver;
 import org.example.grpc.IPC;
 import org.example.grpc.IPCServiceGrpc;

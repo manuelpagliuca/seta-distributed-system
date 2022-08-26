@@ -1,11 +1,11 @@
-package AdminServer;
+package AdminServer.Workers;
 
 import AdminServer.AdminServer;
 
-public class ServerLoggerRunnable implements Runnable {
+public class ServerLoggerThread extends Thread {
     private final Object newTaxiArrived;
 
-    ServerLoggerRunnable(Object dummy) {
+    public ServerLoggerThread(Object dummy) {
         this.newTaxiArrived = dummy;
     }
 

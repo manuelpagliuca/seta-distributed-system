@@ -1,7 +1,7 @@
-package Taxi.Menu;
+package Taxi.Workers.Menu;
 
-import Taxi.Data.TaxiInfo;
-import Taxi.RechargeThread;
+import Taxi.Structures.TaxiInfo;
+import Taxi.Workers.RechargeThread;
 
 import java.util.ArrayList;
 import java.util.Scanner;
@@ -17,15 +17,16 @@ import static Taxi.Taxi.removeTaxi;
  * quit: perform a DELETE request on the administrator server for the
  * removal of this taxi, then quit the process.
  */
-public class MenuRunnable implements Runnable {
+public class CLIThread extends Thread {
     final Object availableCLI;
     private Thread t;
     private final TaxiInfo taxi;
     private final ArrayList<TaxiInfo> otherTaxis;
-    private RechargeThread rechargeThreadRef;
+    private final RechargeThread rechargeThreadRef;
 
 
-    public MenuRunnable(TaxiInfo taxi, ArrayList<TaxiInfo> otherTaxis, Object availableCLI, RechargeThread rechargeThread) {
+    public CLIThread(TaxiInfo taxi, ArrayList<TaxiInfo> otherTaxis,
+                     Object availableCLI, RechargeThread rechargeThread) {
         this.availableCLI = availableCLI;
         this.taxi = taxi;
         this.otherTaxis = otherTaxis;
@@ -58,6 +59,8 @@ public class MenuRunnable implements Runnable {
             if (userInput.equalsIgnoreCase("quit") || userInput.equalsIgnoreCase("exit")) {
                 System.out.println("Terminating the execution");
                 try {
+
+                    rechargeThreadRef.terminate();
                     removeTaxi();
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);

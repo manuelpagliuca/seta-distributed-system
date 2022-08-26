@@ -1,4 +1,4 @@
-package Taxi.Data;
+package Taxi.Structures;
 
 import java.util.Calendar;
 

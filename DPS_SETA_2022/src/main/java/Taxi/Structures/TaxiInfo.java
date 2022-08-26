@@ -2,7 +2,7 @@
  * Mat. Number 975169
  * Manuel Pagliuca
  * M.Sc. of Computer Science @UNIMI A.Y. 2021/2022 */
-package Taxi.Data;
+package Taxi.Structures;
 
 import org.example.grpc.IPC;
 

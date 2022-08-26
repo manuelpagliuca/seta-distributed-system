@@ -4,7 +4,8 @@
  * M.Sc. of Computer Science @UNIMI A.Y. 2021/2022 */
 package AdminServer;
 
-import Taxi.Data.TaxiInfo;
+import AdminServer.Workers.ServerLoggerThread;
+import Taxi.Structures.TaxiInfo;
 import Taxi.Statistics.Statistics.AvgStatisticsInfo;
 import Taxi.Statistics.Statistics.StatisticsInfo;
 import Taxi.Statistics.Statistics.TotalStatisticsInfo;
@@ -17,7 +18,7 @@ import java.net.URI;
 import java.sql.Timestamp;
 import java.util.*;
 
-import static Utility.Utility.genTaxiInitialPosition;
+import static Misc.Utility.genTaxiInitialPosition;
 
 /*
  * The administrator server class manages the taxis (clients)
@@ -54,9 +55,8 @@ public class AdminServer {
         String serverAddress = "http://" + HOST + ":" + PORT;
         HttpServer restServer = GrizzlyHttpServerFactory.createHttpServer(URI.create(serverAddress), config);
 
-        Thread taxisUpdater = new Thread(new ServerLoggerRunnable(newTaxiArrived));
-        taxisUpdater.start();
-
+        ServerLoggerThread serverLoggerThread = new ServerLoggerThread(newTaxiArrived);
+        serverLoggerThread.start();
 
         try {
             restServer.start();

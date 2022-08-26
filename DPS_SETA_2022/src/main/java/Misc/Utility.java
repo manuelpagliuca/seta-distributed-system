@@ -1,4 +1,4 @@
-package Utility;
+package Misc;
 
 import com.google.gson.Gson;
 import jakarta.ws.rs.client.Client;
@@ -8,7 +8,7 @@ import jakarta.ws.rs.client.WebTarget;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
-import Taxi.Data.TaxiInfo;
+import Taxi.Structures.TaxiInfo;
 
 import java.util.ArrayList;
 import java.util.Calendar;

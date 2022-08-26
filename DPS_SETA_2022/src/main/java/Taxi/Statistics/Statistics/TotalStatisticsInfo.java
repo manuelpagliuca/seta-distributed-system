@@ -2,7 +2,7 @@ package Taxi.Statistics.Statistics;
 
 import java.util.List;
 
-import static Utility.Utility.printCalendar;
+import static Misc.Utility.printCalendar;
 
 public class TotalStatisticsInfo extends StatisticsInfo {
     public TotalStatisticsInfo(List<Double> avgMeasurements, double traveledKms, int accomplishedRides, int taxiID, double taxiBattery) {

@@ -7,12 +7,12 @@ package AdminServer;
 import Taxi.Statistics.Statistics.AvgStatisticsInfo;
 import Taxi.Statistics.Statistics.StatisticsInfo;
 import Taxi.Statistics.Statistics.TotalStatisticsInfo;
-import Utility.Utility;
+import Misc.Utility;
 import com.google.gson.*;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
-import Taxi.Data.TaxiInfo;
-import Taxi.Data.TaxiSchema;
+import Taxi.Structures.TaxiInfo;
+import Taxi.Structures.TaxiSchema;
 
 import java.util.ArrayList;
 

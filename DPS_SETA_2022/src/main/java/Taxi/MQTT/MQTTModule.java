@@ -1,16 +1,16 @@
 package Taxi.MQTT;
 
-import SETA.RideInfo;
-import Taxi.Data.TaxiSchema;
+import SETA.Structures.RideInfo;
+import Taxi.Structures.TaxiSchema;
 import Taxi.gRPC.GrpcModule;
-import Taxi.Data.TaxiInfo;
+import Taxi.Structures.TaxiInfo;
 import Taxi.gRPC.GrpcRunnable;
 import org.eclipse.paho.client.mqttv3.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import static Utility.Utility.*;
+import static Misc.Utility.*;
 
 public class MQTTModule {
     // MQTT

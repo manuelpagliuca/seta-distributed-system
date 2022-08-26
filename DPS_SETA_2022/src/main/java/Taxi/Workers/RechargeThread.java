@@ -1,13 +1,13 @@
-package Taxi;
+package Taxi.Workers;
 
-import Taxi.Data.TaxiInfo;
+import Taxi.Structures.TaxiInfo;
 import Taxi.gRPC.GrpcModule;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import static Utility.Utility.euclideanDistance;
-import static Utility.Utility.genTaxiInitialPosition;
+import static Misc.Utility.euclideanDistance;
+import static Misc.Utility.genTaxiInitialPosition;
 
 public class RechargeThread extends Thread {
     private final TaxiInfo thisTaxi;
@@ -66,8 +66,9 @@ public class RechargeThread extends Thread {
                 thisTaxi.getDistrict() +
                 "and after %,.2f Km the battery levels are %,.2f%%\n", totalKm, thisTaxi.getBattery());
         thisTaxi.setRiding(false);
+        thisTaxi.incrementTotalRides();
 
-        int totalAck = otherTaxis.size();
+        final int totalAck = otherTaxis.size();
         int receivedAck = grpcModule.coordinateRechargeGrpcStream();
 
         // Keep asking until he doesn't get the ACK from everybody
@@ -86,5 +87,7 @@ public class RechargeThread extends Thread {
         thisTaxi.setRecharging(false);
     }
 
-
+    public void terminate() {
+        isRunning = false;
+    }
 }

@@ -4,24 +4,25 @@
  * M.Sc. of Computer Science @UNIMI A.Y. 2021/2022 */
 package Taxi;
 
-import Taxi.Data.LogicalClock;
-import Taxi.Data.TaxiInfo;
+import Taxi.Structures.LogicalClock;
+import Taxi.Structures.TaxiInfo;
 import Taxi.MQTT.MQTTModule;
-import Taxi.Menu.InputCheckerThread;
-import Taxi.Menu.MenuRunnable;
-import Taxi.Statistics.LocalStatisticsRunnable;
+import Taxi.Workers.Menu.InputCheckerThread;
+import Taxi.Workers.Menu.CLIThread;
+import Taxi.Workers.LocalStatsThread;
 import Taxi.Statistics.PollutionBuffer;
 import Taxi.Statistics.Simulators.PM10Simulator;
+import Taxi.Workers.RechargeThread;
 import Taxi.gRPC.GrpcModule;
 
-import Utility.Utility;
+import Misc.Utility;
 
 import io.grpc.stub.StreamObserver;
 
 import jakarta.ws.rs.client.*;
 import jakarta.ws.rs.client.Client;
 
-import Taxi.Data.TaxiSchema;
+import Taxi.Structures.TaxiSchema;
 
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.example.grpc.IPC;
@@ -29,7 +30,7 @@ import org.example.grpc.IPCServiceGrpc;
 
 import java.util.ArrayList;
 
-import static Utility.Utility.*;
+import static Misc.Utility.*;
 
 public class Taxi extends IPCServiceGrpc.IPCServiceImplBase {
     private final static String ADMIN_SERVER_ADDRESS = "localhost";
@@ -49,21 +50,29 @@ public class Taxi extends IPCServiceGrpc.IPCServiceImplBase {
 
         postInit();
 
-        // Local Stats & Sensor Data
+        // Create Local Stats & PM10 threads
         PollutionBuffer pollutionBuffer = new PollutionBuffer();
+        PM10Simulator pm10SimulatorThread =
+                new PM10Simulator(Integer.toString(generateRndInteger(0, 10)), pollutionBuffer);
 
-        startLocalStatsThread(pollutionBuffer);
+        LocalStatsThread localStatsThread =
+                new LocalStatsThread(thisTaxi, ADMIN_SERVER_URL, client, pollutionBuffer);
 
-        PM10Simulator pm10SimulatorThread = new PM10Simulator(Integer.toString(generateRndInteger(0, 10)), pollutionBuffer);
-        pm10SimulatorThread.start();
-
-        // Battery Thread
+        // Create recharge thread
         Object checkBattery = new Object();
         RechargeThread rechargeThread = new RechargeThread(thisTaxi, otherTaxis, checkBattery, grpcModule);
 
-        // User Input
-        Object inputAvailable = startCLIthread(rechargeThread);
-        startInputChecker(inputAvailable);
+        // Create the thread for CLI and for checking the input
+        Object inputAvailable = new Object();
+        CLIThread cliThread = new CLIThread(thisTaxi, otherTaxis, inputAvailable, rechargeThread);
+        InputCheckerThread inputCheckerThread = new InputCheckerThread(inputAvailable);
+
+        // Start the threads
+        cliThread.start();
+        inputCheckerThread.start();
+        localStatsThread.start();
+        pm10SimulatorThread.start();
+        rechargeThread.start();
 
         // GRPC
         TaxiSchema taxiSchema = new TaxiSchema();
@@ -75,8 +84,6 @@ public class Taxi extends IPCServiceGrpc.IPCServiceImplBase {
         grpcModule.startServer();
         grpcModule.presentToOtherTaxis();
 
-
-        rechargeThread.start();
         //Thread batteryThread = new Thread(new RechargeRunnable(thisTaxi, otherTaxis, checkBattery, grpcModule));
         //batteryThread.start();
         //RechargeRunnable
@@ -94,25 +101,6 @@ public class Taxi extends IPCServiceGrpc.IPCServiceImplBase {
         logicalClock.increment();
         System.out.println("Logical clock initial value " + logicalClock.printCalendar());
     }
-
-    private static void startLocalStatsThread(PollutionBuffer pollutionBuffer) {
-        Thread localStatistics = new Thread(new LocalStatisticsRunnable(pollutionBuffer,
-                thisTaxi, ADMIN_SERVER_URL, client));
-        localStatistics.start();
-    }
-
-    private static void startInputChecker(Object inputAvailable) {
-        InputCheckerThread checkingLines = new InputCheckerThread(inputAvailable);
-        checkingLines.start();
-    }
-
-    private static Object startCLIthread(RechargeThread rechargeThread) {
-        Object inputAvailable = new Object();
-        MenuRunnable cli = new MenuRunnable(thisTaxi, otherTaxis, inputAvailable, rechargeThread);
-        cli.start();
-        return inputAvailable;
-    }
-
 
     /*
      * Initialization of the Taxi process through the administrator server

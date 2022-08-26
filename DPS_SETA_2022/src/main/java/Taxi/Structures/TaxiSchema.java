@@ -1,6 +1,4 @@
-package Taxi.Data;
-
-import Taxi.Data.TaxiInfo;
+package Taxi.Structures;
 
 import java.io.Serializable;
 import java.util.ArrayList;

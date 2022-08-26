@@ -1,6 +1,7 @@
 package SETA;
 
-import Utility.Utility;
+import Misc.Utility;
+import SETA.Structures.RideInfo;
 import org.eclipse.paho.client.mqttv3.*;
 
 import java.sql.Timestamp;

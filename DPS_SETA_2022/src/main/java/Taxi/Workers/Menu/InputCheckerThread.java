@@ -1,6 +1,4 @@
-package Taxi.Menu;
-
-import Taxi.RechargeThread;
+package Taxi.Workers.Menu;
 
 import java.io.IOException;
 
