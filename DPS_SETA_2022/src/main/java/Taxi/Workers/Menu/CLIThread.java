@@ -1,3 +1,7 @@
+/* Project for the course of "Distributed and Pervasive Systems"
+ * Mat. Number 975169
+ * Manuel Pagliuca
+ * M.Sc. of Computer Science @UNIMI A.Y. 2021/2022 */
 package Taxi.Workers.Menu;
 
 import Taxi.Structures.TaxiInfo;
@@ -23,8 +27,6 @@ public class CLIThread extends Thread {
     private final TaxiInfo taxi;
     private final ArrayList<TaxiInfo> otherTaxis;
     private final RechargeThread rechargeThreadRef;
-
-
     public CLIThread(TaxiInfo taxi, ArrayList<TaxiInfo> otherTaxis,
                      Object availableCLI, RechargeThread rechargeThread) {
         this.availableCLI = availableCLI;

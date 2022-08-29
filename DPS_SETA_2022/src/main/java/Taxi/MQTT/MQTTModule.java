@@ -1,3 +1,7 @@
+/* Project for the course of "Distributed and Pervasive Systems"
+ * Mat. Number 975169
+ * Manuel Pagliuca
+ * M.Sc. of Computer Science @UNIMI A.Y. 2021/2022 */
 package Taxi.MQTT;
 
 import SETA.Structures.RideInfo;
@@ -26,7 +30,6 @@ public class MQTTModule {
     private final GrpcModule grpcModule = GrpcModule.getInstance();
     private final Object checkBattery;
 
-
     public MQTTModule(TaxiSchema taxiSchema, Object checkBatteryRef) {
         thisTaxi = taxiSchema.getTaxiInfo();
         otherTaxis = taxiSchema.getTaxis();
@@ -48,7 +51,7 @@ public class MQTTModule {
         MqttClient mqttClient = createNewClient();
 
         MqttConnectOptions connectOptions = new MqttConnectOptions();
-        connectOptions.setCleanSession(false);
+        connectOptions.setCleanSession(true);
         connectToBroker(mqttClient, connectOptions);
 
         setMqttCallback(mqttClient);
@@ -84,7 +87,7 @@ public class MQTTModule {
         } catch (MqttException e) {
             throw new RuntimeException(e);
         }
-        System.out.println("Subscribed on topic: " + topic);
+        //System.out.println("Subscribed on topic: " + topic);
     }
 
     private void setMqttCallback(MqttClient mqttClient) {
@@ -99,7 +102,7 @@ public class MQTTModule {
                 String ride = new String(message.getPayload());
                 RideInfo rideInfo = GSON.fromJson(ride, RideInfo.class);
 
-                if (topic.equals("seta/smartcity/rides/completed")) {
+                if (topic.equals(COMPLETED_RIDES_TOPIC)) {
                     IDCompletedRides.add(rideInfo.getId());
                 } else {
                     if (rideInfo.getStartingDistrict() == thisTaxi.getDistrict()) {
@@ -109,13 +112,6 @@ public class MQTTModule {
                             if (!thisTaxi.isRiding() && !thisTaxi.isRecharging()) {
                                 coordinateRide(mqttClient, rideInfo, checkBattery);
                             }
-
-                            /*if (message.isRetained()) {
-                                MqttMessage nullPayload = new MqttMessage(new byte[0]);
-                                nullPayload.setRetained(true);
-                                nullPayload.setQos(QOS);
-                                mqttClient.publish(topic, nullPayload);
-                            }*/
                         }
                     }
                 }
@@ -138,19 +134,27 @@ public class MQTTModule {
         final double clientDistance = euclideanDistance(thisTaxi.getPosition(), passengerPosition);
 
         int totalAck = otherTaxis.size();
-        System.out.println("[Ride " + rideInfo.getId() + "] Waiting for " + totalAck + " ACK votes");
+        //System.out.println("[Ride " + rideInfo.getId() + "] Waiting for " + totalAck + " ACK votes");
 
         int receivedAck = grpcModule.coordinateRideGrpcStream(
                 clientDistance,
                 rideInfo.getStartPosition(),
                 false);
 
-        System.out.println("Received a total of " + receivedAck + " ACKs");
-
         if (receivedAck == totalAck) {
-            System.out.println("I got the ownership for the ride " + rideInfo.getId());
-            GrpcRunnable.resetACKS();
-            performRide(mqttClient, rideInfo, checkBattery);
+            if (!IDCompletedRides.contains(rideInfo.getId())) {
+                // Send the completed ride on the "completed" topic
+                MqttMessage rideCompletionMsg = new MqttMessage(GSON.toJson(rideInfo).getBytes());
+                rideCompletionMsg.setQos(QUALITY_OF_SERVICE);
+                mqttClient.publish(COMPLETED_RIDES_TOPIC, rideCompletionMsg);
+
+                // Reset the acks
+                System.out.println("I got the ownership for the ride " + rideInfo.getId());
+                GrpcRunnable.resetACKS();
+
+                // Perform ride
+                performRide(mqttClient, rideInfo, checkBattery);
+            }
         } else {
             GrpcRunnable.resetACKS();
             System.out.println("I didn't got the ownership for the ride " + rideInfo.getId());
@@ -179,11 +183,6 @@ public class MQTTModule {
         thisTaxi.setRiding(false);
         thisTaxi.addTotalKm(totalKm);
         thisTaxi.incrementTotalRides();
-
-        // Send the completed ride on the "completed" topic
-        MqttMessage rideCompletionMsg = new MqttMessage(GSON.toJson(rideInfo).getBytes());
-        rideCompletionMsg.setQos(QUALITY_OF_SERVICE);
-        mqttClient.publish("seta/smartcity/rides/completed", rideCompletionMsg);
 
         // Change the subscription district if necessary
         if (thisTaxi.getDistrict() != rideInfo.getDestinationDistrict()) {

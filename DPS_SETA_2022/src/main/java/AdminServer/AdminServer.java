@@ -36,7 +36,6 @@ public class AdminServer {
     private static AdminServer instance = null;
     private static final ArrayList<TaxiInfo> taxis = new ArrayList<>();
     private static final Object newTaxiArrived = new Object();
-
     private static final Map<Integer, ArrayList<StatisticsInfo>> taxiLocalStatistics = new HashMap<>();
 
     public AdminServer() {

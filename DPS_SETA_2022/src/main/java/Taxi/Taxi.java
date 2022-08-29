@@ -35,7 +35,8 @@ import static Misc.Utility.*;
 public class Taxi extends IPCServiceGrpc.IPCServiceImplBase {
     private final static String ADMIN_SERVER_ADDRESS = "localhost";
     private final static int ADMIN_SERVER_PORT = 9001;
-    private final static String ADMIN_SERVER_URL = "http://" + ADMIN_SERVER_ADDRESS + ":" + ADMIN_SERVER_PORT;
+    private final static String ADMIN_SERVER_URL =
+            "http://" + ADMIN_SERVER_ADDRESS + ":" + ADMIN_SERVER_PORT;
     private static final GrpcModule grpcModule = GrpcModule.getInstance();
 
     // Taxi Data
@@ -84,11 +85,6 @@ public class Taxi extends IPCServiceGrpc.IPCServiceImplBase {
         grpcModule.startServer();
         grpcModule.presentToOtherTaxis();
 
-        //Thread batteryThread = new Thread(new RechargeRunnable(thisTaxi, otherTaxis, checkBattery, grpcModule));
-        //batteryThread.start();
-        //RechargeRunnable
-
-
         // MQTT
         MQTTModule mqttModule = new MQTTModule(taxiSchema, checkBattery);
         mqttModule.startMqttClient();
@@ -99,7 +95,7 @@ public class Taxi extends IPCServiceGrpc.IPCServiceImplBase {
     private static void logicalClockInit() {
         logicalClock = new LogicalClock(RAND_CLOCK_OFFSET);
         logicalClock.increment();
-        System.out.println("Logical clock initial value " + logicalClock.printCalendar());
+        //System.out.println("Logical clock initial value " + logicalClock.printCalendar());
     }
 
     /*
@@ -133,7 +129,7 @@ public class Taxi extends IPCServiceGrpc.IPCServiceImplBase {
         thisTaxi.setGrpcPort(serverData.getGrpcPort());
         thisTaxi.setPosition(serverData.getPosition());
         thisTaxi.setDistrict(serverData.getDistrict());
-        thisTaxi.setBattery(100);
+        thisTaxi.setBattery(100.0);
         otherTaxis = taxiSchema.getTaxis();
 
         System.out.println(serverData);
