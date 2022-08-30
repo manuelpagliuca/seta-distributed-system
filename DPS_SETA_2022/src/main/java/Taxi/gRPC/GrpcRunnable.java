@@ -1,7 +1,7 @@
 /* Project for the course of "Distributed and Pervasive Systems"
  * Mat. Number 975169
  * Manuel Pagliuca
- * M.Sc. of Computer Science @UNIMI A.Y. 2021/2022 */
+ * M.Sc. in Computer Science @UNIMI A.Y. 2021/2022 */
 package Taxi.gRPC;
 
 import Taxi.Structures.TaxiInfo;
@@ -19,7 +19,6 @@ public class GrpcRunnable implements Runnable {
     }
 
     private static final AtomicInteger ackRides = new AtomicInteger(0);
-    //private volatile static Integer ackRides = 0;
     private final GrpcMessages grpcMessages = new GrpcMessages();
     private final IPCServiceGrpc.IPCServiceStub stub;
     private static TaxiInfo t = null;
@@ -55,7 +54,7 @@ public class GrpcRunnable implements Runnable {
             clientStream.onNext(grpcMessages.infos);
         } else if (grpcMessages.rechargeProposal != null) {
             StreamObserver<IPC.RechargeProposal> rechargeStream = getRechargeProposalStreamObserver(stub);
-            //System.out.println("[Recharge][Send] Proposal to " + t.getId());
+            System.out.println("[Recharge][Send] Proposal to " + t.getId());
             rechargeStream.onNext(grpcMessages.rechargeProposal);
         }
     }
@@ -67,9 +66,9 @@ public class GrpcRunnable implements Runnable {
                 if (value.getVote()) {
                     ackRides.incrementAndGet();
                     //System.out.println("[Ride][Receive] ACK from " + t.getId());
-                } else {
-                    //System.out.println("[Ride][Receive] NACK from " + t.getId());
-                }
+                } //else {
+                    //priorityTimestamps.add(new Pair<>(value.getId(), value.getLogicalClock()));
+                //}
             }
 
             @Override
@@ -91,9 +90,9 @@ public class GrpcRunnable implements Runnable {
                 if (value.getVote()) {
                     ackRides.incrementAndGet();
                     //System.out.println("[Ride][Receive] ACK from " + t.getId());
-                } else {
+                } //else {
                     //System.out.println("[Ride][Receive] NACK from " + t.getId());
-                }
+                //}
                 //syncLogicalClock(value, t);
             }
 
@@ -118,9 +117,9 @@ public class GrpcRunnable implements Runnable {
                     ackRides.incrementAndGet();
                     //}
                     //System.out.println("[Ride][Receive] ACK from " + t.getId());
-                } else {
+                } //else {
                     //System.out.println("[Ride][Receive] NACK from " + t.getId());
-                }
+                //}
                 //syncLogicalClock(value, t);
             }
 

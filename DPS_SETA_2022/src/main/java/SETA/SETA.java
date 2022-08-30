@@ -1,12 +1,13 @@
 /* Project for the course of "Distributed and Pervasive Systems"
  * Mat. Number 975169
  * Manuel Pagliuca
- * M.Sc. of Computer Science @UNIMI A.Y. 2021/2022 */
+ * M.Sc. in Computer Science @UNIMI A.Y. 2021/2022 */
 package SETA;
 
 import Misc.Utility;
+
 import SETA.Structures.RideInfo;
-import jdk.jshell.execution.Util;
+
 import org.eclipse.paho.client.mqttv3.*;
 
 import java.util.*;
@@ -132,12 +133,12 @@ public class SETA {
         }
     }
 
-    private static void printDistrictQueues() {
+    /*private static void printDistrictQueues() {
         System.out.println("Queue District 1: " + queueDistrict1);
         System.out.println("Queue District 2: " + queueDistrict2);
         System.out.println("Queue District 3: " + queueDistrict3);
         System.out.println("Queue District 4: " + queueDistrict4);
-    }
+    }*/
 
     private static void sendQueuedRide(MqttClient client, RideInfo ride, boolean sameDistrict) throws MqttException {
         addRideDistrictQueue(ride);
@@ -176,47 +177,6 @@ public class SETA {
             queueDistrict3.add(ride);
         } else {
             queueDistrict4.add(ride);
-        }
-    }
-
-    private static boolean isDistrictQueueEmpty(RideInfo ride) {
-        if (ride.getStartingDistrict() == 1) {
-            return queueDistrict1.isEmpty();
-        } else if (ride.getStartingDistrict() == 2) {
-            return queueDistrict2.isEmpty();
-        } else if (ride.getStartingDistrict() == 3) {
-            return queueDistrict3.isEmpty();
-        }
-        return queueDistrict4.isEmpty();
-    }
-
-    private static void addToDistrictQueue(RideInfo ride) {
-        if (ride.getStartingDistrict() == 1) {
-            if (!queueDistrict1.contains(ride)) {
-                if (queueDistrict1.size() >= 5) {
-                    queueDistrict1.add(ride);
-                }
-            }
-        } else if (ride.getStartingDistrict() == 2) {
-            if (!queueDistrict2.contains(ride)) {
-                if (queueDistrict2.size() >= 5) {
-                    queueDistrict2.add(ride);
-                } else {
-
-                }
-            }
-        } else if (ride.getStartingDistrict() == 3) {
-            if (!queueDistrict3.contains(ride)) {
-                if (queueDistrict3.size() >= 5) {
-                    queueDistrict3.add(ride);
-                }
-            }
-        } else if (ride.getStartingDistrict() == 4) {
-            if (!queueDistrict4.contains(ride)) {
-                if (queueDistrict4.size() >= 5) {
-                    queueDistrict4.add(ride);
-                }
-            }
         }
     }
 

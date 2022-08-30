@@ -1,7 +1,7 @@
 /* Project for the course of "Distributed and Pervasive Systems"
  * Mat. Number 975169
  * Manuel Pagliuca
- * M.Sc. of Computer Science @UNIMI A.Y. 2021/2022 */
+ * M.Sc. in Computer Science @UNIMI A.Y. 2021/2022 */
 package Taxi.gRPC;
 
 import Taxi.Structures.TaxiSchema;
@@ -19,8 +19,6 @@ import org.example.grpc.IPCServiceGrpc;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
-
-import static Taxi.Taxi.*;
 
 public class GrpcModule implements Runnable {
     private final static String ADMIN_SERVER_ADDRESS = "localhost";
@@ -120,7 +118,7 @@ public class GrpcModule implements Runnable {
                 ackS++;
 
             // Synchronize and increment the logical clock
-            syncLogicalClock(answer, t);
+            //syncLogicalClock(answer, t);
             channel.shutdown();
         }
 
@@ -172,7 +170,7 @@ public class GrpcModule implements Runnable {
     }
 
     public int coordinateRechargeGrpcStream() throws InterruptedException {
-        IPC.Infos infos = getIPCInfos();
+        IPC.RechargeProposal rechargeProposal = getIPCRechargProposal();
 
         Thread[] msg = new Thread[otherTaxis.size()];
         int i = 0;
@@ -180,7 +178,7 @@ public class GrpcModule implements Runnable {
         for (TaxiInfo t : otherTaxis) {
             ManagedChannel channel = getManagedChannel(t.getGrpcPort());
             IPCServiceGrpc.IPCServiceStub stub = IPCServiceGrpc.newStub(channel);
-            msg[i] = new Thread(new GrpcRunnable(t, infos, stub));
+            msg[i] = new Thread(new GrpcRunnable(t, rechargeProposal, stub));
             msg[i].start();
             channel.awaitTermination(2, TimeUnit.SECONDS);
             i++;
@@ -188,6 +186,7 @@ public class GrpcModule implements Runnable {
 
         return GrpcRunnable.getACKs();
     }
+
 
     public int coordinateRideGrpcStream(double distanceToDestination, int[] destination,
                                         boolean isRechargeRide) throws InterruptedException {
@@ -212,8 +211,9 @@ public class GrpcModule implements Runnable {
         return GrpcRunnable.getACKs();
     }
 
+    /*
     public static void syncLogicalClock(IPC.ACK value, TaxiInfo t) {
-        LogicalClock serverClock = new LogicalClock(RAND_CLOCK_OFFSET);
+        LogicalClock serverClock = new LogicalClock(CLOCK_OFFSET);
         serverClock.setLogicalClock(value.getLogicalClock());
 
         if (logicalClock.getLogicalClock() <= value.getLogicalClock())
@@ -224,6 +224,23 @@ public class GrpcModule implements Runnable {
         //System.out.println("ACK/NACK sent from " + t.getId()
         //      + " at " + serverClock.printCalendar()
         //    + ", received at " + logicalClock.printCalendar());
+    }*/
+
+    private IPC.RechargeProposal getIPCRechargProposal() {
+        return IPC.RechargeProposal.newBuilder()
+                .setTaxi(IPC.Infos.newBuilder()
+                        .setId(thisTaxi.getId())
+                        .setDistrict(thisTaxi.getDistrict())
+                        .setGrpcPort(thisTaxi.getGrpcPort())
+                        .addPosition(thisTaxi.getPosition()[0])
+                        .addPosition(thisTaxi.getPosition()[1])
+                        .setIsRecharging(thisTaxi.isRecharging())
+                        .setIsRiding(thisTaxi.isRiding())
+                        .setBattery(thisTaxi.getBattery())
+                        .setLogicalClock(taxiLogicalClock.getLogicalClock())
+                        .build())
+                .setLogicalClock(taxiLogicalClock.getLogicalClock())
+                .build();
     }
 
     private IPC.RideCharge getRideCharge(double distanceToDestination, int[] destination, boolean isRechargeRide) {

@@ -1,7 +1,7 @@
 /* Project for the course of "Distributed and Pervasive Systems"
  * Mat. Number 975169
  * Manuel Pagliuca
- * M.Sc. of Computer Science @UNIMI A.Y. 2021/2022 */
+ * M.Sc. in Computer Science @UNIMI A.Y. 2021/2022 */
 package AdminServer;
 
 import AdminServer.Workers.ServerLoggerThread;
@@ -249,14 +249,12 @@ public class AdminServer {
         avgAccomplishedRides /= lastNstatsList.size();
         avgBatteryLevel /= lastNstatsList.size();
 
-        AvgStatisticsInfo avgLastNstats = new AvgStatisticsInfo(
+        //System.out.println(avgLastNstats);
+
+        return new AvgStatisticsInfo(
                 singlePollutionAvg,
                 avgTraveledKms, avgAccomplishedRides,
                 taxiID, avgBatteryLevel);
-
-        //System.out.println(avgLastNstats);
-
-        return avgLastNstats;
     }
 
     // Return the list of statistics given a taxi ID
@@ -280,7 +278,7 @@ public class AdminServer {
         int totalAvgAccomplishedRides = 0;
         double totalBatteryLevels = 0.0;
 
-        int numberOfTaxis = 0;
+        int numberOfTaxis;
         synchronized (taxiLocalStatistics) {
             numberOfTaxis = taxiLocalStatistics.size();
             for (Map.Entry<Integer, ArrayList<StatisticsInfo>> e : taxiLocalStatistics.entrySet()) {

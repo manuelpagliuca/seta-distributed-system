@@ -1,7 +1,7 @@
 /* Project for the course of "Distributed and Pervasive Systems"
  * Mat. Number 975169
  * Manuel Pagliuca
- * M.Sc. of Computer Science @UNIMI A.Y. 2021/2022 */
+ * M.Sc. in Computer Science @UNIMI A.Y. 2021/2022 */
 package Taxi.Workers.Menu;
 
 import Taxi.Structures.TaxiInfo;
@@ -73,7 +73,7 @@ public class CLIThread extends Thread {
             } else if (userInput.equalsIgnoreCase("recharge")) {
                 // TODO: Dovrebbe terminare la corsa che sta eseguendo?
                 try {
-                    rechargeThreadRef.moveToRechargeStation();
+                    rechargeThreadRef.rechargeProcedure();
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }

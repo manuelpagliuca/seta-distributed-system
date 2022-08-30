@@ -1,7 +1,7 @@
 /* Project for the course of "Distributed and Pervasive Systems"
  * Mat. Number 975169
  * Manuel Pagliuca
- * M.Sc. of Computer Science @UNIMI A.Y. 2021/2022 */
+ * M.Sc. in Computer Science @UNIMI A.Y. 2021/2022 */
 package Taxi.MQTT;
 
 import SETA.Structures.RideInfo;
@@ -47,7 +47,7 @@ public class MQTTModule {
      * should take the ownership of the ride (the coordination will be performed
      * through gRPC).
      */
-    public void startMqttClient() throws MqttException {
+    public void startMqttClient() {
         MqttClient mqttClient = createNewClient();
 
         MqttConnectOptions connectOptions = new MqttConnectOptions();
@@ -81,7 +81,7 @@ public class MQTTModule {
         }
     }
 
-    private void subscribeTopic(MqttClient mqttClient, String topic) throws MqttException {
+    private void subscribeTopic(MqttClient mqttClient, String topic) {
         try {
             mqttClient.subscribe(topic, QUALITY_OF_SERVICE);
         } catch (MqttException e) {

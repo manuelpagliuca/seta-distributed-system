@@ -1,7 +1,7 @@
 /* Project for the course of "Distributed and Pervasive Systems"
  * Mat. Number 975169
  * Manuel Pagliuca
- * M.Sc. of Computer Science @UNIMI A.Y. 2021/2022 */
+ * M.Sc. in Computer Science @UNIMI A.Y. 2021/2022 */
 package Misc;
 
 import com.google.gson.Gson;
@@ -12,25 +12,14 @@ import jakarta.ws.rs.client.WebTarget;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
-import Taxi.Structures.TaxiInfo;
-
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Random;
 
 public class Utility {
-    private static Utility instance;
     private static final Random random = new Random();
     public static Gson GSON = new Gson();
 
     Utility() {
-    }
-
-    public static Utility getInstance() {
-        if (instance == null) {
-            instance = new Utility();
-        }
-        return instance;
     }
 
     public static String postRequest(Client client, String url, String jsonBody) {
@@ -98,18 +87,6 @@ public class Utility {
         double xOffset = Math.pow((end[0] - start[1]), 2);
         double yOffset = Math.pow((end[1] - start[0]), 2);
         return Math.sqrt(xOffset + yOffset);
-    }
-
-    public static ArrayList<TaxiInfo> getAvailableTaxisInDistrict(ArrayList<TaxiInfo> otherTaxis, TaxiInfo thisTaxi) {
-        ArrayList<TaxiInfo> availableTaxisInDistrict = new ArrayList<>();
-
-        for (TaxiInfo t : otherTaxis) {
-            final boolean tHasSameDistrict = (t.getDistrict() == thisTaxi.getDistrict());
-            final boolean tIsAvailable = !t.isRecharging() && !t.isRiding();
-            if (tHasSameDistrict && tIsAvailable)
-                availableTaxisInDistrict.add(t);
-        }
-        return availableTaxisInDistrict;
     }
 
     /*

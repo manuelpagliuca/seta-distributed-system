@@ -1,7 +1,7 @@
 /* Project for the course of "Distributed and Pervasive Systems"
  * Mat. Number 975169
  * Manuel Pagliuca
- * M.Sc. of Computer Science @UNIMI A.Y. 2021/2022 */
+ * M.Sc. in Computer Science @UNIMI A.Y. 2021/2022 */
 package AdminClient;
 
 import Taxi.Statistics.Statistics.AvgStatisticsInfo;
@@ -85,6 +85,7 @@ public class AdministratorClient {
 
     }
 
+    @SuppressWarnings("CommentedOutCode")
     private static long getTimestampFromUser(Calendar calendar) {
         //System.out.println("Insert year: ");
         //final int year = SCANNER.nextInt();
@@ -147,7 +148,7 @@ public class AdministratorClient {
         String json = getJsonString(response);
 
         if (response.getStatus() == Response.Status.OK.getStatusCode()) {
-            ArrayList<TaxiInfo> taxis = GSON.fromJson(json, new TypeToken<ArrayList<TaxiInfo>>() {
+            @SuppressWarnings("UnstableApiUsage") ArrayList<TaxiInfo> taxis = GSON.fromJson(json, new TypeToken<ArrayList<TaxiInfo>>() {
             }.getType());
 
             assert taxis != null;

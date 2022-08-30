@@ -3142,6 +3142,17 @@ public final class IPC {
      * @return The logicalClock.
      */
     long getLogicalClock();
+
+    /**
+     * <code>required int32 id = 4;</code>
+     * @return Whether the id field is set.
+     */
+    boolean hasId();
+    /**
+     * <code>required int32 id = 4;</code>
+     * @return The id.
+     */
+    int getId();
   }
   /**
    * Protobuf type {@code org.example.grpc.ACK}
@@ -3197,6 +3208,11 @@ public final class IPC {
             case 16: {
               bitField0_ |= 0x00000002;
               logicalClock_ = input.readInt64();
+              break;
+            }
+            case 32: {
+              bitField0_ |= 0x00000004;
+              id_ = input.readInt32();
               break;
             }
             default: {
@@ -3266,6 +3282,23 @@ public final class IPC {
       return logicalClock_;
     }
 
+    public static final int ID_FIELD_NUMBER = 4;
+    private int id_;
+    /**
+     * <code>required int32 id = 4;</code>
+     * @return Whether the id field is set.
+     */
+    public boolean hasId() {
+      return ((bitField0_ & 0x00000004) != 0);
+    }
+    /**
+     * <code>required int32 id = 4;</code>
+     * @return The id.
+     */
+    public int getId() {
+      return id_;
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -3281,6 +3314,10 @@ public final class IPC {
         memoizedIsInitialized = 0;
         return false;
       }
+      if (!hasId()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
       memoizedIsInitialized = 1;
       return true;
     }
@@ -3293,6 +3330,9 @@ public final class IPC {
       }
       if (((bitField0_ & 0x00000002) != 0)) {
         output.writeInt64(2, logicalClock_);
+      }
+      if (((bitField0_ & 0x00000004) != 0)) {
+        output.writeInt32(4, id_);
       }
       unknownFields.writeTo(output);
     }
@@ -3310,6 +3350,10 @@ public final class IPC {
       if (((bitField0_ & 0x00000002) != 0)) {
         size += com.google.protobuf.CodedOutputStream
           .computeInt64Size(2, logicalClock_);
+      }
+      if (((bitField0_ & 0x00000004) != 0)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(4, id_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -3336,6 +3380,11 @@ public final class IPC {
         if (getLogicalClock()
             != other.getLogicalClock()) return false;
       }
+      if (hasId() != other.hasId()) return false;
+      if (hasId()) {
+        if (getId()
+            != other.getId()) return false;
+      }
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -3356,6 +3405,10 @@ public final class IPC {
         hash = (37 * hash) + LOGICALCLOCK_FIELD_NUMBER;
         hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
             getLogicalClock());
+      }
+      if (hasId()) {
+        hash = (37 * hash) + ID_FIELD_NUMBER;
+        hash = (53 * hash) + getId();
       }
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
@@ -3494,6 +3547,8 @@ public final class IPC {
         bitField0_ = (bitField0_ & ~0x00000001);
         logicalClock_ = 0L;
         bitField0_ = (bitField0_ & ~0x00000002);
+        id_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000004);
         return this;
       }
 
@@ -3529,6 +3584,10 @@ public final class IPC {
         if (((from_bitField0_ & 0x00000002) != 0)) {
           result.logicalClock_ = logicalClock_;
           to_bitField0_ |= 0x00000002;
+        }
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          result.id_ = id_;
+          to_bitField0_ |= 0x00000004;
         }
         result.bitField0_ = to_bitField0_;
         onBuilt();
@@ -3585,6 +3644,9 @@ public final class IPC {
         if (other.hasLogicalClock()) {
           setLogicalClock(other.getLogicalClock());
         }
+        if (other.hasId()) {
+          setId(other.getId());
+        }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
         return this;
@@ -3596,6 +3658,9 @@ public final class IPC {
           return false;
         }
         if (!hasLogicalClock()) {
+          return false;
+        }
+        if (!hasId()) {
           return false;
         }
         return true;
@@ -3694,6 +3759,43 @@ public final class IPC {
         onChanged();
         return this;
       }
+
+      private int id_ ;
+      /**
+       * <code>required int32 id = 4;</code>
+       * @return Whether the id field is set.
+       */
+      public boolean hasId() {
+        return ((bitField0_ & 0x00000004) != 0);
+      }
+      /**
+       * <code>required int32 id = 4;</code>
+       * @return The id.
+       */
+      public int getId() {
+        return id_;
+      }
+      /**
+       * <code>required int32 id = 4;</code>
+       * @param value The id to set.
+       * @return This builder for chaining.
+       */
+      public Builder setId(int value) {
+        bitField0_ |= 0x00000004;
+        id_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required int32 id = 4;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearId() {
+        bitField0_ = (bitField0_ & ~0x00000004);
+        id_ = 0;
+        onChanged();
+        return this;
+      }
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
@@ -3786,15 +3888,16 @@ public final class IPC {
       "oDestination\030\003 \002(\001\022\026\n\016rechargingRide\030\004 \002" +
       "(\010\"O\n\020RechargeProposal\022%\n\004taxi\030\001 \002(\0132\027.o" +
       "rg.example.grpc.Infos\022\024\n\014logicalClock\030\002 " +
-      "\002(\003\")\n\003ACK\022\014\n\004vote\030\001 \002(\010\022\024\n\014logicalClock" +
-      "\030\002 \002(\0032\262\002\n\nIPCService\0229\n\007present\022\027.org.e" +
-      "xample.grpc.Infos\032\025.org.example.grpc.ACK" +
-      "\022=\n\007goodbye\022\027.org.example.grpc.Infos\032\025.o" +
-      "rg.example.grpc.ACK(\0010\001\022O\n\024coordinateRid" +
-      "eStream\022\034.org.example.grpc.RideCharge\032\025." +
-      "org.example.grpc.ACK(\0010\001\022Y\n\030coordinateRe" +
-      "chargeStream\022\".org.example.grpc.Recharge" +
-      "Proposal\032\025.org.example.grpc.ACK(\0010\001"
+      "\002(\003\"5\n\003ACK\022\014\n\004vote\030\001 \002(\010\022\024\n\014logicalClock" +
+      "\030\002 \002(\003\022\n\n\002id\030\004 \002(\0052\262\002\n\nIPCService\0229\n\007pre" +
+      "sent\022\027.org.example.grpc.Infos\032\025.org.exam" +
+      "ple.grpc.ACK\022=\n\007goodbye\022\027.org.example.gr" +
+      "pc.Infos\032\025.org.example.grpc.ACK(\0010\001\022O\n\024c" +
+      "oordinateRideStream\022\034.org.example.grpc.R" +
+      "ideCharge\032\025.org.example.grpc.ACK(\0010\001\022Y\n\030" +
+      "coordinateRechargeStream\022\".org.example.g" +
+      "rpc.RechargeProposal\032\025.org.example.grpc." +
+      "ACK(\0010\001"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -3823,7 +3926,7 @@ public final class IPC {
     internal_static_org_example_grpc_ACK_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_example_grpc_ACK_descriptor,
-        new java.lang.String[] { "Vote", "LogicalClock", });
+        new java.lang.String[] { "Vote", "LogicalClock", "Id", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)
