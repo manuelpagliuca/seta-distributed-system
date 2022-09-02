@@ -6,56 +6,39 @@ package Taxi.gRPC;
 
 import Taxi.Structures.TaxiInfo;
 import io.grpc.stub.StreamObserver;
+
 import org.example.grpc.IPC;
 import org.example.grpc.IPCServiceGrpc;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class GrpcRunnable implements Runnable {
-    public static class GrpcMessages {
-        private IPC.RideCharge rideCharge = null;
-        private IPC.Infos infos = null;
-        private IPC.RechargeProposal rechargeProposal = null;
-    }
-
     private static final AtomicInteger ackRides = new AtomicInteger(0);
-    private final GrpcMessages grpcMessages = new GrpcMessages();
+    private final GrpcMessages grpcMessages;
     private final IPCServiceGrpc.IPCServiceStub stub;
     private static TaxiInfo t = null;
 
-    public GrpcRunnable(TaxiInfo t, IPC.RideCharge rideCharge, IPCServiceGrpc.IPCServiceStub stub) {
+    public GrpcRunnable(TaxiInfo t, GrpcMessages grpcMessages, IPCServiceGrpc.IPCServiceStub stub) {
         GrpcRunnable.t = t;
-        this.grpcMessages.rideCharge = rideCharge;
-        this.stub = stub;
-    }
-
-    public GrpcRunnable(TaxiInfo t, IPC.Infos infos, IPCServiceGrpc.IPCServiceStub stub) {
-        GrpcRunnable.t = t;
-        this.grpcMessages.infos = infos;
-        this.stub = stub;
-    }
-
-    public GrpcRunnable(TaxiInfo t, IPC.RechargeProposal rechargeProposal, IPCServiceGrpc.IPCServiceStub stub) {
-        GrpcRunnable.t = t;
-        this.grpcMessages.rechargeProposal = rechargeProposal;
+        this.grpcMessages = grpcMessages;
         this.stub = stub;
     }
 
     @Override
     public void run() {
-        if (grpcMessages.rideCharge != null) {
+        if (grpcMessages.getRideCharge() != null) {
             StreamObserver<IPC.RideCharge> clientStream = getRideChargeStreamObserver(stub);
-            //System.out.println("[Ride][Send] Infos to " + t.getId());
-            clientStream.onNext(grpcMessages.rideCharge);
-        } else if (grpcMessages.infos != null) {
+            System.out.println("[Ride][Send] Infos to " + t.getId());
+            clientStream.onNext(grpcMessages.getRideCharge());
+        } else if (grpcMessages.getInfos() != null) {
             // TODO implement infos stream
             StreamObserver<IPC.Infos> clientStream = getInfosStreamObserver(stub);
-            //System.out.println("[Infos][Send] Infos to " + t.getId());
-            clientStream.onNext(grpcMessages.infos);
-        } else if (grpcMessages.rechargeProposal != null) {
+            System.out.println("[Infos][Send] Infos to " + t.getId());
+            clientStream.onNext(grpcMessages.getInfos());
+        } else if (grpcMessages.getRechargeProposal() != null) {
             StreamObserver<IPC.RechargeProposal> rechargeStream = getRechargeProposalStreamObserver(stub);
             System.out.println("[Recharge][Send] Proposal to " + t.getId());
-            rechargeStream.onNext(grpcMessages.rechargeProposal);
+            rechargeStream.onNext(grpcMessages.getRechargeProposal());
         }
     }
 
@@ -65,10 +48,10 @@ public class GrpcRunnable implements Runnable {
             public void onNext(IPC.ACK value) {
                 if (value.getVote()) {
                     ackRides.incrementAndGet();
-                    //System.out.println("[Ride][Receive] ACK from " + t.getId());
-                } //else {
-                    //priorityTimestamps.add(new Pair<>(value.getId(), value.getLogicalClock()));
-                //}
+                    System.out.println("[Recharge][Receive] ACK from " + t.getId());
+                } else {
+                    System.out.println("[Recharge][Receive] NACK from " + t.getId());
+                }
             }
 
             @Override
@@ -89,10 +72,10 @@ public class GrpcRunnable implements Runnable {
             public void onNext(IPC.ACK value) {
                 if (value.getVote()) {
                     ackRides.incrementAndGet();
-                    //System.out.println("[Ride][Receive] ACK from " + t.getId());
-                } //else {
-                    //System.out.println("[Ride][Receive] NACK from " + t.getId());
-                //}
+                    System.out.println("[Ride][Receive] ACK from " + t.getId());
+                } else {
+                    System.out.println("[Ride][Receive] NACK from " + t.getId());
+                }
                 //syncLogicalClock(value, t);
             }
 
@@ -113,13 +96,11 @@ public class GrpcRunnable implements Runnable {
             @Override
             public void onNext(IPC.ACK value) {
                 if (value.getVote()) {
-                    //synchronized (ackRides) {
                     ackRides.incrementAndGet();
-                    //}
-                    //System.out.println("[Ride][Receive] ACK from " + t.getId());
-                } //else {
-                    //System.out.println("[Ride][Receive] NACK from " + t.getId());
-                //}
+                    System.out.println("[Infos][Receive] ACK from " + t.getId());
+                } else {
+                    System.out.println("[Infos][Receive] NACK from " + t.getId());
+                }
                 //syncLogicalClock(value, t);
             }
 

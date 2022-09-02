@@ -53,7 +53,6 @@ public class AdminServer {
         config.register(AdminServerServices.class);
         String serverAddress = "http://" + HOST + ":" + PORT;
         HttpServer restServer = GrizzlyHttpServerFactory.createHttpServer(URI.create(serverAddress), config);
-
         ServerLoggerThread serverLoggerThread = new ServerLoggerThread(newTaxiArrived);
         serverLoggerThread.start();
 
@@ -162,8 +161,8 @@ public class AdminServer {
         final int upperBound = 4;
 
         // TODO: revert back to original functioning
-        //return 2; // for testing gRPC
-        return rnd.nextInt(lowerBound, upperBound + 1);
+        return 2; // for testing gRPC
+        //return rnd.nextInt(lowerBound, upperBound + 1);
     }
 
     /*

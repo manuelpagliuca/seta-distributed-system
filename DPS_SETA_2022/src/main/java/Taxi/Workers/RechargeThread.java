@@ -6,6 +6,7 @@ package Taxi.Workers;
 
 import Taxi.Structures.TaxiInfo;
 import Taxi.gRPC.GrpcModule;
+import Taxi.gRPC.GrpcRunnable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,6 +32,7 @@ public class RechargeThread extends Thread {
     @Override
     public void run() {
         while (isRunning) {
+            // Check the battery condition only after the execution of a ride.
             synchronized (checkBattery) {
                 try {
                     checkBattery.wait();
@@ -50,17 +52,28 @@ public class RechargeThread extends Thread {
     }
 
     public void rechargeProcedure() throws InterruptedException {
+        thisTaxi.setWantsToRecharge(true);
         System.out.println("[Critical Battery Level] Moving to the recharge station of district "
                 + thisTaxi.getDistrict());
 
         rideToDistrictRechargeStation();
 
-        final int totalAck = otherTaxis.size();
-        int receivedAck = grpcModule.coordinateRechargeGrpcStream();
+        int totalACKs = otherTaxis.size();
+        int receivedACKs = 0;
 
-        if (totalAck != receivedAck) {
-            rechargeBattery();
+        while (receivedACKs < totalACKs) {
+            try {
+                receivedACKs = grpcModule.coordinateRechargeGrpcStream();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            GrpcRunnable.resetACKS();
+            totalACKs = otherTaxis.size();
+            System.out.println("The recharge station is busy...");
         }
+
+        System.out.println("It is your turn now!");
+        rechargeBattery();
     }
 
     private void rechargeBattery() throws InterruptedException {
@@ -71,6 +84,7 @@ public class RechargeThread extends Thread {
         System.out.printf("The taxi has been successfully recharged, battery levels are %,.2f%%\n",
                 thisTaxi.getBattery());
         thisTaxi.setRecharging(false);
+        thisTaxi.setWantsToRecharge(false);
     }
 
     private void rideToDistrictRechargeStation() throws InterruptedException {
@@ -93,6 +107,8 @@ public class RechargeThread extends Thread {
         thisTaxi.incrementTotalRides();
     }
 
+
+    // Used for the general software termination procedure (through CLI)
     public void terminate() {
         isRunning = false;
     }

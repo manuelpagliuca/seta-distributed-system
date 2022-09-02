@@ -147,11 +147,11 @@ public class TaxiInfo implements Serializable {
         this.kmTraveled += kmTraveled;
     }
 
-    public boolean wantToRecharge() {
+    public boolean wantsToRecharge() {
         return wantToRecharge;
     }
 
-    public void setWantToRecharge(boolean wantToRecharge) {
+    public void setWantsToRecharge(boolean wantToRecharge) {
         this.wantToRecharge = wantToRecharge;
     }
 }

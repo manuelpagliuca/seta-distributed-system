@@ -29,8 +29,7 @@ message RechargeProposal {
 
 message ACK {
   required bool vote = 1;
-  required int64 logicalClock = 2;
-  required int32 id = 4;
+  required int32 id = 2;
 }
 
 service IPCService {

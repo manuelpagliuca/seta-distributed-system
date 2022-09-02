@@ -1,7 +1,7 @@
 /* Project for the course of "Distributed and Pervasive Systems"
  * Mat. Number 975169
  * Manuel Pagliuca
- * M.Sc. of Computer Science @UNIMI A.Y. 2021/2022 */
+ * M.Sc. in Computer Science @UNIMI A.Y. 2021/2022 */
 package org.example.grpc;
 
 message Infos {
@@ -22,14 +22,14 @@ message RideCharge {
   required bool rechargingRide = 4;
 }
 
-message RechargeProposal{
+message RechargeProposal {
   required Infos taxi = 1;
   required int64 logicalClock = 2;
 }
 
 message ACK {
   required bool vote = 1;
-  required int64 logicalClock = 2;
+  required int32 id = 2;
 }
 
 service IPCService {

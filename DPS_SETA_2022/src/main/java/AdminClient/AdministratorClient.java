@@ -77,7 +77,8 @@ public class AdministratorClient {
         String json = getJsonString(response);
 
         if (response.getStatus() == Response.Status.OK.getStatusCode()) {
-            TotalStatisticsInfo avgTimestampStats = new TotalStatisticsInfo(GSON.fromJson(json, TotalStatisticsInfo.class));
+            TotalStatisticsInfo avgTimestampStats =
+                    new TotalStatisticsInfo(GSON.fromJson(json, TotalStatisticsInfo.class));
             System.out.println(avgTimestampStats);
         } else {
             System.out.println(json);

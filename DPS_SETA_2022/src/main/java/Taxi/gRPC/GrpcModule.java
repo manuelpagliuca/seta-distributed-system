@@ -38,16 +38,6 @@ public class GrpcModule implements Runnable {
         return instance;
     }
 
-    public void setTaxiData(TaxiSchema taxiSchema) {
-        this.thisTaxi = taxiSchema.getTaxiInfo();
-        this.otherTaxis = taxiSchema.getTaxis();
-    }
-
-    public void setClockAndPort(LogicalClock logicalClock, int grpcPort) {
-        this.grpcPort = grpcPort;
-        this.taxiLogicalClock = logicalClock;
-    }
-
     /* Start the gRPC server side of the taxi
      * ------------------------------------------------------------------------
      * Once this method is called it will be possible to send data to this
@@ -57,9 +47,7 @@ public class GrpcModule implements Runnable {
     public void run() {
         if (grpcPort != -1) {
             try {
-                io.grpc.Server server =
-                        ServerBuilder.forPort(grpcPort)
-                                .addService(new Taxi()).build();
+                io.grpc.Server server = ServerBuilder.forPort(grpcPort).addService(new Taxi()).build();
                 server.start();
                 System.out.println("gRPC server started on port: " + grpcPort);
                 server.awaitTermination();
@@ -78,47 +66,40 @@ public class GrpcModule implements Runnable {
     }
 
     /*
-     * Send a presentation msg to other taxis through gRPC
-     * ------------------------------------------------------------------------
-     * This function sends to each previously registered taxi in the
-     * system (received from the initialization POST of the
-     * administrator server) its own individual data.
+     * Send a broadcast presentation message through gRPC to all taxis in the smartcity
+     * -------------------------------------------------------------------------------------
+     * This function sends to each previously registered taxi in the  system (received from
+     * the initialization POST of the administrator server) its own individual data.
      *
-     * This will make possible to create future bidirectional
-     * communication with the other taxis because now they will know
-     * the gRPC port of the new taxi.
+     * This will make possible to create future bidirectional communication with the other
+     * taxis because now they will know the gRPC port of the new taxi.
      */
-    public void presentToOtherTaxis() {
+    public void broadcastPresentationSync() {
         if (otherTaxis.size() > 0) {
-            int ackS = sendHelloInBroadcast();
+            int ackS = broadcastPresentationSyncImpl();
             int taxisInSmartCity = otherTaxis.size();
 
             if (ackS == taxisInSmartCity)
-                System.out.println("Taxi " +
-                        thisTaxi.getId() +
-                        " has been presented correctly to all the previous taxis of the smart city");
+                System.out.println("The taxi " + thisTaxi.getId() +
+                        " has been presented correctly to all the taxis of the smart city");
             else
-                System.out.println("Taxi " +
-                        thisTaxi.getId() + " encountered an error during the presentation phase");
+                System.out.println("The taxi " + thisTaxi.getId() +
+                        " encountered an error during the presentation phase");
         }
     }
 
-    // TODO: should be an async communication
-    private int sendHelloInBroadcast() {
+    private int broadcastPresentationSyncImpl() {
         IPC.Infos presentMsg = getIPCInfos();
         int ackS = 0;
 
         for (TaxiInfo t : otherTaxis) {
             ManagedChannel channel = getManagedChannel(t.getGrpcPort());
             IPCServiceGrpc.IPCServiceBlockingStub stub = IPCServiceGrpc.newBlockingStub(channel);
-            //System.out.println("Sending to " + t.getId() + " the presentation at time " + logicalClock.printCalendar());
             IPC.ACK answer = stub.present(presentMsg);
 
             if (answer.getVote())
                 ackS++;
 
-            // Synchronize and increment the logical clock
-            //syncLogicalClock(answer, t);
             channel.shutdown();
         }
 
@@ -141,50 +122,46 @@ public class GrpcModule implements Runnable {
 
     private int sendGoodbyeBroadcastAsync() throws InterruptedException {
         IPC.Infos goodByeMsg = getIPCInfos();
+        GrpcMessages grpcMessages = new GrpcMessages();
+        grpcMessages.setInfos(goodByeMsg);
 
-        int i = 0;
-        Thread[] threads = new Thread[otherTaxis.size()];
-
-        for (TaxiInfo t : otherTaxis) {
-            ManagedChannel channel = getManagedChannel(t.getGrpcPort());
-            IPCServiceGrpc.IPCServiceStub stub = IPCServiceGrpc.newStub(channel);
-
-            threads[i] = new Thread(new GrpcRunnable(t, goodByeMsg, stub));
-            threads[i].start();
-            channel.awaitTermination(2, TimeUnit.SECONDS);
-            // Synchronize and increment the logical clock
-            //syncLogicalClock(answer, t);
-            channel.shutdown();
-            i++;
-        }
-
-        for (Thread thread : threads) {
-            thread.join();
-        }
-
-        return GrpcRunnable.getACKs();
+        final int receivedACKs = broadcastGrpcStreams(grpcMessages);
+        GrpcRunnable.resetACKS();
+        return receivedACKs;
     }
 
     private ManagedChannel getManagedChannel(int grpcPort) {
         return ManagedChannelBuilder.forTarget(ADMIN_SERVER_ADDRESS + ":" + grpcPort).usePlaintext().build();
     }
 
-    public int coordinateRechargeGrpcStream() throws InterruptedException {
-        IPC.RechargeProposal rechargeProposal = getIPCRechargProposal();
-
-        Thread[] msg = new Thread[otherTaxis.size()];
+    private int broadcastGrpcStreams(GrpcMessages grpcMessages) throws InterruptedException {
+        Thread[] threads = new Thread[otherTaxis.size()];
         int i = 0;
 
         for (TaxiInfo t : otherTaxis) {
             ManagedChannel channel = getManagedChannel(t.getGrpcPort());
             IPCServiceGrpc.IPCServiceStub stub = IPCServiceGrpc.newStub(channel);
-            msg[i] = new Thread(new GrpcRunnable(t, rechargeProposal, stub));
-            msg[i].start();
+            threads[i] = new Thread(new GrpcRunnable(t, grpcMessages, stub));
+            threads[i].start();
             channel.awaitTermination(2, TimeUnit.SECONDS);
             i++;
         }
 
+        for (Thread t : threads) {
+            t.join();
+        }
         return GrpcRunnable.getACKs();
+    }
+
+    public int coordinateRechargeGrpcStream() throws InterruptedException {
+        IPC.RechargeProposal rechargeProposal = getIPCRechargeProposal();
+
+        GrpcMessages grpcMessages = new GrpcMessages();
+        grpcMessages.setRechargeProposal(rechargeProposal);
+
+        final int receivedACKs = broadcastGrpcStreams(grpcMessages);
+        GrpcRunnable.resetACKS();
+        return receivedACKs;
     }
 
 
@@ -192,41 +169,16 @@ public class GrpcModule implements Runnable {
                                         boolean isRechargeRide) throws InterruptedException {
         IPC.RideCharge rideCharge = getRideCharge(distanceToDestination, destination, isRechargeRide);
 
-        Thread[] msg = new Thread[otherTaxis.size()];
-        int i = 0;
+        GrpcMessages grpcMessages = new GrpcMessages();
+        grpcMessages.setRideCharge(rideCharge);
 
-        for (TaxiInfo t : otherTaxis) {
-            ManagedChannel channel = getManagedChannel(t.getGrpcPort());
-            IPCServiceGrpc.IPCServiceStub stub = IPCServiceGrpc.newStub(channel);
-            msg[i] = new Thread(new GrpcRunnable(t, rideCharge, stub));
-            msg[i].start();
-            channel.awaitTermination(2, TimeUnit.SECONDS);
-            i++;
-        }
-
-        for (Thread thread : msg) {
-            thread.join();
-        }
-
-        return GrpcRunnable.getACKs();
+        final int receivedACKs = broadcastGrpcStreams(grpcMessages);
+        GrpcRunnable.resetACKS();
+        return receivedACKs;
     }
 
-    /*
-    public static void syncLogicalClock(IPC.ACK value, TaxiInfo t) {
-        LogicalClock serverClock = new LogicalClock(CLOCK_OFFSET);
-        serverClock.setLogicalClock(value.getLogicalClock());
-
-        if (logicalClock.getLogicalClock() <= value.getLogicalClock())
-            logicalClock.setLogicalClock(value.getLogicalClock());
-
-        logicalClock.increment();
-
-        //System.out.println("ACK/NACK sent from " + t.getId()
-        //      + " at " + serverClock.printCalendar()
-        //    + ", received at " + logicalClock.printCalendar());
-    }*/
-
-    private IPC.RechargeProposal getIPCRechargProposal() {
+    // Getters & Setters
+    private IPC.RechargeProposal getIPCRechargeProposal() {
         return IPC.RechargeProposal.newBuilder()
                 .setTaxi(IPC.Infos.newBuilder()
                         .setId(thisTaxi.getId())
@@ -265,5 +217,15 @@ public class GrpcModule implements Runnable {
                 .setBattery(thisTaxi.getBattery())
                 .setLogicalClock(taxiLogicalClock.getLogicalClock())
                 .build();
+    }
+
+    public void setTaxiData(TaxiSchema taxiSchema) {
+        this.thisTaxi = taxiSchema.getTaxiInfo();
+        this.otherTaxis = taxiSchema.getTaxis();
+    }
+
+    public void setClockAndPort(LogicalClock logicalClock, int grpcPort) {
+        this.grpcPort = grpcPort;
+        this.taxiLogicalClock = logicalClock;
     }
 }
