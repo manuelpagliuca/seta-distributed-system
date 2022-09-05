@@ -6,11 +6,33 @@ package SETA.Structures;
 
 import java.io.Serializable;
 
+/* RideInfo
+ * ------------------------------------------------------------------------------
+ * This class is the structure of ride message, it will be used
+ * for the generation of the rides and for the marshalling/unmarshalling
+ * through Gson (JSON) of the MQTT messages to the broker.
+ *
+ * This will be used both for the sending that for the receiving of the
+ * rides messages (from Taxi and SETA).
+ */
 public class RideInfo implements Serializable {
     private int id;
     private int[] startPosition = new int[2];
     private int[] destinationPosition = new int[2];
 
+    /// Utility
+
+    // Get the starting district of the ride
+    public int getStartingDistrict() {
+        return getDistrict(startPosition);
+    }
+
+    // Get the destination district of the ride
+    public int getDestinationDistrict() {
+        return getDistrict(destinationPosition);
+    }
+
+    // Get the district of the ride given the position, usable only from member functions
     private int getDistrict(int[] position) {
         if (position.length != 2)
             return -1;
@@ -23,14 +45,6 @@ public class RideInfo implements Serializable {
             return 4;
         else
             return 3;
-    }
-
-    public int getStartingDistrict() {
-        return getDistrict(startPosition);
-    }
-
-    public int getDestinationDistrict() {
-        return getDistrict(destinationPosition);
     }
 
     // Getters & Setters
