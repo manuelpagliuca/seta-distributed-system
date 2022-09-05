@@ -10,15 +10,28 @@ import java.util.ArrayList;
 public class TaxiSchema implements Serializable {
     private TaxiInfo taxiInfo;
     private ArrayList<TaxiInfo> taxis = new ArrayList<>();
+
+    public TaxiSchema(){
+
+    }
+
+    public TaxiSchema(TaxiInfo thisTaxi, ArrayList<TaxiInfo> otherTaxis) {
+        taxiInfo = thisTaxi;
+        taxis = otherTaxis;
+    }
+
     public TaxiInfo getTaxiInfo() {
         return taxiInfo;
     }
+
     public void setTaxiInfo(TaxiInfo taxiInfo) {
         this.taxiInfo = taxiInfo;
     }
+
     public ArrayList<TaxiInfo> getTaxis() {
         return taxis;
     }
+
     public void setTaxis(ArrayList<TaxiInfo> taxis) {
         this.taxis = taxis;
     }

@@ -6,8 +6,9 @@ package Taxi.gRPC;
 
 import Taxi.Structures.TaxiSchema;
 import Taxi.Structures.LogicalClock;
-import Taxi.Taxi;
+
 import Taxi.Structures.TaxiInfo;
+
 
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
@@ -22,6 +23,7 @@ import java.util.concurrent.TimeUnit;
 
 public class GrpcModule implements Runnable {
     private final static String ADMIN_SERVER_ADDRESS = "localhost";
+    private GrpcServices grpcServices;
     private Thread server;
     private TaxiInfo thisTaxi;
     private ArrayList<TaxiInfo> otherTaxis;
@@ -47,7 +49,9 @@ public class GrpcModule implements Runnable {
     public void run() {
         if (grpcPort != -1) {
             try {
-                io.grpc.Server server = ServerBuilder.forPort(grpcPort).addService(new Taxi()).build();
+                io.grpc.Server server = ServerBuilder.forPort(grpcPort)
+                        .addService(new GrpcServices(new TaxiSchema(thisTaxi, otherTaxis)))
+                        .build();
                 server.start();
                 System.out.println("gRPC server started on port: " + grpcPort);
                 server.awaitTermination();
@@ -88,6 +92,7 @@ public class GrpcModule implements Runnable {
         }
     }
 
+
     private int broadcastPresentationSyncImpl() {
         IPC.Infos presentMsg = getIPCInfos();
         int ackS = 0;
@@ -95,7 +100,9 @@ public class GrpcModule implements Runnable {
         for (TaxiInfo t : otherTaxis) {
             ManagedChannel channel = getManagedChannel(t.getGrpcPort());
             IPCServiceGrpc.IPCServiceBlockingStub stub = IPCServiceGrpc.newBlockingStub(channel);
+
             IPC.ACK answer = stub.present(presentMsg);
+
 
             if (answer.getVote())
                 ackS++;
@@ -104,6 +111,61 @@ public class GrpcModule implements Runnable {
         }
 
         return ackS;
+    }
+
+    public void broadcastGoodbyeSync() {
+        if (otherTaxis.size() > 0) {
+            int ackS = broadcastGoodbyeSyncImpl();
+            int taxisInSmartCity = otherTaxis.size();
+
+            if (ackS == taxisInSmartCity)
+                System.out.println("The taxi " + thisTaxi.getId() +
+                        " has been removed correctly from all the taxis of the smart city");
+            else
+                System.out.println("The taxi " + thisTaxi.getId() +
+                        " encountered an error during the goodbye phase");
+        }
+    }
+
+    private int broadcastGoodbyeSyncImpl() {
+        IPC.Infos goodByeMsg = getIPCInfos();
+        int ackS = 0;
+
+        for (TaxiInfo t : otherTaxis) {
+            ManagedChannel channel = getManagedChannel(t.getGrpcPort());
+            IPCServiceGrpc.IPCServiceBlockingStub stub = IPCServiceGrpc.newBlockingStub(channel);
+            IPC.ACK answer = stub.goodbye(goodByeMsg);
+
+            if (answer.getVote())
+                ackS++;
+
+            channel.shutdown();
+        }
+
+        return ackS;
+    }
+
+    public void removeTaxiSync() {
+        int totalAck = otherTaxis.size();
+        int receivedAck = broadcastGoodbyeSyncImpl();
+
+        if (totalAck == receivedAck) {
+            System.out.println("The other taxis removed me correctly from their list");
+        } else {
+            System.out.println("An error occurred during the removal of this taxi from the" +
+                    "entries of the other taxis");
+        }
+    }
+
+    /*
+    private int sendGoodbyeBroadcastAsync() throws InterruptedException {
+        IPC.Infos goodByeMsg = getIPCInfos();
+        GrpcMessages grpcMessages = new GrpcMessages();
+        grpcMessages.setInfos(goodByeMsg);
+
+        final int receivedACKs = broadcastGrpcStreams(grpcMessages);
+        GrpcRunnable.resetACKS();
+        return receivedACKs;
     }
 
     // TODO : Should be an async communication
@@ -119,16 +181,8 @@ public class GrpcModule implements Runnable {
                     "entries of the other taxis");
         }
     }
+    */
 
-    private int sendGoodbyeBroadcastAsync() throws InterruptedException {
-        IPC.Infos goodByeMsg = getIPCInfos();
-        GrpcMessages grpcMessages = new GrpcMessages();
-        grpcMessages.setInfos(goodByeMsg);
-
-        final int receivedACKs = broadcastGrpcStreams(grpcMessages);
-        GrpcRunnable.resetACKS();
-        return receivedACKs;
-    }
 
     private ManagedChannel getManagedChannel(int grpcPort) {
         return ManagedChannelBuilder.forTarget(ADMIN_SERVER_ADDRESS + ":" + grpcPort).usePlaintext().build();
@@ -222,10 +276,12 @@ public class GrpcModule implements Runnable {
     public void setTaxiData(TaxiSchema taxiSchema) {
         this.thisTaxi = taxiSchema.getTaxiInfo();
         this.otherTaxis = taxiSchema.getTaxis();
+        grpcServices = new GrpcServices(taxiSchema);
     }
 
     public void setClockAndPort(LogicalClock logicalClock, int grpcPort) {
         this.grpcPort = grpcPort;
         this.taxiLogicalClock = logicalClock;
+        grpcServices.setClock(logicalClock);
     }
 }

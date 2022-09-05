@@ -34,7 +34,7 @@ message ACK {
 
 service IPCService {
   rpc present(Infos) returns (ACK);
-  rpc goodbye(stream Infos) returns (stream ACK);
+  rpc goodbye(Infos) returns (ACK);
   rpc coordinateRideStream(stream RideCharge) returns (stream ACK);
   rpc coordinateRechargeStream(stream RechargeProposal) returns (stream ACK);
 }

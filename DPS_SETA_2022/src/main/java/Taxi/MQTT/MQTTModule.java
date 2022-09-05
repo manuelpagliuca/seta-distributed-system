@@ -47,7 +47,7 @@ public class MQTTModule {
      * should take the ownership of the ride (the coordination will be performed
      * through gRPC).
      */
-    public void startMqttClient() {
+    public void initMQTTConnection() {
         MqttClient mqttClient = createNewClient();
 
         MqttConnectOptions connectOptions = new MqttConnectOptions();

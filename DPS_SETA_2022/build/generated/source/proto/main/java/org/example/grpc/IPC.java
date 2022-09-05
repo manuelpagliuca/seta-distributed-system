@@ -3785,15 +3785,15 @@ public final class IPC {
       "oDestination\030\003 \002(\001\022\026\n\016rechargingRide\030\004 \002" +
       "(\010\"O\n\020RechargeProposal\022%\n\004taxi\030\001 \002(\0132\027.o" +
       "rg.example.grpc.Infos\022\024\n\014logicalClock\030\002 " +
-      "\002(\003\"\037\n\003ACK\022\014\n\004vote\030\001 \002(\010\022\n\n\002id\030\002 \002(\0052\262\002\n" +
+      "\002(\003\"\037\n\003ACK\022\014\n\004vote\030\001 \002(\010\022\n\n\002id\030\002 \002(\0052\256\002\n" +
       "\nIPCService\0229\n\007present\022\027.org.example.grp" +
-      "c.Infos\032\025.org.example.grpc.ACK\022=\n\007goodby" +
+      "c.Infos\032\025.org.example.grpc.ACK\0229\n\007goodby" +
       "e\022\027.org.example.grpc.Infos\032\025.org.example" +
-      ".grpc.ACK(\0010\001\022O\n\024coordinateRideStream\022\034." +
-      "org.example.grpc.RideCharge\032\025.org.exampl" +
-      "e.grpc.ACK(\0010\001\022Y\n\030coordinateRechargeStre" +
-      "am\022\".org.example.grpc.RechargeProposal\032\025" +
-      ".org.example.grpc.ACK(\0010\001"
+      ".grpc.ACK\022O\n\024coordinateRideStream\022\034.org." +
+      "example.grpc.RideCharge\032\025.org.example.gr" +
+      "pc.ACK(\0010\001\022Y\n\030coordinateRechargeStream\022\"" +
+      ".org.example.grpc.RechargeProposal\032\025.org" +
+      ".example.grpc.ACK(\0010\001"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,

@@ -17,36 +17,59 @@ import Taxi.gRPC.GrpcModule;
 
 import Misc.Utility;
 
-import io.grpc.stub.StreamObserver;
-
 import jakarta.ws.rs.client.*;
 import jakarta.ws.rs.client.Client;
 
 import Taxi.Structures.TaxiSchema;
 
-import org.example.grpc.IPC;
-import org.example.grpc.IPCServiceGrpc;
-
 import java.util.ArrayList;
 
 import static Misc.Utility.*;
 
-public class Taxi extends IPCServiceGrpc.IPCServiceImplBase {
+/* Taxi
+ * ------------------------------------------------------------------------------
+ * This class represents a single taxi process (which in the test will be started
+ * several times), it has its own logic clock that advances by a random offset
+ * (chosen at) during the actions it will perform in its lifecycle.
+ *
+ * It has an endpoint with the administrator server, in fact it will benefit from
+ * the REST API exposed by the latter.
+ *
+ * It presents a module to manage communications through gRPC, the services of the
+ * latter are implemented on the class 'GrpcServices'.
+ *
+ * There is another module to handle MQTT communications.
+ *
+ * The taxi once started process initiates an initialization/registration procedure
+ * on the adminsitrator server through POST. It then prepares threads to handle
+ * local statistics, pollution simulators, user command line, and battery check
+ * (to then start the charging procedure).
+ *
+ * The threads are started in a specific order that must be respected, then the
+ * server side of the taxi is started for gRPC communication.
+ *
+ * Finally, an initialization procedure is started for MQTT through the module,
+ * this will subscribe to the topics of interest and manage the publications and
+ * messages received (runs).
+ */
+public class Taxi {
+    // Server addresses
     private final static String ADMIN_SERVER_ADDRESS = "localhost";
     private final static int ADMIN_SERVER_PORT = 9001;
     private final static String ADMIN_SERVER_URL = "http://" + ADMIN_SERVER_ADDRESS + ":" + ADMIN_SERVER_PORT;
-    private static final GrpcModule grpcModule = GrpcModule.getInstance();
 
-    // Taxi Data
-    private final static long CLOCK_OFFSET = Utility.generateRndLong(0, 15L);
-    public static LogicalClock logicalClock;
+    // Logical clock
+    public final static long CLOCK_OFFSET = Utility.generateRndLong(0, 15L);
+    public final static LogicalClock logicalClock = new LogicalClock(CLOCK_OFFSET);
+    private final static GrpcModule grpcModule = GrpcModule.getInstance();
     private static final TaxiInfo thisTaxi = new TaxiInfo();
     private static Client client;
     private static ArrayList<TaxiInfo> otherTaxis = new ArrayList<>();
 
     public static void main(String[] args) {
-        logicalClockInit();
+        logicalClock.increment();
 
+        // Procedure for initialize through the administrator server
         postInit();
 
         // Create Local Stats & PM10 threads
@@ -85,15 +108,9 @@ public class Taxi extends IPCServiceGrpc.IPCServiceImplBase {
 
         // MQTT
         MQTTModule mqttModule = new MQTTModule(taxiSchema, checkBattery);
-        mqttModule.startMqttClient();
+        mqttModule.initMQTTConnection();
 
         // TODO: Function for terminating correctly all the threads.
-    }
-
-    private static void logicalClockInit() {
-        logicalClock = new LogicalClock(CLOCK_OFFSET);
-        logicalClock.increment();
-        //System.out.println("Logical clock initial value " + logicalClock.printCalendar());
     }
 
     /*
@@ -140,187 +157,11 @@ public class Taxi extends IPCServiceGrpc.IPCServiceImplBase {
      * administrator server.
      */
     public static void removeTaxi() throws InterruptedException {
-        grpcModule.removeTaxiAsync();
+        grpcModule.broadcastGoodbyeSync();
 
         final String INIT_PATH = "/del-taxi/" + thisTaxi.getId();
         String serverInitInfos = delRequest(client, ADMIN_SERVER_URL + INIT_PATH);
         System.out.println(serverInitInfos);
         System.exit(0);
-    }
-
-    /// gRPC Services
-    private static void sendACKAndCompleteStream(StreamObserver<IPC.ACK> responseObserver, IPC.ACK.Builder thisTaxi) {
-        responseObserver.onNext(thisTaxi.setId(thisTaxi.getId()).setVote(true).build());
-        responseObserver.onCompleted();
-    }
-
-    private static void sendNACKAndCompleteStream(StreamObserver<IPC.ACK> responseObserver, IPC.ACK.Builder thisTaxi) {
-        responseObserver.onNext(thisTaxi.setId(thisTaxi.getId()).setVote(false).build());
-        responseObserver.onCompleted();
-    }
-
-    // Ricart & Agrawala
-    @Override
-    public StreamObserver<IPC.RechargeProposal> coordinateRechargeStream(StreamObserver<IPC.ACK> responseObserver) {
-        return new StreamObserver<>() {
-            @Override
-            public void onNext(IPC.RechargeProposal request) {
-                LogicalClock clientLogicalClock = getLogicalClockFromRequest(request);
-                final boolean sameDistrict = thisTaxi.getDistrict() == request.getTaxi().getDistrict();
-
-                if (!sameDistrict) {
-                    sendACKAndCompleteStream(responseObserver, IPC.ACK.newBuilder());
-                    return;
-                }
-
-                // If the taxi is inside the critical section
-                if (thisTaxi.isRecharging()) {
-                    sendNACKAndCompleteStream(responseObserver, IPC.ACK.newBuilder());
-                    return;
-                }
-
-                if (thisTaxi.wantsToRecharge()) {
-                    if (!thisTaxi.isRecharging()) {
-                        if (clientLogicalClock.getLogicalClock() < logicalClock.getLogicalClock()) {
-                            sendACKAndCompleteStream(responseObserver, IPC.ACK.newBuilder());
-                            return;
-                        } else if (clientLogicalClock.getLogicalClock() > logicalClock.getLogicalClock()) {
-                            logicalClock.setLogicalClock(clientLogicalClock.getLogicalClock());
-                            logicalClock.increment();
-                            sendNACKAndCompleteStream(responseObserver, IPC.ACK.newBuilder());
-                            return;
-                        } else {
-                            // Enforce Lamport Total Order
-                            if (request.getTaxi().getId() < thisTaxi.getId()) {
-                                sendACKAndCompleteStream(responseObserver, IPC.ACK.newBuilder());
-                                return;
-                            } else {
-                                sendNACKAndCompleteStream(responseObserver, IPC.ACK.newBuilder());
-                            }
-                            return;
-                        }
-                    }
-                }
-                // This taxi is not interested in recharging
-                sendACKAndCompleteStream(responseObserver, IPC.ACK.newBuilder());
-            }
-
-            private LogicalClock getLogicalClockFromRequest(IPC.RechargeProposal request) {
-                LogicalClock requestLogicalClock = new LogicalClock(CLOCK_OFFSET);
-                requestLogicalClock.setLogicalClock(request.getTaxi().getLogicalClock());
-                return requestLogicalClock;
-            }
-
-            @Override
-            public void onError(Throwable t) {
-
-            }
-
-            @Override
-            public void onCompleted() {
-
-            }
-        };
-    }
-
-    @Override
-    public StreamObserver<IPC.RideCharge> coordinateRideStream(StreamObserver<IPC.ACK> responseObserver) {
-        return new StreamObserver<>() {
-            @Override
-
-            public void onNext(IPC.RideCharge request) {
-                int[] passengerPos = new int[2];
-                passengerPos[0] = request.getDestinationPosition(0);
-                passengerPos[1] = request.getDestinationPosition(1);
-
-                final double clientTaxiDistance = request.getDistanceToDestination();
-                final double serverTaxiDistance = Utility.euclideanDistance(thisTaxi.getPosition(), passengerPos);
-
-                final boolean differentDistrict = thisTaxi.getDistrict() != request.getTaxi().getDistrict();
-                final boolean isRecharging = thisTaxi.isRecharging();
-                final boolean isRiding = thisTaxi.isRiding();
-                final boolean tripleCondition = differentDistrict || isRecharging || isRiding;
-
-                if (tripleCondition) {
-                    sendACKAndCompleteStream(responseObserver, IPC.ACK.newBuilder());
-                    return;
-                }
-
-                if (serverTaxiDistance > clientTaxiDistance) {
-                    // The client taxi has a smaller distance to the passenger than this, ACK
-                    // System.out.println(thisTaxi.getId()
-                    //        + " has a smaller distance than "
-                    //        + request.getTaxi().getId());
-                    sendACKAndCompleteStream(responseObserver, IPC.ACK.newBuilder());
-                    return;
-                } else if (serverTaxiDistance == clientTaxiDistance) {
-                    if (thisTaxi.getBattery() < request.getTaxi().getBattery()) {
-                        // Requester has more battery than this, ACK
-                        // System.out.println(thisTaxi.getId()
-                        //        + " has less battery than "
-                        //        + request.getTaxi().getId());
-                        sendACKAndCompleteStream(responseObserver, IPC.ACK.newBuilder());
-                        return;
-                    } else if (thisTaxi.getBattery() == request.getTaxi().getBattery()) {
-                        if (thisTaxi.getId() < request.getTaxi().getId()) {
-                            // The requesting taxi has a greater ID than this taxi, ACK
-                            // System.out.println(thisTaxi.getId()
-                            //        + " has a smaller ID than "
-                            //        + request.getTaxi().getId());
-                            sendACKAndCompleteStream(responseObserver, IPC.ACK.newBuilder());
-                            return;
-                        }
-                    }
-                }
-                // This taxi has a better distance, battery level or ID value than the requester,
-                // sends NACK to him
-                sendNACKAndCompleteStream(responseObserver, IPC.ACK.newBuilder());
-            }
-
-            @Override
-            public void onError(Throwable t) {
-
-            }
-
-            @Override
-            public void onCompleted() {
-
-            }
-        };
-    }
-
-    @Override
-    public void present(IPC.Infos request, StreamObserver<IPC.ACK> responseObserver) {
-        TaxiInfo clientTaxi = new TaxiInfo(request);
-        final boolean taxiIsNew = otherTaxis.isEmpty() || !otherTaxis.contains(clientTaxi);
-
-        if (taxiIsNew) {
-            otherTaxis.add(clientTaxi);
-            sendACKAndCompleteStream(responseObserver, IPC.ACK.newBuilder());
-            return;
-        }
-        sendNACKAndCompleteStream(responseObserver, IPC.ACK.newBuilder());
-    }
-
-    @Override
-    public StreamObserver<IPC.Infos> goodbye(StreamObserver<IPC.ACK> responseObserver) {
-        return new StreamObserver<>() {
-            @Override
-            public void onNext(IPC.Infos request) {
-                TaxiInfo clientTaxi = new TaxiInfo(request);
-                otherTaxis.removeIf(t -> clientTaxi.getId() == t.getId());
-                sendACKAndCompleteStream(responseObserver, IPC.ACK.newBuilder());
-            }
-
-            @Override
-            public void onError(Throwable t) {
-
-            }
-
-            @Override
-            public void onCompleted() {
-
-            }
-        };
     }
 }

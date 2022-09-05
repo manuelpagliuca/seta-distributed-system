@@ -30,16 +30,16 @@ public class GrpcRunnable implements Runnable {
             StreamObserver<IPC.RideCharge> clientStream = getRideChargeStreamObserver(stub);
             System.out.println("[Ride][Send] Infos to " + t.getId());
             clientStream.onNext(grpcMessages.getRideCharge());
-        } else if (grpcMessages.getInfos() != null) {
-            // TODO implement infos stream
-            StreamObserver<IPC.Infos> clientStream = getInfosStreamObserver(stub);
-            System.out.println("[Infos][Send] Infos to " + t.getId());
-            clientStream.onNext(grpcMessages.getInfos());
         } else if (grpcMessages.getRechargeProposal() != null) {
             StreamObserver<IPC.RechargeProposal> rechargeStream = getRechargeProposalStreamObserver(stub);
             System.out.println("[Recharge][Send] Proposal to " + t.getId());
             rechargeStream.onNext(grpcMessages.getRechargeProposal());
-        }
+        }/*else if (grpcMessages.getInfos() != null) {
+            // TODO implement infos stream
+            StreamObserver<IPC.Infos> clientStream = getInfosStreamObserver(stub);
+            System.out.println("[Infos][Send] Infos to " + t.getId());
+            clientStream.onNext(grpcMessages.getInfos());
+        }*/
     }
 
     private static StreamObserver<IPC.RechargeProposal> getRechargeProposalStreamObserver(IPCServiceGrpc.IPCServiceStub stub) {
@@ -91,6 +91,7 @@ public class GrpcRunnable implements Runnable {
         });
     }
 
+    /*
     private static StreamObserver<IPC.Infos> getInfosStreamObserver(IPCServiceGrpc.IPCServiceStub stub) {
         return stub.goodbye(new StreamObserver<>() {
             @Override
@@ -115,7 +116,7 @@ public class GrpcRunnable implements Runnable {
             }
         });
     }
-
+*/
     public static int getACKs() {
         return ackRides.get();
     }
@@ -125,3 +126,4 @@ public class GrpcRunnable implements Runnable {
     }
 
 }
+

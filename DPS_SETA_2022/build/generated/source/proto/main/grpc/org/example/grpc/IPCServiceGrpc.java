@@ -65,7 +65,7 @@ public final class IPCServiceGrpc {
       fullMethodName = SERVICE_NAME + '/' + "goodbye",
       requestType = org.example.grpc.IPC.Infos.class,
       responseType = org.example.grpc.IPC.ACK.class,
-      methodType = io.grpc.MethodDescriptor.MethodType.BIDI_STREAMING)
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<org.example.grpc.IPC.Infos,
       org.example.grpc.IPC.ACK> getGoodbyeMethod() {
     io.grpc.MethodDescriptor<org.example.grpc.IPC.Infos, org.example.grpc.IPC.ACK> getGoodbyeMethod;
@@ -74,7 +74,7 @@ public final class IPCServiceGrpc {
         if ((getGoodbyeMethod = IPCServiceGrpc.getGoodbyeMethod) == null) {
           IPCServiceGrpc.getGoodbyeMethod = getGoodbyeMethod =
               io.grpc.MethodDescriptor.<org.example.grpc.IPC.Infos, org.example.grpc.IPC.ACK>newBuilder()
-              .setType(io.grpc.MethodDescriptor.MethodType.BIDI_STREAMING)
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
               .setFullMethodName(generateFullMethodName(SERVICE_NAME, "goodbye"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
@@ -187,9 +187,9 @@ public final class IPCServiceGrpc {
 
     /**
      */
-    public io.grpc.stub.StreamObserver<org.example.grpc.IPC.Infos> goodbye(
+    public void goodbye(org.example.grpc.IPC.Infos request,
         io.grpc.stub.StreamObserver<org.example.grpc.IPC.ACK> responseObserver) {
-      return asyncUnimplementedStreamingCall(getGoodbyeMethod(), responseObserver);
+      asyncUnimplementedUnaryCall(getGoodbyeMethod(), responseObserver);
     }
 
     /**
@@ -217,7 +217,7 @@ public final class IPCServiceGrpc {
                   this, METHODID_PRESENT)))
           .addMethod(
             getGoodbyeMethod(),
-            asyncBidiStreamingCall(
+            asyncUnaryCall(
               new MethodHandlers<
                 org.example.grpc.IPC.Infos,
                 org.example.grpc.IPC.ACK>(
@@ -268,10 +268,10 @@ public final class IPCServiceGrpc {
 
     /**
      */
-    public io.grpc.stub.StreamObserver<org.example.grpc.IPC.Infos> goodbye(
+    public void goodbye(org.example.grpc.IPC.Infos request,
         io.grpc.stub.StreamObserver<org.example.grpc.IPC.ACK> responseObserver) {
-      return asyncBidiStreamingCall(
-          getChannel().newCall(getGoodbyeMethod(), getCallOptions()), responseObserver);
+      asyncUnaryCall(
+          getChannel().newCall(getGoodbyeMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -315,6 +315,13 @@ public final class IPCServiceGrpc {
       return blockingUnaryCall(
           getChannel(), getPresentMethod(), getCallOptions(), request);
     }
+
+    /**
+     */
+    public org.example.grpc.IPC.ACK goodbye(org.example.grpc.IPC.Infos request) {
+      return blockingUnaryCall(
+          getChannel(), getGoodbyeMethod(), getCallOptions(), request);
+    }
   }
 
   /**
@@ -341,6 +348,14 @@ public final class IPCServiceGrpc {
         org.example.grpc.IPC.Infos request) {
       return futureUnaryCall(
           getChannel().newCall(getPresentMethod(), getCallOptions()), request);
+    }
+
+    /**
+     */
+    public com.google.common.util.concurrent.ListenableFuture<org.example.grpc.IPC.ACK> goodbye(
+        org.example.grpc.IPC.Infos request) {
+      return futureUnaryCall(
+          getChannel().newCall(getGoodbyeMethod(), getCallOptions()), request);
     }
   }
 
@@ -370,6 +385,10 @@ public final class IPCServiceGrpc {
           serviceImpl.present((org.example.grpc.IPC.Infos) request,
               (io.grpc.stub.StreamObserver<org.example.grpc.IPC.ACK>) responseObserver);
           break;
+        case METHODID_GOODBYE:
+          serviceImpl.goodbye((org.example.grpc.IPC.Infos) request,
+              (io.grpc.stub.StreamObserver<org.example.grpc.IPC.ACK>) responseObserver);
+          break;
         default:
           throw new AssertionError();
       }
@@ -380,9 +399,6 @@ public final class IPCServiceGrpc {
     public io.grpc.stub.StreamObserver<Req> invoke(
         io.grpc.stub.StreamObserver<Resp> responseObserver) {
       switch (methodId) {
-        case METHODID_GOODBYE:
-          return (io.grpc.stub.StreamObserver<Req>) serviceImpl.goodbye(
-              (io.grpc.stub.StreamObserver<org.example.grpc.IPC.ACK>) responseObserver);
         case METHODID_COORDINATE_RIDE_STREAM:
           return (io.grpc.stub.StreamObserver<Req>) serviceImpl.coordinateRideStream(
               (io.grpc.stub.StreamObserver<org.example.grpc.IPC.ACK>) responseObserver);

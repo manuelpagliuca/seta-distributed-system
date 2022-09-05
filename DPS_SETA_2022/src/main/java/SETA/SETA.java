@@ -136,7 +136,7 @@ public class SETA {
      * Since there is a system for buffering the rides which are not accomplished,
      * the first thing to do is add the ride to the queue of his district.
      *
-     * If the ride is not in the same district as the previous ride (N.B.: the first
+     * If the ride is not in the same district as the previous ride (Note: the first
      * ride will always have this flag set to 'false'), then we must pick
      * the ride with the highest priority from his district queue.
      *
