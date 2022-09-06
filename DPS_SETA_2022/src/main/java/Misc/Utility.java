@@ -26,73 +26,6 @@ public class Utility {
     Utility() {
     }
 
-    public static String postRequest(Client client, String url, String jsonBody) {
-        Invocation.Builder builder = getBuilder(client, url);
-        Response response = builder.post(Entity.json(jsonBody));
-        response.bufferEntity();
-
-        String responseJson = null;
-        try {
-            responseJson = response.readEntity(String.class);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-        return responseJson;
-    }
-
-    public static String getJsonString(Response response) {
-        String json = "";
-        try {
-            json = response.readEntity(String.class);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-        return json;
-    }
-
-    public static Response getRequest(Client client, String url) {
-        Invocation.Builder builder = getBuilder(client, url);
-        Response response = builder.get();
-        response.bufferEntity();
-
-        return response;
-    }
-
-    public static String printCalendar(long timestamp) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(timestamp);
-        return String.format(calendar.get(Calendar.HOUR_OF_DAY) + ":" +
-                calendar.get(Calendar.MINUTE) + ":" +
-                calendar.get(Calendar.SECOND) + ":" +
-                calendar.get(Calendar.MILLISECOND));
-    }
-
-
-    public static String delRequest(Client client, String url) {
-        Invocation.Builder builder = getBuilder(client, url);
-        Response response = builder.delete();
-        response.bufferEntity();
-
-        String responseJson = null;
-        try {
-            responseJson = response.readEntity(String.class);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-        return responseJson;
-    }
-
-    private static Invocation.Builder getBuilder(Client client, String url) {
-        WebTarget webTarget = client.target(url);
-        return webTarget.request(MediaType.APPLICATION_JSON_TYPE);
-    }
-
-    public static double euclideanDistance(int[] start, int[] end) {
-        double xOffset = Math.pow((end[0] - start[1]), 2);
-        double yOffset = Math.pow((end[1] - start[0]), 2);
-        return Math.sqrt(xOffset + yOffset);
-    }
-
     /*
      * Generate the taxi initial position
      * ---------------------------------------------------------------------------------
@@ -119,10 +52,85 @@ public class Utility {
         return position;
     }
 
+    // Perform a POST request on the given server URL and return the JSON answer
+    public static String postRequest(Client client, String url, String jsonBody) {
+        Invocation.Builder builder = getBuilder(client, url);
+        Response response = builder.post(Entity.json(jsonBody));
+        response.bufferEntity();
+
+        String responseJson = null;
+        try {
+            responseJson = response.readEntity(String.class);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        return responseJson;
+    }
+
+    // Perform a GET request on the given server URL and return the JSON answer
+    public static Response getRequest(Client client, String url) {
+        Invocation.Builder builder = getBuilder(client, url);
+        Response response = builder.get();
+        response.bufferEntity();
+
+        return response;
+    }
+
+    // Perform a DELETE request on the given server URL and return the JSON answer
+    public static String delRequest(Client client, String url) {
+        Invocation.Builder builder = getBuilder(client, url);
+        Response response = builder.delete();
+        response.bufferEntity();
+
+        String responseJson = null;
+        try {
+            responseJson = response.readEntity(String.class);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        return responseJson;
+    }
+
+    // Return the builder for a given web target
+    private static Invocation.Builder getBuilder(Client client, String url) {
+        WebTarget webTarget = client.target(url);
+        return webTarget.request(MediaType.APPLICATION_JSON_TYPE);
+    }
+
+    // Given a response object return a JSON string
+    public static String getJsonString(Response response) {
+        String json = "";
+        try {
+            json = response.readEntity(String.class);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        return json;
+    }
+
+    // Computes the euclidean distance between two points
+    public static double euclideanDistance(int[] start, int[] end) {
+        final double xOffset = Math.pow((end[0] - start[1]), 2);
+        final double yOffset = Math.pow((end[1] - start[0]), 2);
+        return Math.sqrt(xOffset + yOffset);
+    }
+
+    // Given a timestamp return a formatted string
+    public static String printCalendar(long timestamp) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(timestamp);
+        return String.format(calendar.get(Calendar.HOUR_OF_DAY) + ":" +
+                calendar.get(Calendar.MINUTE) + ":" +
+                calendar.get(Calendar.SECOND) + ":" +
+                calendar.get(Calendar.MILLISECOND));
+    }
+
+    // Generate arandom integer
     public static int generateRndInteger(int origin, int bound) {
         return random.nextInt(origin, bound);
     }
 
+    // Generate a random long
     public static long generateRndLong(long origin, long bound) {
         return random.nextLong(origin, bound);
     }

@@ -216,11 +216,11 @@ public class AdminServer {
      * reaches the value of N.
      *
      * For each list of measurements (one list for each taxi) we get the average
-     * of these measurements.
-     *
+     * of these measurements for each stat measurement. Then computes the averages of the
+     * averages of these lists (for all stat measurements).
      */
     public AvgStatisticsInfo getAveragesNStats(int taxiID, int lastNstats) {
-        // Stats list of a given taxi ID
+        // Get the list of statistics for a given taxi ID
         ArrayList<StatisticsInfo> taxiStats = getLocalTaxiStats(taxiID);
         // Sort the list by timestamp
         taxiStats.sort(Comparator.comparingLong(StatisticsInfo::getTimestamp));
@@ -230,23 +230,27 @@ public class AdminServer {
         for (int i = 0; i < lastNstats; i++)
             lastNstatsList.add(taxiStats.get(i));
 
-        // Get the average of each list of measurement averages, and then take the averages of all these averages
-        double avgPollution = 0.0;
+        // Get the average of each list of measurement averages
+        // then take the average of the averages
+        double avgPollutionForAllStats = 0.0D;
         for (StatisticsInfo statisticsInfo : lastNstatsList) {
             List<Double> listAvgPollutionLevels = statisticsInfo.getListAvgPollutionLevels();
-            double avgList = 0.0;
-            for (Double avg : listAvgPollutionLevels) {
-                avgList += avg;
-            }
-            avgList /= listAvgPollutionLevels.size();
-            avgPollution += avgList;
-        }
-        avgPollution /= lastNstatsList.size();
+            double avgPollutionLevelsForSingleStat = 0.0D;
 
-        // Take the averages of the other
-        double avgTraveledKms = 0.0;
+            for (Double avg : listAvgPollutionLevels)
+                avgPollutionLevelsForSingleStat += avg;
+
+            avgPollutionLevelsForSingleStat /= listAvgPollutionLevels.size();
+            avgPollutionForAllStats += avgPollutionLevelsForSingleStat;
+        }
+
+        // Overall average of
+        avgPollutionForAllStats /= lastNstatsList.size();
+
+        // Take the averages of the other local statistics
+        double avgTraveledKms = 0.0D;
         int avgAccomplishedRides = 0;
-        double avgBatteryLevel = 0.0;
+        double avgBatteryLevel = 0.0D;
 
         for (StatisticsInfo statisticsInfo : lastNstatsList) {
             avgTraveledKms += statisticsInfo.getTraveledKms();
@@ -254,14 +258,15 @@ public class AdminServer {
             avgBatteryLevel += statisticsInfo.getTaxiBattery();
         }
 
-        // Pollution value will be sent as a single valued list
-        ArrayList<Double> singlePollutionAvg = new ArrayList<>();
-        singlePollutionAvg.add(avgPollution);
         avgTraveledKms /= lastNstatsList.size();
         avgAccomplishedRides /= lastNstatsList.size();
         avgBatteryLevel /= lastNstatsList.size();
 
-        //System.out.println(avgLastNstats);
+        // Return the average of the pollution as a single element list
+        ArrayList<Double> singlePollutionAvg = new ArrayList<>();
+        singlePollutionAvg.add(avgPollutionForAllStats);
+
+        //System.out.println(avgLastNstats); // debug
 
         return new AvgStatisticsInfo(
                 singlePollutionAvg,
@@ -269,40 +274,40 @@ public class AdminServer {
                 taxiID, avgBatteryLevel);
     }
 
-    // Return the list of statistics given a taxi ID
-    public ArrayList<StatisticsInfo> getLocalTaxiStats(int taxiID) {
-        ArrayList<StatisticsInfo> taxiStats = new ArrayList<>();
-        synchronized (taxiLocalStatistics) {
-            for (Map.Entry<Integer, ArrayList<StatisticsInfo>> e : taxiLocalStatistics.entrySet())
-                if (e.getKey() == taxiID)
-                    taxiStats = e.getValue();
-        }
-        return taxiStats;
-    }
-
+    /* Get the average of all the taxis between two given timestamps
+     * ---------------------------------------------------------------------------------
+     * It computes the average of all the statistics between two timestamps,
+     * the method is the same as the 'getAveragesNStats', but considers the list of all
+     * taxis clamped between the two given timestamps.
+     *
+     * It iterates over all taxis, then over all stats of each taxis, and then on
+     * the list of pollution for each state, so the performance of this algorithm are
+     * pretty bad (this is a design problem of how the data for measurements
+     * are structured).
+     */
     public TotalStatisticsInfo getAllTaxisAvgStats(long timestamp1, long timestamp2) {
         TotalStatisticsInfo noMeasurements = checkMeasurementsPresence();
         if (noMeasurements != null) return noMeasurements;
 
-        double totalAvgPollution = 0.0;
-        double totalAvgTraveledKms = 0.0;
+        double totalAvgPollution = 0.0D;
+        double totalAvgTraveledKms = 0.0D;
         int totalAvgAccomplishedRides = 0;
-        double totalBatteryLevels = 0.0;
+        double totalBatteryLevels = 0.0D;
 
         int numberOfTaxis;
         synchronized (taxiLocalStatistics) {
             numberOfTaxis = taxiLocalStatistics.size();
             for (Map.Entry<Integer, ArrayList<StatisticsInfo>> e : taxiLocalStatistics.entrySet()) {
-                double avgPollutionTaxi = 0.0;
-                double avgTraveledKmsTaxi = 0.0;
+                double avgPollutionTaxi = 0.0D;
+                double avgTraveledKmsTaxi = 0.0D;
                 int avgAccomplishedRidesTaxi = 0;
-                double avgBatteryLevelsTaxi = 0.0;
+                double avgBatteryLevelsTaxi = 0.0D;
 
                 ArrayList<StatisticsInfo> listOfAllStats = e.getValue();
                 int consideredMeasurements = 0;
 
                 for (StatisticsInfo statsTaxi : listOfAllStats) {
-                    double avgPollutionMeasurement = 0.0;
+                    double avgPollutionMeasurement = 0.0D;
                     if (statsTaxi.getTimestamp() >= timestamp1 && statsTaxi.getTimestamp() <= timestamp2) {
                         // Avg. Pollution level for a single measurement list
                         for (Double m : statsTaxi.getListAvgPollutionLevels()) {
@@ -335,16 +340,16 @@ public class AdminServer {
 
         }
 
-
         /// Compute the total averages
         // Single valued list for total pollutions
         totalAvgPollution /= numberOfTaxis;
-        //System.out.println("Total Avg. Pollution " + totalAvgPollution + ", over all the " + taxiLocalStatistics.size() + " taxis");
+        //System.out.println("Total Avg. Pollution " + totalAvgPollution + ",over all the " + taxiLocalStatistics.size() + " taxis");
         ArrayList<Double> singleValuedAvg = new ArrayList<>();
         singleValuedAvg.add(totalAvgPollution);
         totalAvgAccomplishedRides /= numberOfTaxis;
         totalAvgTraveledKms /= numberOfTaxis;
         totalBatteryLevels /= numberOfTaxis;
+
         // Re-use the taxiID as error code (-1, means fine)
         int errorCode = -1;
         if (totalAvgPollution == 0.0) {
@@ -357,7 +362,18 @@ public class AdminServer {
                 errorCode, totalBatteryLevels);
     }
 
-    //
+    // Return the list of statistics given a taxi ID
+    public ArrayList<StatisticsInfo> getLocalTaxiStats(int taxiID) {
+        ArrayList<StatisticsInfo> taxiStats = new ArrayList<>();
+        synchronized (taxiLocalStatistics) {
+            for (Map.Entry<Integer, ArrayList<StatisticsInfo>> e : taxiLocalStatistics.entrySet())
+                if (e.getKey() == taxiID)
+                    taxiStats = e.getValue();
+        }
+        return taxiStats;
+    }
+
+    // Check if there are measurements register in the system
     private synchronized static TotalStatisticsInfo checkMeasurementsPresence() {
         if (taxiLocalStatistics.isEmpty()) {
             int errorCode = -7777;
@@ -368,6 +384,8 @@ public class AdminServer {
     }
 
     /// Getters & Setters
+
+    // Get a clone of the taxi list
     public static ArrayList<TaxiInfo> getTaxis() {
         return (ArrayList<TaxiInfo>) taxis.clone();
     }
