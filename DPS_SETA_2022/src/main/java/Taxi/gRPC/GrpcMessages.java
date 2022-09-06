@@ -2,6 +2,10 @@ package Taxi.gRPC;
 
 import org.example.grpc.IPC;
 
+/* GrpcMessages
+ * ------------------------------------------------------------------------------
+ * Helper class for handling the different IPC objects for the services.
+ */
 public class GrpcMessages {
     private IPC.RideCharge rideCharge = null;
     private IPC.Infos infos = null;

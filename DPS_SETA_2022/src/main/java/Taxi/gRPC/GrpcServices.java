@@ -13,6 +13,11 @@ import java.util.ArrayList;
 
 import static Taxi.Taxi.CLOCK_OFFSET;
 
+/* GrpcServices
+ * ------------------------------------------------------------------------------
+ * Contains the implementation of the gRPC services that handles the taxis in
+ * the smartcity.
+ */
 public class GrpcServices extends IPCServiceGrpc.IPCServiceImplBase {
     private final TaxiInfo thisTaxi;
     private final ArrayList<TaxiInfo> otherTaxis;
