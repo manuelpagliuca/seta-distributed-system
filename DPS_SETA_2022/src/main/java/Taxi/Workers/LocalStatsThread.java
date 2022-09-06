@@ -54,7 +54,8 @@ public class LocalStatsThread extends Thread {
 
             avgMeasurements /= 8;
             listAvgPollution.add(avgMeasurements);
-            //System.out.println("Added measurement. measurements: " + avgMeasurements);
+
+            //System.out.println("Added measurement. measurements: " + avgMeasurements); // debug
             if (sendData.get()) {
                 StatisticsInfo statisticsInfo = new StatisticsInfo(
                         listAvgPollution,
@@ -62,7 +63,7 @@ public class LocalStatsThread extends Thread {
                         thisTaxi.getAccomplishedRides(),
                         thisTaxi.getId(),
                         thisTaxi.getBattery());
-                //System.out.println("Send the info to the server");
+                //System.out.println("Send the info to the server"); // debug
                 postStatistics(statisticsInfo);
                 sendData.set(false);
                 listAvgPollution.clear();
@@ -86,6 +87,6 @@ public class LocalStatsThread extends Thread {
         String serverInitInfos = Utility.postRequest(client,
                 ADMIN_SERVER_URL + STAT_PATH, GSON.toJson(statisticsInfo));
         assert (serverInitInfos != null);
-        //System.out.println(serverInitInfos);
+        //System.out.println(serverInitInfos); // debug
     }
 }

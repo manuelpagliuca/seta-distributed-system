@@ -61,6 +61,7 @@ public class MQTTModule {
         subscribeTopic(mqttClient, COMPLETED_RIDES_TOPIC);
     }
 
+
     private static MqttClient createNewClient() {
         MqttClient mqttClient;
         String clientID = MqttClient.generateClientId();

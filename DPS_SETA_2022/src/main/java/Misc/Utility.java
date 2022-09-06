@@ -15,6 +15,10 @@ import jakarta.ws.rs.core.Response;
 import java.util.Calendar;
 import java.util.Random;
 
+/* Utility
+ * ------------------------------------------------------------------------------
+ * A singleton used in the project which contains useful general functions.
+ */
 public class Utility {
     private static final Random random = new Random();
     public static Gson GSON = new Gson();

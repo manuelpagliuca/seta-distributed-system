@@ -7,15 +7,24 @@ package AdminServer;
 import Taxi.Statistics.Statistics.AvgStatisticsInfo;
 import Taxi.Statistics.Statistics.StatisticsInfo;
 import Taxi.Statistics.Statistics.TotalStatisticsInfo;
+
 import Misc.Utility;
+
 import com.google.gson.*;
+
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
+
 import Taxi.Structures.TaxiInfo;
 import Taxi.Structures.TaxiSchema;
 
 import java.util.ArrayList;
 
+/* AdminServerServices
+ * ------------------------------------------------------------------------------
+ * HTTP requests from the administrator server are exposed in this class. The
+ * root path is "/".
+ */
 @Path("/")
 public class AdminServerServices {
     private final AdminServer administratorServer = AdminServer.getInstance();
@@ -23,19 +32,17 @@ public class AdminServerServices {
 
     /*
      * HTTP POST Request at "/taxi-init" for initializing a taxi client
-     * ------------------------------------------------------------------
-     * This method will receive the buffered information of a new taxi
-     * process and add it through the 'addTaxi()' method exposed from the
-     * administrator server.
+     * ------------------------------------------------------------------------------
+     * This method will receive the buffered information of a new taxi process and
+     * add it through the 'addTaxi()' method exposed from the administrator server.
      *
-     * The input information regarding the taxi will contain a tentative
-     * ID which could be used only if retained valid from the administrator
-     * server (it will handle the checking), otherwise it will use an
-     * arbitrary generated one.
+     * The input information regarding the taxi will contain a tentative ID which
+     * could be used only if retained valid from the administrator server (it will
+     * handle the checking), otherwise it will use an arbitrary generated one.
      *
-     * In both case the same or the new ID (contained in the TaxiInfo class)
-     * will be returned to the client with the list of other taxis present
-     * on the server. This will happen through a wrapper class "TaxiSchema".
+     * In both case the same or the new ID (contained in the TaxiInfo class) will be
+     * returned to the client with the list of other taxis present on the server.
+     * This will happen through a wrapper class "TaxiSchema".
      */
     @POST
     @Path("taxi-init")
@@ -76,9 +83,9 @@ public class AdminServerServices {
 
     /*
      * HTTP POST Request at "/get-taxis" for getting list of other taxis.
-     * ------------------------------------------------------------------
-     * it will return the list of the taxis which are present on the
-     * administrator server.
+     * ------------------------------------------------------------------------------
+     * It will return the list of the taxis which are present on the administrator
+     * server.
      */
     @GET
     @Path("get-taxis")
@@ -98,10 +105,11 @@ public class AdminServerServices {
     }
 
     /*
-     * Remove a single taxi given a taxi ID
-     * ----------------------------------------------------------------
-     * This function can be both called by the administrator client that
-     * by the taxi process itself (both from CLI).
+     * HTTP DELETE Request at "del-taxi/{id}" which removes a taxi
+     * ------------------------------------------------------------------------------
+     * This method can be both called by the administrator client that by the taxi
+     * process itself (both from CLI). It just removes the taxi from the smartcity
+     * given the id.
      */
     @DELETE
     @Path("del-taxi/{id}")
@@ -120,6 +128,13 @@ public class AdminServerServices {
                     .build();
     }
 
+    /*
+     * HTTP POST Request at "stats" which sends the local stats
+     * ------------------------------------------------------------------------------
+     * This method will add the local stats collected by the stats thread of the taxi
+     * on the administrator server. The administrator server got an internal data
+     * structure for mangaing this data which is called 'taxiLocalStatistics'.
+     */
     @POST
     @Path("stats")
     @Consumes("application/json")
@@ -151,6 +166,12 @@ public class AdminServerServices {
                 .build();
     }
 
+    /*
+     * HTTP GET Request at "stats/{id}_{n}" it returns the avg of n latest statistics
+     * ------------------------------------------------------------------------------
+     * This method returns the avg of the latest 'n' local statistics for a given taxi
+     * 'id'.
+     */
     @GET
     @Path("stats/{id}_{n}")
     @Produces("application/json")
@@ -170,12 +191,18 @@ public class AdminServerServices {
                     .build();
         }
 
-        AvgStatisticsInfo avgTaxiStats = administratorServer.getAveragesStats(taxiId, n);
+        AvgStatisticsInfo avgTaxiStats = administratorServer.getAveragesNStats(taxiId, n);
         String output = Utility.GSON.toJson(avgTaxiStats);
 
         return Response.ok().entity(output).build();
     }
 
+    /*
+     * HTTP GET Request at "stats/{timestamp1}+{timestamp2}" returns local statistics
+     * ------------------------------------------------------------------------------
+     * This method returns the avg statistic of all taxis which are between the two
+     * given timestamps 'timestamp1' and 'timestamp2'.
+     */
     @GET
     @Path("stats/{timestamp1}+{timestamp2}")
     @Produces("application/json")

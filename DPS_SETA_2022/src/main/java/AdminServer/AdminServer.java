@@ -23,12 +23,11 @@ import static Misc.Utility.genTaxiInitialPosition;
 /*
  * The administrator server class manages the taxis (clients)
  * ---------------------------------------------------------------------------------
- * The class is defined as a singleton so that it guarantees
- * a easier and global scope access to the same instance inside
- * the project.
+ * The class is defined as a singleton so that it guarantees a easier and global
+ * scope access to the same instance inside the project.
  *
- * It allows to:
- * TODO: [WIP] I will add infos at the end of the project
+ * It manages the taxis of the smartcity, implement the HTTP request from the
+ * services and do the analysis for the received measurements.
  */
 public class AdminServer {
     private static final String HOST = "localhost";
@@ -138,8 +137,8 @@ public class AdminServer {
         return false;
     }
 
-    /// Utility.Utility
-    // Print all the taxis ID each one with the list of the other taxis on the smart city (debug)
+    /// Utility
+    // Print all the data entries of taxis in the smart city (debug)
     public void printAllTaxis() {
         Timestamp timestamp = new Timestamp(System.currentTimeMillis());
         System.out.println("*--" + timestamp + "--*");
@@ -154,16 +153,7 @@ public class AdminServer {
         System.out.println("*---------------------------*");
     }
 
-    // Generate a random district inside the integer range [1,4]
-    private int genRandomDistrict() {
-        Random rnd = new Random();
-        final int lowerBound = 1;
-        final int upperBound = 4;
-
-        // TODO: revert back to original functioning
-        return 2; // for testing gRPC
-        //return rnd.nextInt(lowerBound, upperBound + 1);
-    }
+    /// Utility
 
     /*
      * Generate a valid ID (not taken/available) for a taxi in the smart city
@@ -187,6 +177,18 @@ public class AdminServer {
         return newID;
     }
 
+    // Generate a random district inside the integer range [1,4]
+    private int genRandomDistrict() {
+        Random rnd = new Random();
+        final int lowerBound = 1;
+        final int upperBound = 4;
+
+        // TODO: revert back to original functioning
+        return 2; // for testing gRPC
+        //return rnd.nextInt(lowerBound, upperBound + 1);
+    }
+
+    // Check the presence of a taxi in the smartcity
     public synchronized boolean taxiIsPresent(int taxiID) {
         for (TaxiInfo t : taxis)
             if (t.getId() == taxiID)
@@ -194,18 +196,30 @@ public class AdminServer {
         return false;
     }
 
+    /* Add the local statistics
+     * ---------------------------------------------------------------------------------
+     * If necessary (there is no measurement for a given taxi, i.e. it is the first
+     * measurement) creates new element in the hashmap of the statistics.
+    */
     public synchronized void addLocalStatistics(StatisticsInfo info) {
         if (taxiLocalStatistics.get(info.getTaxiID()) == null) {
             taxiLocalStatistics.put(info.getTaxiID(), new ArrayList<>());
         }
-
         taxiLocalStatistics.get(info.getTaxiID()).add(info);
-        //System.out.println(taxiLocalStatistics);
     }
 
-    // TODO CHECK if the semantic of this function is correct!
-    //
-    public AvgStatisticsInfo getAveragesStats(int taxiID, int lastNstats) {
+    /* Get the average of the latest N stats
+     * ---------------------------------------------------------------------------------
+     * Get the stats list of a given taxi ID, then sort it by timestamp non-decremental
+     * order. Create the list from the most recent timestamp (which is the long with
+     * the highest value), the list will stop adding element when the iterator
+     * reaches the value of N.
+     *
+     * For each list of measurements (one list for each taxi) we get the average
+     * of these measurements.
+     *
+     */
+    public AvgStatisticsInfo getAveragesNStats(int taxiID, int lastNstats) {
         // Stats list of a given taxi ID
         ArrayList<StatisticsInfo> taxiStats = getLocalTaxiStats(taxiID);
         // Sort the list by timestamp
@@ -215,7 +229,6 @@ public class AdminServer {
         ArrayList<StatisticsInfo> lastNstatsList = new ArrayList<>();
         for (int i = 0; i < lastNstats; i++)
             lastNstatsList.add(taxiStats.get(i));
-
 
         // Get the average of each list of measurement averages, and then take the averages of all these averages
         double avgPollution = 0.0;
@@ -266,7 +279,6 @@ public class AdminServer {
         }
         return taxiStats;
     }
-
 
     public TotalStatisticsInfo getAllTaxisAvgStats(long timestamp1, long timestamp2) {
         TotalStatisticsInfo noMeasurements = checkMeasurementsPresence();
@@ -345,6 +357,7 @@ public class AdminServer {
                 errorCode, totalBatteryLevels);
     }
 
+    //
     private synchronized static TotalStatisticsInfo checkMeasurementsPresence() {
         if (taxiLocalStatistics.isEmpty()) {
             int errorCode = -7777;
@@ -358,5 +371,4 @@ public class AdminServer {
     public static ArrayList<TaxiInfo> getTaxis() {
         return (ArrayList<TaxiInfo>) taxis.clone();
     }
-
 }
