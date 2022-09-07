@@ -27,13 +27,16 @@ import static Taxi.Taxi.removeTaxi;
  */
 public class CLIThread extends Thread {
     final Object availableCLI;
+    final Object checkRechargeCLI;
     private Thread t;
     private final TaxiInfo taxi;
     private final ArrayList<TaxiInfo> otherTaxis;
     private final RechargeThread rechargeThreadRef;
+
     public CLIThread(TaxiInfo taxi, ArrayList<TaxiInfo> otherTaxis,
-                     Object availableCLI, RechargeThread rechargeThread) {
+                     Object availableCLI, Object checkRechargeCLI, RechargeThread rechargeThread) {
         this.availableCLI = availableCLI;
+        this.checkRechargeCLI = checkRechargeCLI;
         this.taxi = taxi;
         this.otherTaxis = otherTaxis;
         this.rechargeThreadRef = rechargeThread;
@@ -74,13 +77,25 @@ public class CLIThread extends Thread {
                 System.out.println(taxi.toString());
                 System.out.println(otherTaxis);
             } else if (userInput.equalsIgnoreCase("recharge")) {
-                // TODO: Dovrebbe terminare la corsa che sta eseguendo?
-                try {
-                    rechargeThreadRef.rechargeProcedure();
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
+                if (taxi.isRecharging() || taxi.wantsToRecharge()) {
+                    System.out.println("The taxi is already recharging!");
+                } else if (taxi.isRiding() && !taxi.isRecharging()) {
+                    System.out.println("The taxi is executing a ride, it will go to recharge station after.");
+                    synchronized (checkRechargeCLI) {
+                        try {
+                            checkRechargeCLI.wait();
+                            rechargeThreadRef.rechargeProcedure();
+                        } catch (InterruptedException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                } else {
+                    try {
+                        rechargeThreadRef.rechargeProcedure();
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
                 }
-
             } else {
                 System.out.println("This command is not available.");
             }

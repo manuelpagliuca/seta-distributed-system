@@ -87,7 +87,8 @@ public class Taxi {
 
         // Create the thread for CLI and for checking the input
         Object inputAvailable = new Object();
-        CLIThread cliThread = new CLIThread(thisTaxi, otherTaxis, inputAvailable, rechargeThread);
+        Object checkRechargeCLI = new Object();
+        CLIThread cliThread = new CLIThread(thisTaxi, otherTaxis, inputAvailable, checkRechargeCLI, rechargeThread);
         InputCheckerThread inputCheckerThread = new InputCheckerThread(inputAvailable);
 
         // Start the threads
@@ -108,7 +109,7 @@ public class Taxi {
         grpcModule.broadcastPresentationSync();
 
         // MQTT
-        MQTTModule mqttModule = new MQTTModule(taxiSchema, checkBattery);
+        MQTTModule mqttModule = new MQTTModule(taxiSchema, checkBattery, checkRechargeCLI);
         mqttModule.initMQTTConnection();
 
         // TODO: Function for terminating correctly all the threads.
@@ -145,7 +146,7 @@ public class Taxi {
         thisTaxi.setGrpcPort(serverData.getGrpcPort());
         thisTaxi.setPosition(serverData.getPosition());
         thisTaxi.setDistrict(serverData.getDistrict());
-        thisTaxi.setBattery(100.0);
+        thisTaxi.setBattery(40);
         otherTaxis = taxiSchema.getTaxis();
 
         System.out.println(serverData);

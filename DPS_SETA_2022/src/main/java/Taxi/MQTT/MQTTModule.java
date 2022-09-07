@@ -37,11 +37,12 @@ public class MQTTModule {
     private static ArrayList<TaxiInfo> otherTaxis;
     private final GrpcModule grpcModule = GrpcModule.getInstance();
     private final Object checkBattery;
-
-    public MQTTModule(TaxiSchema taxiSchema, Object checkBatteryRef) {
+    private final Object checkRechargeCLI;
+    public MQTTModule(TaxiSchema taxiSchema, Object checkBatteryRef, Object checkRechargeCLI) {
         thisTaxi = taxiSchema.getTaxiInfo();
         otherTaxis = taxiSchema.getTaxis();
         checkBattery = checkBatteryRef;
+        this.checkRechargeCLI = checkRechargeCLI;
     }
 
     /*
@@ -218,6 +219,10 @@ public class MQTTModule {
 
             mqttClient.subscribe(topic, QUALITY_OF_SERVICE);
             System.out.println("Subscribed on topic: " + topic);
+        }
+
+        synchronized (checkRechargeCLI){
+            checkRechargeCLI.notify();
         }
 
         //noinspection SynchronizationOnLocalVariableOrMethodParameter
