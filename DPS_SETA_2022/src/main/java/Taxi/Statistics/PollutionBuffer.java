@@ -10,7 +10,8 @@ import Taxi.Statistics.Simulators.Measurement;
 import java.util.ArrayList;
 import java.util.List;
 
-/* PollutionBuffer
+/*
+ * PollutionBuffer
  * ------------------------------------------------------------------------------
  * This buffer is where the PM10 measurements are saved, it keeps saving the
  * single mesurements in a static array of size 8. Then it uses a sliding window

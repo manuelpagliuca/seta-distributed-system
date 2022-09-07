@@ -20,7 +20,8 @@ import static Misc.Utility.getJsonString;
 import Taxi.Structures.TaxiInfo;
 import jakarta.ws.rs.core.Response;
 
-/* Administrator Client
+/*
+ * Administrator Client
  * ------------------------------------------------------------------------------
  * Through this client it is possible to make queries to the administrator server
  * through the REST API.

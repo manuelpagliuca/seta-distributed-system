@@ -6,7 +6,8 @@ package AdminServer.Workers;
 
 import AdminServer.AdminServer;
 
-/* Server Logger Thread
+/*
+ * Server Logger Thread
  * ------------------------------------------------------------------------------
  * A thread class that defines threads which will just print the all the taxis
  * entries each time a new taxis will join the server.

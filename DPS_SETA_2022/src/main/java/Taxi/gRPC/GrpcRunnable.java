@@ -5,6 +5,7 @@
 package Taxi.gRPC;
 
 import Taxi.Structures.TaxiInfo;
+
 import io.grpc.stub.StreamObserver;
 
 import org.example.grpc.IPC;
@@ -12,7 +13,8 @@ import org.example.grpc.IPCServiceGrpc;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-/* GrpcRunnable
+/*
+ * GrpcRunnable
  * ------------------------------------------------------------------------------
  * This Runnable class allows the execution of a thread that manages the stream
  * services (async). You initiate it with the GrpcMessage that you want to deliver

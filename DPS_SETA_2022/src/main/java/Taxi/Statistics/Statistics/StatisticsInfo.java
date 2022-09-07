@@ -4,12 +4,18 @@
  * M.Sc. in Computer Science @UNIMI A.Y. 2021/2022 */
 package Taxi.Statistics.Statistics;
 
+import static Misc.Utility.printCalendar;
+
 import java.io.Serializable;
 import java.util.List;
 
-import static Misc.Utility.printCalendar;
-
-@SuppressWarnings("unused")
+/*
+ * StatisticsInfo
+ * ------------------------------------------------------------------------------
+ * This class will contain all the local statistics of the taxi (with also the
+ * list of all the average pollution levels). This will be used as exchange data
+ * structure between the Administrator Server and the taxi as JSON through REST.
+ */
 public class StatisticsInfo implements Serializable {
     protected List<Double> listAvgPollutionLevels;
     protected double traveledKms;

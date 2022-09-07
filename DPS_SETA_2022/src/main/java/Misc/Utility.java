@@ -15,7 +15,8 @@ import jakarta.ws.rs.core.Response;
 import java.util.Calendar;
 import java.util.Random;
 
-/* Utility
+/*
+ * Utility
  * ------------------------------------------------------------------------------
  * A singleton used in the project which contains useful general functions.
  */

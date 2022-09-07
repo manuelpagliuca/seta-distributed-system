@@ -4,12 +4,19 @@
  * M.Sc. in Computer Science @UNIMI A.Y. 2021/2022 */
 package Taxi.Statistics.Statistics;
 
-import java.util.List;
-
 import static Misc.Utility.printCalendar;
 
+import java.util.List;
+
+/*
+ * TotalStatisticsInfo
+ * ------------------------------------------------------------------------------
+ * Subclass of StatisticsInfo it will just override the 'toString()' method for
+ * getting a proper formatting of the data for the global statistics.
+ */
 public class TotalStatisticsInfo extends StatisticsInfo {
-    public TotalStatisticsInfo(List<Double> avgMeasurements, double traveledKms, int accomplishedRides, int taxiID, double taxiBattery) {
+    public TotalStatisticsInfo(List<Double> avgMeasurements, double traveledKms,
+                               int accomplishedRides, int taxiID, double taxiBattery) {
         super(avgMeasurements, traveledKms, accomplishedRides, taxiID, taxiBattery);
     }
 

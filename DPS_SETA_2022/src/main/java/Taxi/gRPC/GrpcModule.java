@@ -9,7 +9,6 @@ import Taxi.Structures.LogicalClock;
 
 import Taxi.Structures.TaxiInfo;
 
-
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.ServerBuilder;
@@ -21,7 +20,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
-/* GrpcModule
+/*
+ * GrpcModule
  * ------------------------------------------------------------------------
  * This modules handle the various communication (broadcast) between the
  * taxis. Essentially it prepares the settings for use the gRPC services

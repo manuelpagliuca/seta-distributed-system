@@ -6,7 +6,8 @@ package SETA.Structures;
 
 import java.io.Serializable;
 
-/* RideInfo
+/*
+ * RideInfo
  * ------------------------------------------------------------------------------
  * This class is the structure of ride message, it will be used
  * for the generation of the rides and for the marshalling/unmarshalling

@@ -2,7 +2,8 @@ package Taxi.gRPC;
 
 import org.example.grpc.IPC;
 
-/* GrpcMessage
+/*
+ * GrpcMessage
  * ------------------------------------------------------------------------------
  * Helper class for handling the different IPC objects for the services.
  */

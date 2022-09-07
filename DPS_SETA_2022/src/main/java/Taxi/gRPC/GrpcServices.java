@@ -1,11 +1,13 @@
 package Taxi.gRPC;
 
 import Misc.Utility;
+
 import Taxi.Structures.LogicalClock;
 import Taxi.Structures.TaxiInfo;
 import Taxi.Structures.TaxiSchema;
 
 import io.grpc.stub.StreamObserver;
+
 import org.example.grpc.IPC;
 import org.example.grpc.IPCServiceGrpc;
 
@@ -13,7 +15,8 @@ import java.util.ArrayList;
 
 import static Taxi.Taxi.CLOCK_OFFSET;
 
-/* GrpcServices
+/*
+ * GrpcServices
  * ------------------------------------------------------------------------------
  * Contains the implementation of the gRPC services that handles the taxis in
  * the smartcity.

@@ -20,7 +20,8 @@ import Taxi.Structures.TaxiSchema;
 
 import java.util.ArrayList;
 
-/* AdminServerServices
+/*
+ * AdminServerServices
  * ------------------------------------------------------------------------------
  * HTTP requests from the administrator server are exposed in this class. The
  * root path is "/".

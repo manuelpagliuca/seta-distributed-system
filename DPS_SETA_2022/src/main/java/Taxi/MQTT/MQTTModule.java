@@ -4,19 +4,22 @@
  * M.Sc. in Computer Science @UNIMI A.Y. 2021/2022 */
 package Taxi.MQTT;
 
+import static Misc.Utility.*;
+
 import SETA.Structures.RideInfo;
+
 import Taxi.Structures.TaxiSchema;
 import Taxi.gRPC.GrpcModule;
 import Taxi.Structures.TaxiInfo;
 import Taxi.gRPC.GrpcRunnable;
+
 import org.eclipse.paho.client.mqttv3.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import static Misc.Utility.*;
-
-/* MQTTModule
+/*
+ * MQTTModule
  * ------------------------------------------------------------------------------
  * This class handles the connections to the MQTT broker from the taxi side. It
  * allows the subscription to district topics for receiving the rides. This class

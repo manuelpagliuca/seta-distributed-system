@@ -12,7 +12,8 @@ import org.eclipse.paho.client.mqttv3.*;
 
 import java.util.*;
 
-/* SETA
+/*
+ * SETA
  * ------------------------------------------------------------------------------
  * This class is a stand-alone process that produces 2 rides every 5 seconds,
  * these rides will be sent on the relative district (extracted from their starting
