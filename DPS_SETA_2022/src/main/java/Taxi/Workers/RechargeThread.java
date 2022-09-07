@@ -14,6 +14,15 @@ import java.util.Arrays;
 import static Misc.Utility.euclideanDistance;
 import static Misc.Utility.genTaxiInitialPosition;
 
+/*
+ * RechargeThread
+ * ------------------------------------------------------------------------------
+ * This thread monitors the battery levels of the taxi at the end of each ride,
+ * if the battery levels drop below the 30% it will start a procedure that will
+ * move the taxi to the recharge station of the current district for recharging
+ * the batteries (this will use Ricart & Agrawala mutual exclusion algorithm
+ * for handling the access to the critical section).
+ */
 public class RechargeThread extends Thread {
     private final TaxiInfo thisTaxi;
     private final ArrayList<TaxiInfo> otherTaxis;
@@ -29,6 +38,12 @@ public class RechargeThread extends Thread {
         this.grpcModule = grpcModule;
     }
 
+    /*
+     * Check the battery levels and if necessary start a recharge operation
+     * ------------------------------------------------------------------------------
+     * It checks the battery levels every time the tixe has completed a ride, in the
+     * case in which the battery levels are below 30% it starts a recharge procedure.
+     */
     @Override
     public void run() {
         while (isRunning) {
@@ -51,9 +66,23 @@ public class RechargeThread extends Thread {
         }
     }
 
+    /*
+     * It drives the taxi to the recharge station and starts the mutual exclusion
+     * ------------------------------------------------------------------------------
+     * First of all it sets that the taxi wants to recharge (in this way it can't
+     * accept any ride) and then moves the taxi to the recharge station of the
+     * current district.
+     *
+     * After that it starts the procedure for acessing to the critical section,
+     * so it has to use the gRPC service which implements the Ricart & Agrawala
+     * algorithm.
+     *
+     * If he passes that barrier, it recharges the batteries.
+     */
     public void rechargeProcedure() throws InterruptedException {
         thisTaxi.setWantsToRecharge(true);
-        System.out.println("[Critical Battery Level] Moving to the recharge station of district "
+        System.out.println(
+                "[Critical Battery Level] Moving to the recharge station of district "
                 + thisTaxi.getDistrict());
 
         rideToDistrictRechargeStation();
@@ -76,21 +105,41 @@ public class RechargeThread extends Thread {
         rechargeBattery();
     }
 
+    /*
+     * Recharges the battery
+     * -----------------------------------------------------------------------------
+     * It enables the flag for telling to the other taxis that he is recharging
+     * (this means that he still can't join any ride election), and then it wait 5
+     * seconds for charge is battery levels to 100%.
+     */
     private void rechargeBattery() throws InterruptedException {
         thisTaxi.setRecharging(true);
-        System.out.printf("The taxi is recharging (current battery levels %,.2f%%)\n", thisTaxi.getBattery());
+        System.out.printf(
+                "The taxi is recharging (current battery levels %,.2f%%)\n",
+                thisTaxi.getBattery());
         Thread.sleep(5000);
+
         thisTaxi.setBattery(100.0D);
-        System.out.printf("The taxi has been successfully recharged, battery levels are %,.2f%%\n",
+
+        System.out.printf(
+                "The taxi has been successfully recharged, battery levels are %,.2f%%\n",
                 thisTaxi.getBattery());
         thisTaxi.setRecharging(false);
         thisTaxi.setWantsToRecharge(false);
     }
 
+    /*
+     * Move the taxi from the current position to the recharge station
+     * -----------------------------------------------------------------------------
+     * It drives the taxi to the recharge station of is district (it took 5 seconds
+     * like for a normal ride), even in this case he will consume batteries for
+     * reaching the station. It behaves like a normal ride to another node of the
+     * smartcity.
+     */
     private void rideToDistrictRechargeStation() throws InterruptedException {
         thisTaxi.setRiding(true);
 
-        int[] rechargeStationPos = genTaxiInitialPosition(thisTaxi.getDistrict());
+        final int[] rechargeStationPos = genTaxiInitialPosition(thisTaxi.getDistrict());
         final double totalKm = euclideanDistance(thisTaxi.getPosition(), rechargeStationPos);
 
         thisTaxi.getPosition()[0] = rechargeStationPos[0];
@@ -98,7 +147,8 @@ public class RechargeThread extends Thread {
 
         Thread.sleep(5000);
         thisTaxi.setBattery(thisTaxi.getBattery() - totalKm);
-        System.out.printf("I reached the recharge station " +
+        System.out.printf(
+                "I reached the recharge station " +
                 Arrays.toString(rechargeStationPos) +
                 " at district " +
                 thisTaxi.getDistrict() +
@@ -106,7 +156,6 @@ public class RechargeThread extends Thread {
         thisTaxi.setRiding(false);
         thisTaxi.incrementTotalRides();
     }
-
 
     // Used for the general software termination procedure (through CLI)
     public void terminate() {

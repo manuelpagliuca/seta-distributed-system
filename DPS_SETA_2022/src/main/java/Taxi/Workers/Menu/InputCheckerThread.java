@@ -6,10 +6,15 @@ package Taxi.Workers.Menu;
 
 import java.io.IOException;
 
+/*
+ * InputCheckerThread
+ * ------------------------------------------------------------------------------
+ * This thread notifies the CLIThread when it can read from the user input, it
+ * is designed just for avoiding the busy waiting.
+ */
 public class InputCheckerThread implements Runnable {
     final Object availableCLI;
     private Thread t;
-
     public InputCheckerThread(Object availableCLI) {
         this.availableCLI = availableCLI;
     }

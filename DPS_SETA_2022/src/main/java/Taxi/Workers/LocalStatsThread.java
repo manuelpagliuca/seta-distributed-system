@@ -8,15 +8,27 @@ import Taxi.Structures.TaxiInfo;
 import Taxi.Statistics.PollutionBuffer;
 import Taxi.Statistics.Statistics.StatisticsInfo;
 import Taxi.Statistics.Simulators.Measurement;
+
 import Misc.Utility;
+
 import jakarta.ws.rs.client.Client;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static Misc.Utility.GSON;
 
+/*
+ * LocalStatsThread
+ * ------------------------------------------------------------------------------
+ * This class implement the thread which will compute the average of the
+ * measurements from the PM10 simulator and send it to the administrator server
+ * through REST.
+ */
 public class LocalStatsThread extends Thread {
     private final PollutionBuffer pollutionBuffer;
     private final ArrayList<Double> listAvgPollution = new ArrayList<>();
@@ -25,7 +37,7 @@ public class LocalStatsThread extends Thread {
     private final String ADMIN_SERVER_URL;
     private final Client client;
     private final AtomicBoolean sendData = new AtomicBoolean(false);
-    private final Thread postRequestClock = new Thread(this::sendEach15sec);
+    private final Object lock = new Object();
 
     public LocalStatsThread(TaxiInfo thisTaxi, String adminServerUrl,
                             Client client, PollutionBuffer pollutionBuffer) {
@@ -35,11 +47,26 @@ public class LocalStatsThread extends Thread {
         this.client = client;
     }
 
+    /* Collect the average of the 8 measurements and send to administrator server
+     * ------------------------------------------------------------------------------
+     * Every 15 seconds (through a scheduled executor) sends compute the average of
+     * the 8 measurements retrived from the sliding window and send it to the
+     * adminstrator server by creating a POST request.
+     */
+    private class EnableDataSend implements Runnable{
+        @Override
+        public void run() {
+            sendData.set(true);
+        }
+    }
+
     @Override
     public void run() {
         List<Measurement> slidingWindow;
 
-        postRequestClock.start();
+        EnableDataSend enableDataSend = new EnableDataSend();
+        ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
+        executor.scheduleAtFixedRate(enableDataSend, 0, 15, TimeUnit.SECONDS);
 
         while (!Thread.currentThread().isInterrupted()) {
             synchronized (pollutionBuffer) {
@@ -63,23 +90,11 @@ public class LocalStatsThread extends Thread {
                         thisTaxi.getAccomplishedRides(),
                         thisTaxi.getId(),
                         thisTaxi.getBattery());
-                //System.out.println("Send the info to the server"); // debug
+                //System.out.println("Send the info to the server: " + statisticsInfo); // debug
                 postStatistics(statisticsInfo);
                 sendData.set(false);
                 listAvgPollution.clear();
             }
-        }
-    }
-
-    @SuppressWarnings("BusyWait")
-    private void sendEach15sec() {
-        while (!Thread.currentThread().isInterrupted()) {
-            try {
-                Thread.sleep(15000);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-            sendData.set(true);
         }
     }
 

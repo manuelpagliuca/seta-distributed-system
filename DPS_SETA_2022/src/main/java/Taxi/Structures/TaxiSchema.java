@@ -7,17 +7,22 @@ package Taxi.Structures;
 import java.io.Serializable;
 import java.util.ArrayList;
 
+/*
+ * TaxiSchema
+ * ------------------------------------------------------------------------------
+ * This class act as a wrapper for the taxi information and his list of other
+ * taxis.
+ */
 public class TaxiSchema implements Serializable {
     private TaxiInfo taxiInfo;
     private ArrayList<TaxiInfo> taxis = new ArrayList<>();
 
-    public TaxiSchema(){
-
-    }
-
     public TaxiSchema(TaxiInfo thisTaxi, ArrayList<TaxiInfo> otherTaxis) {
         taxiInfo = thisTaxi;
         taxis = otherTaxis;
+    }
+
+    public TaxiSchema(){
     }
 
     public TaxiInfo getTaxiInfo() {

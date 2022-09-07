@@ -8,7 +8,13 @@ import org.example.grpc.IPC;
 
 import java.io.Serializable;
 
-// Class for buffering data regarding Taxi processes
+/*
+ * TaxiInfo
+ * ------------------------------------------------------------------------------
+ * This class contains the all the information of the taxi, the utility is to
+ * implement it as Serializable so that can be used as JSON for sending these
+ * information to the administrator server through REST.
+ */
 public class TaxiInfo implements Serializable {
     private int id = -1;
     private int grpcPort = -1;
@@ -32,6 +38,8 @@ public class TaxiInfo implements Serializable {
         this.battery = info.battery;
         this.administratorServerAddress = info.administratorServerAddress;
         this.wantToRecharge = info.wantToRecharge;
+        this.accomplishedRides = info.accomplishedRides;
+        this.kmTraveled = info.kmTraveled;
     }
 
     public TaxiInfo(int id, int grpcPort, String admServer) {
@@ -59,12 +67,6 @@ public class TaxiInfo implements Serializable {
 
     public TaxiInfo() {
         wantToRecharge = false;
-    }
-
-    @Override
-    public String toString() {
-        return String.format("id=%d, grpc-port=%d, district=%s, position=(%d,%d)",
-                id, grpcPort, district, position[0], position[1]);
     }
 
     public double getBattery() {
@@ -153,5 +155,11 @@ public class TaxiInfo implements Serializable {
 
     public void setWantsToRecharge(boolean wantToRecharge) {
         this.wantToRecharge = wantToRecharge;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("id=%d, grpc-port=%d, district=%s, position=(%d,%d)",
+                id, grpcPort, district, position[0], position[1]);
     }
 }

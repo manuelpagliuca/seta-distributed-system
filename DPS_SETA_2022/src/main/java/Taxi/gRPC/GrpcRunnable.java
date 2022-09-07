@@ -12,13 +12,24 @@ import org.example.grpc.IPCServiceGrpc;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+/* GrpcRunnable
+ * ------------------------------------------------------------------------------
+ * This Runnable class allows the execution of a thread that manages the stream
+ * services (async). You initiate it with the GrpcMessage that you want to deliver
+ * to the gRPC server side, the rest will be done by the class it will extract
+ * the actual IPC structure from the GrpcMessage and send it through the stub, then
+ * it will wait the answer through the appropriate StreamObserver.
+ *
+ * This class got a static field for the ACKs (which you can reset) that you receive
+ * from the streams.
+ */
 public class GrpcRunnable implements Runnable {
     private static final AtomicInteger ackRides = new AtomicInteger(0);
-    private final GrpcMessages grpcMessages;
+    private final GrpcMessage grpcMessages;
     private final IPCServiceGrpc.IPCServiceStub stub;
     private static TaxiInfo t = null;
 
-    public GrpcRunnable(TaxiInfo t, GrpcMessages grpcMessages, IPCServiceGrpc.IPCServiceStub stub) {
+    public GrpcRunnable(TaxiInfo t, GrpcMessage grpcMessages, IPCServiceGrpc.IPCServiceStub stub) {
         GrpcRunnable.t = t;
         this.grpcMessages = grpcMessages;
         this.stub = stub;
@@ -42,7 +53,9 @@ public class GrpcRunnable implements Runnable {
         }*/
     }
 
-    private static StreamObserver<IPC.RechargeProposal> getRechargeProposalStreamObserver(IPCServiceGrpc.IPCServiceStub stub) {
+    // Returns the StreamObserver for the recharge operation.
+    private static StreamObserver<IPC.RechargeProposal> getRechargeProposalStreamObserver(
+            IPCServiceGrpc.IPCServiceStub stub) {
         return stub.coordinateRechargeStream(new StreamObserver<>() {
             @Override
             public void onNext(IPC.ACK value) {
@@ -66,6 +79,7 @@ public class GrpcRunnable implements Runnable {
         });
     }
 
+    // Returns the StreamObserver for the handling of the rides
     private static StreamObserver<IPC.RideCharge> getRideChargeStreamObserver(IPCServiceGrpc.IPCServiceStub stub) {
         return stub.coordinateRideStream(new StreamObserver<>() {
             @Override

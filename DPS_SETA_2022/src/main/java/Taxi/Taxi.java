@@ -26,7 +26,8 @@ import java.util.ArrayList;
 
 import static Misc.Utility.*;
 
-/* Taxi
+/*
+ * Taxi
  * ------------------------------------------------------------------------------
  * This class represents a single taxi process (which in the test will be started
  * several times), it has its own logic clock that advances by a random offset

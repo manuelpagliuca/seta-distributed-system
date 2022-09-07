@@ -14,12 +14,16 @@ import static Taxi.Taxi.removeTaxi;
 
 /*
  * Command Line Interface for receiving user commands
- * --------------------------------------------------------------
- * It is implemented through a thread and always in listening on the
- * standard input for a command.
+ * ------------------------------------------------------------------------------
+ * It is implemented through a thread and always in listening on the standard
+ * input for a command.
  *
- * quit: perform a DELETE request on the administrator server for the
- * removal of this taxi, then quit the process.
+ * quit: perform a DELETE request on the administrator server for the removal of
+ * this taxi, then quit the process.
+ *
+ * info: print the taxi information.
+ *
+ * recharge: trigger the recharge operation (even if battery levels are > 30%)
  */
 public class CLIThread extends Thread {
     final Object availableCLI;
@@ -61,7 +65,6 @@ public class CLIThread extends Thread {
             if (userInput.equalsIgnoreCase("quit") || userInput.equalsIgnoreCase("exit")) {
                 System.out.println("Terminating the execution");
                 try {
-
                     rechargeThreadRef.terminate();
                     removeTaxi();
                 } catch (InterruptedException e) {

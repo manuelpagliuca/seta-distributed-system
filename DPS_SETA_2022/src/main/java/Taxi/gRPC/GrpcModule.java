@@ -163,7 +163,7 @@ public class GrpcModule implements Runnable {
     public int coordinateRechargeGrpcStream() throws InterruptedException {
         IPC.RechargeProposal rechargeProposal = getIPCRechargeProposal();
 
-        GrpcMessages grpcMessages = new GrpcMessages();
+        GrpcMessage grpcMessages = new GrpcMessage();
         grpcMessages.setRechargeProposal(rechargeProposal);
 
         final int receivedACKs = broadcastGrpcStreams(grpcMessages);
@@ -176,7 +176,7 @@ public class GrpcModule implements Runnable {
                                         boolean isRechargeRide) throws InterruptedException {
         IPC.RideCharge rideCharge = getRideCharge(distanceToDestination, destination, isRechargeRide);
 
-        GrpcMessages grpcMessages = new GrpcMessages();
+        GrpcMessage grpcMessages = new GrpcMessage();
         grpcMessages.setRideCharge(rideCharge);
 
         final int receivedACKs = broadcastGrpcStreams(grpcMessages);
@@ -189,7 +189,7 @@ public class GrpcModule implements Runnable {
      * Generalizes the gRPC services that uses streams. i.e. recharge and ride handling.
      * It sends the requests in broadcast (parallel), and returns the collected ACKs.
      */
-    private int broadcastGrpcStreams(GrpcMessages grpcMessages) throws InterruptedException {
+    private int broadcastGrpcStreams(GrpcMessage grpcMessages) throws InterruptedException {
         Thread[] threads = new Thread[otherTaxis.size()];
         int i = 0;
 
