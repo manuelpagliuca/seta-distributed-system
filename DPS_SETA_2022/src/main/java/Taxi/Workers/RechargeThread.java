@@ -94,10 +94,10 @@ public class RechargeThread extends Thread {
         receivedACKs = grpcModule.coordinateRechargeGrpcStream(waitingList);
 
         while (receivedACKs < totalACKs) {
+            System.out.println("The recharge station is busy...");
             synchronized (lock) {
                 lock.wait();
             }
-            System.out.println("The recharge station is busy...");
         }
 
         System.out.println("It is your turn now!");
