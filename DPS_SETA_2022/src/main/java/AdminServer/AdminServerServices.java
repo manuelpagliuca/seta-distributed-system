@@ -143,8 +143,7 @@ public class AdminServerServices {
         if (json.isEmpty()) {
             return Response
                     .status(Response.Status.BAD_REQUEST)
-                    .entity("Bad request or wrong formatting")
-                    .build();
+                    .entity("Bad request or wrong formatting").build();
         }
 
         StatisticsInfo statInfo;
@@ -154,8 +153,14 @@ public class AdminServerServices {
             e.printStackTrace();
             return Response
                     .status(Response.Status.BAD_REQUEST)
-                    .entity("Bad request or wrong formatting")
-                    .build();
+                    .entity("Bad request or wrong formatting").build();
+        }
+
+        // Taxi not present in the system, means that has been removed, so we should quit the process
+        if (!administratorServer.taxiIsPresent(statInfo.getTaxiID())) {
+            return Response
+                    .status(Response.Status.FORBIDDEN)
+                    .entity("This taxi has been removed from the smart city.").build();
         }
 
         administratorServer.addLocalStatistics(statInfo);
@@ -163,8 +168,7 @@ public class AdminServerServices {
         return Response
                 .status(Response.Status.OK)
                 .entity("The local statistics of the taxi " + statInfo.getTaxiID()
-                        + " have been added correctly on the administrator server.")
-                .build();
+                        + " have been added correctly on the administrator server.").build();
     }
 
     /*
@@ -180,16 +184,14 @@ public class AdminServerServices {
         if (!administratorServer.taxiIsPresent(taxiId)) {
             return Response
                     .status(Response.Status.BAD_REQUEST)
-                    .entity("The requested ID is not present in the smart city.")
-                    .build();
+                    .entity("The requested ID is not present in the smart city.").build();
         }
 
         if (administratorServer.getLocalTaxiStats(taxiId).size() < n) {
             return Response
                     .status(Response.Status.BAD_REQUEST)
                     .entity("The quantity of chosen measurements is bigger than the" +
-                            "actual measurements, use a smaller number.")
-                    .build();
+                            "actual measurements, use a smaller number.").build();
         }
 
         AvgStatisticsInfo avgTaxiStats = administratorServer.getAveragesNStats(taxiId, n);
@@ -220,12 +222,10 @@ public class AdminServerServices {
         } else if (allTaxisAvgStats.getTaxiID() == -7777) {
             return Response
                     .status(Response.Status.NOT_FOUND)
-                    .entity("There are no measurements for any taxi in the administrator server.")
-                    .build();
+                    .entity("There are no measurements for any taxi in the administrator server.").build();
         }
         return Response
                 .status(Response.Status.BAD_REQUEST)
-                .entity("The server couldn't perform the computations, some data is missing.")
-                .build();
+                .entity("The server couldn't perform the computations, some data is missing.").build();
     }
 }

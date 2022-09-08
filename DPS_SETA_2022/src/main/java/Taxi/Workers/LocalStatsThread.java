@@ -47,13 +47,14 @@ public class LocalStatsThread extends Thread {
         this.client = client;
     }
 
-    /* Collect the average of the 8 measurements and send to administrator server
+    /*
+     * Collect the average of the 8 measurements and send to administrator server
      * ------------------------------------------------------------------------------
      * Every 15 seconds (through a scheduled executor) sends compute the average of
      * the 8 measurements retrived from the sliding window and send it to the
-     * adminstrator server by creating a POST request.
+     * administrator server by creating a POST request.
      */
-    private class EnableDataSend implements Runnable{
+    private class EnableDataSend implements Runnable {
         @Override
         public void run() {
             sendData.set(true);
@@ -99,8 +100,8 @@ public class LocalStatsThread extends Thread {
     }
 
     private void postStatistics(StatisticsInfo statisticsInfo) {
-        String serverInitInfos = Utility.postRequest(client,
-                ADMIN_SERVER_URL + STAT_PATH, GSON.toJson(statisticsInfo));
+        String serverInitInfos =
+                Utility.postRequest(client, ADMIN_SERVER_URL + STAT_PATH, GSON.toJson(statisticsInfo));
         assert (serverInitInfos != null);
         //System.out.println(serverInitInfos); // debug
     }

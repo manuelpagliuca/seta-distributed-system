@@ -75,7 +75,6 @@ public class CLIThread extends Thread {
                 }
             } else if (userInput.equalsIgnoreCase("info")) {
                 System.out.println(taxi.toString());
-                System.out.println(otherTaxis);
             } else if (userInput.equalsIgnoreCase("recharge")) {
                 if (taxi.isRecharging() || taxi.wantsToRecharge()) {
                     System.out.println("The taxi is already recharging!");

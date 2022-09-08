@@ -4,7 +4,9 @@
  * M.Sc. in Computer Science @UNIMI A.Y. 2021/2022 */
 package Misc;
 
+import Taxi.gRPC.GrpcModule;
 import com.google.gson.Gson;
+
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.client.Invocation;
@@ -23,6 +25,7 @@ import java.util.Random;
 public class Utility {
     private static final Random random = new Random();
     public static Gson GSON = new Gson();
+    private static GrpcModule grpcModule;
 
     Utility() {
     }
@@ -58,6 +61,11 @@ public class Utility {
         Invocation.Builder builder = getBuilder(client, url);
         Response response = builder.post(Entity.json(jsonBody));
         response.bufferEntity();
+
+        if (response.getStatus() == Response.Status.FORBIDDEN.getStatusCode()) {
+            grpcModule.broadcastGoodbyeSync();
+            System.exit(0);
+        }
 
         String responseJson = null;
         try {
@@ -134,5 +142,9 @@ public class Utility {
     // Generate a random long
     public static long generateRndLong(long origin, long bound) {
         return random.nextLong(origin, bound);
+    }
+
+    public static void setGrpcModule(GrpcModule tgrpcModule) {
+        grpcModule = tgrpcModule;
     }
 }

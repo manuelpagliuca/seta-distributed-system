@@ -106,6 +106,7 @@ public class Taxi {
         grpcModule.setTaxiData(taxiSchema, logicalClock);
         grpcModule.startServer();
         grpcModule.broadcastPresentationSync();
+        Utility.setGrpcModule(grpcModule);
 
         // MQTT
         MQTTModule mqttModule = new MQTTModule(taxiSchema, checkBattery, checkRechargeCLI);
@@ -144,7 +145,7 @@ public class Taxi {
         thisTaxi.setGrpcPort(serverData.getGrpcPort());
         thisTaxi.setPosition(serverData.getPosition());
         thisTaxi.setDistrict(serverData.getDistrict());
-        thisTaxi.setBattery(40);
+        thisTaxi.setBattery(100.0D);
         otherTaxis = taxiSchema.getTaxis();
 
         System.out.println(serverData);

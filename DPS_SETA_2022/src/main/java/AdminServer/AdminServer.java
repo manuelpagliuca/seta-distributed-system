@@ -183,9 +183,8 @@ public class AdminServer {
         final int lowerBound = 1;
         final int upperBound = 4;
 
-        // TODO: revert back to original functioning
-        return 2; // for testing gRPC
-        //return rnd.nextInt(lowerBound, upperBound + 1);
+        //return 2; // debug
+        return rnd.nextInt(lowerBound, upperBound + 1);
     }
 
     // Check the presence of a taxi in the smartcity

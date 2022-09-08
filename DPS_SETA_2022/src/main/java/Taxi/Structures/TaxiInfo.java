@@ -159,7 +159,7 @@ public class TaxiInfo implements Serializable {
 
     @Override
     public String toString() {
-        return String.format("id=%d, grpc-port=%d, district=%s, position=(%d,%d)",
-                id, grpcPort, district, position[0], position[1]);
+        return String.format("id=%d, grpc-port=%d, district=%s, position=(%d,%d), battery=%.2f, total rides=%d, total kms= %.2f",
+                id, grpcPort, district, position[0], position[1], battery, accomplishedRides, kmTraveled);
     }
 }
