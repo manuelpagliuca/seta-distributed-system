@@ -110,7 +110,6 @@ public class Taxi {
         // MQTT
         MQTTModule mqttModule = new MQTTModule(taxiSchema, checkBattery, checkRechargeCLI);
         mqttModule.initMQTTConnection();
-
         // TODO: Function for terminating correctly all the threads.
     }
 

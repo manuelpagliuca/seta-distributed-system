@@ -168,7 +168,6 @@ public class GrpcModule implements Runnable {
         grpcMessages.setAckNotify(ackMsg);
 
         multicastGrpcStreams(grpcMessages, waitingList);
-
     }
 
     // Uses the 'broadcastGrpcStreams' for sending broadcast recharging requests
@@ -225,13 +224,15 @@ public class GrpcModule implements Runnable {
         int i = 0;
 
         for (TaxiInfo t : otherTaxis) {
-            if (t.getId() == idNodes.get(i)) {
-                ManagedChannel channel = getManagedChannel(t.getGrpcPort());
-                IPCServiceGrpc.IPCServiceStub stub = IPCServiceGrpc.newStub(channel);
-                threads[i] = new Thread(new GrpcRunnable(t, grpcMessages, stub));
-                threads[i].start();
-                channel.awaitTermination(2, TimeUnit.SECONDS);
-                i++;
+            if (i < idNodes.size()) {
+                if (t.getId() == idNodes.get(i)) {
+                    ManagedChannel channel = getManagedChannel(t.getGrpcPort());
+                    IPCServiceGrpc.IPCServiceStub stub = IPCServiceGrpc.newStub(channel);
+                    threads[i] = new Thread(new GrpcRunnable(t, grpcMessages, stub));
+                    threads[i].start();
+                    channel.awaitTermination(2, TimeUnit.SECONDS);
+                    i++;
+                }
             }
         }
 

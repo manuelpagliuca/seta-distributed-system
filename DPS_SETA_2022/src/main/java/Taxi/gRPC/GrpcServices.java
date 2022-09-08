@@ -97,12 +97,14 @@ public class GrpcServices extends IPCServiceGrpc.IPCServiceImplBase {
                 if (!sameDistrict) {
                     responseObserver.onNext(IPC.ACK.newBuilder().setId(-9999).setVote(true).build());
                     responseObserver.onCompleted();
+                    logicalClock.increment();
                     return;
                 }
 
                 // If the taxi is inside the critical section
                 if (thisTaxi.isRecharging()) {
                     sendNACKAndCompleteStream(responseObserver, IPC.ACK.newBuilder());
+                    logicalClock.increment();
                     return;
                 }
 
@@ -111,28 +113,28 @@ public class GrpcServices extends IPCServiceGrpc.IPCServiceImplBase {
                         if (clientLogicalClock.getLogicalClock() < logicalClock.getLogicalClock()) {
                             responseObserver.onNext(IPC.ACK.newBuilder().setId(thisTaxi.getId()).setVote(true).build());
                             responseObserver.onCompleted();
-                            return;
-                        } else if (clientLogicalClock.getLogicalClock() > logicalClock.getLogicalClock()) {
-                            logicalClock.setLogicalClock(clientLogicalClock.getLogicalClock());
-                            logicalClock.increment();
-                            sendNACKAndCompleteStream(responseObserver, IPC.ACK.newBuilder());
-                            return;
                         } else {
-                            // Enforce Total Order
-                            if (request.getTaxi().getId() < thisTaxi.getId()) {
-                                responseObserver.onNext(IPC.ACK.newBuilder().setId(thisTaxi.getId()).setVote(true).build());
-                                responseObserver.onCompleted();
-                                return;
-                            } else {
+                            if (clientLogicalClock.getLogicalClock() > logicalClock.getLogicalClock()) {
+                                logicalClock.setLogicalClock(clientLogicalClock.getLogicalClock());
                                 sendNACKAndCompleteStream(responseObserver, IPC.ACK.newBuilder());
+                            } else {
+                                // Enforce Total Order
+                                if (request.getTaxi().getId() < thisTaxi.getId()) {
+                                    responseObserver.onNext(IPC.ACK.newBuilder().setId(thisTaxi.getId()).setVote(true).build());
+                                    responseObserver.onCompleted();
+                                } else {
+                                    sendNACKAndCompleteStream(responseObserver, IPC.ACK.newBuilder());
+                                }
                             }
-                            return;
                         }
+                        logicalClock.increment();
+                        return;
                     }
                 }
                 // This taxi is not interested in recharging
                 responseObserver.onNext(IPC.ACK.newBuilder().setId(-9999).setVote(true).build());
                 responseObserver.onCompleted();
+                logicalClock.increment();
             }
 
             private LogicalClock getLogicalClockFromRequest(IPC.RechargeProposal request) {
