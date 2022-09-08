@@ -239,7 +239,7 @@ public class MQTTModule {
         String clientID = MqttClient.generateClientId();
 
         try {
-            mqttClient = new MqttClient(MQTT_BROKER_URL, clientID);
+            mqttClient = new MqttClient(MQTT_BROKER_URL, clientID, null);
         } catch (MqttException e) {
             throw new RuntimeException(e);
         }

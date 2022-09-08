@@ -29,6 +29,9 @@ public class RechargeThread extends Thread {
     private final Object checkBattery;
     private final GrpcModule grpcModule;
     private boolean isRunning = true;
+    private static final Object lock = new Object();
+    private static int receivedACKs = 0;
+    private static final ArrayList<Integer> waitingList = new ArrayList<>();
 
     public RechargeThread(TaxiInfo thisTaxi, ArrayList<TaxiInfo> otherTaxis,
                           Object checkBattery, GrpcModule grpcModule) {
@@ -83,21 +86,17 @@ public class RechargeThread extends Thread {
         thisTaxi.setWantsToRecharge(true);
         System.out.println(
                 "[Critical Battery Level] Moving to the recharge station of district "
-                + thisTaxi.getDistrict());
+                        + thisTaxi.getDistrict());
 
         rideToDistrictRechargeStation();
 
-        int totalACKs = otherTaxis.size();
-        int receivedACKs = 0;
+        final int totalACKs = otherTaxis.size();
+        receivedACKs = grpcModule.coordinateRechargeGrpcStream(waitingList);
 
         while (receivedACKs < totalACKs) {
-            try {
-                receivedACKs = grpcModule.coordinateRechargeGrpcStream();
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
+            synchronized (lock) {
+                lock.wait();
             }
-            GrpcRunnable.resetACKS();
-            totalACKs = otherTaxis.size();
             System.out.println("The recharge station is busy...");
         }
 
@@ -126,6 +125,23 @@ public class RechargeThread extends Thread {
                 thisTaxi.getBattery());
         thisTaxi.setRecharging(false);
         thisTaxi.setWantsToRecharge(false);
+
+        if (!waitingList.isEmpty()) {
+            grpcModule.sendAcksToWaitingTaxis(waitingList);
+            receivedACKs = 0;
+            waitingList.clear();
+        }
+    }
+
+    public static void addWaitingTaxi(Integer id) {
+        waitingList.add(id);
+    }
+
+    public static void incrementAcks() {
+        receivedACKs++;
+        synchronized (lock) {
+            lock.notify();
+        }
     }
 
     /*
@@ -149,10 +165,10 @@ public class RechargeThread extends Thread {
         thisTaxi.setBattery(thisTaxi.getBattery() - totalKm);
         System.out.printf(
                 "I reached the recharge station " +
-                Arrays.toString(rechargeStationPos) +
-                " at district " +
-                thisTaxi.getDistrict() +
-                "and after %,.2f Km the battery levels are %,.2f%%\n", totalKm, thisTaxi.getBattery());
+                        Arrays.toString(rechargeStationPos) +
+                        " at district " +
+                        thisTaxi.getDistrict() +
+                        "and after %,.2f Km the battery levels are %,.2f%%\n", totalKm, thisTaxi.getBattery());
         thisTaxi.setRiding(false);
         thisTaxi.incrementTotalRides();
     }

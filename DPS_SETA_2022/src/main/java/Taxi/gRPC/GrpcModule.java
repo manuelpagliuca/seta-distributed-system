@@ -17,6 +17,7 @@ import org.example.grpc.IPC;
 import org.example.grpc.IPCServiceGrpc;
 
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
@@ -63,7 +64,7 @@ public class GrpcModule implements Runnable {
         if (grpcPort != -1) {
             try {
                 io.grpc.Server server = ServerBuilder.forPort(grpcPort)
-                        .addService(new GrpcServices(new TaxiSchema(thisTaxi, otherTaxis)))
+                        .addService(new GrpcServices(new TaxiSchema(thisTaxi, otherTaxis), taxiLogicalClock))
                         .build();
                 server.start();
                 System.out.println("gRPC server started on port: " + grpcPort);
@@ -159,8 +160,19 @@ public class GrpcModule implements Runnable {
         return ackS;
     }
 
+    //
+    public void sendAcksToWaitingTaxis(ArrayList<Integer> waitingList) throws InterruptedException {
+        IPC.ACK ackMsg = IPC.ACK.newBuilder().setId(thisTaxi.getId()).setVote(true).build();
+
+        GrpcMessage grpcMessages = new GrpcMessage();
+        grpcMessages.setAckNotify(ackMsg);
+
+        multicastGrpcStreams(grpcMessages, waitingList);
+
+    }
+
     // Uses the 'broadcastGrpcStreams' for sending broadcast recharging requests
-    public int coordinateRechargeGrpcStream() throws InterruptedException {
+    public int coordinateRechargeGrpcStream(ArrayList<Integer> waitingList) throws InterruptedException {
         IPC.RechargeProposal rechargeProposal = getIPCRechargeProposal();
 
         GrpcMessage grpcMessages = new GrpcMessage();
@@ -206,6 +218,26 @@ public class GrpcModule implements Runnable {
             t.join();
         }
         return GrpcRunnable.getACKs();
+    }
+
+    private void multicastGrpcStreams(GrpcMessage grpcMessages, ArrayList<Integer> idNodes) throws InterruptedException {
+        Thread[] threads = new Thread[idNodes.size()];
+        int i = 0;
+
+        for (TaxiInfo t : otherTaxis) {
+            if (t.getId() == idNodes.get(i)) {
+                ManagedChannel channel = getManagedChannel(t.getGrpcPort());
+                IPCServiceGrpc.IPCServiceStub stub = IPCServiceGrpc.newStub(channel);
+                threads[i] = new Thread(new GrpcRunnable(t, grpcMessages, stub));
+                threads[i].start();
+                channel.awaitTermination(2, TimeUnit.SECONDS);
+                i++;
+            }
+        }
+
+        for (Thread t : threads) {
+            t.join();
+        }
     }
 
     /// Getters & Setters
@@ -260,17 +292,11 @@ public class GrpcModule implements Runnable {
     }
 
     // Set the taxi info and taxi list
-    public void setTaxiData(TaxiSchema taxiSchema) {
+    public void setTaxiData(TaxiSchema taxiSchema, LogicalClock logicalClock) {
         this.thisTaxi = taxiSchema.getTaxiInfo();
         this.otherTaxis = taxiSchema.getTaxis();
-        grpcServices = new GrpcServices(taxiSchema);
-    }
-
-    // Set the logical clock and the gRPC port of the taxi
-    public void setClockAndPort(LogicalClock logicalClock, int grpcPort) {
-        this.grpcPort = grpcPort;
+        this.grpcPort = thisTaxi.getGrpcPort();
         this.taxiLogicalClock = logicalClock;
-        grpcServices.setClock(logicalClock);
     }
 
     /*

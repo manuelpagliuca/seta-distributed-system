@@ -103,8 +103,7 @@ public class Taxi {
         taxiSchema.setTaxiInfo(thisTaxi);
         taxiSchema.setTaxis(otherTaxis);
 
-        grpcModule.setTaxiData(taxiSchema);
-        grpcModule.setClockAndPort(logicalClock, thisTaxi.getGrpcPort());
+        grpcModule.setTaxiData(taxiSchema, logicalClock);
         grpcModule.startServer();
         grpcModule.broadcastPresentationSync();
 

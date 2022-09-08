@@ -6,6 +6,7 @@ package Taxi.gRPC;
 
 import Taxi.Structures.TaxiInfo;
 
+import Taxi.Workers.RechargeThread;
 import io.grpc.stub.StreamObserver;
 
 import org.example.grpc.IPC;
@@ -47,12 +48,38 @@ public class GrpcRunnable implements Runnable {
             StreamObserver<IPC.RechargeProposal> rechargeStream = getRechargeProposalStreamObserver(stub);
             System.out.println("[Recharge][Send] Proposal to " + t.getId());
             rechargeStream.onNext(grpcMessages.getRechargeProposal());
-        }/*else if (grpcMessages.getInfos() != null) {
+        } else if (grpcMessages.getACKNotify() != null) {
+            StreamObserver<IPC.ACK> ackStreamObserver = getACKNotifyStreamObserver(stub);
+            System.out.println("[ACK-Waiting][Send] Notify to " + t.getId());
+            ackStreamObserver.onNext(grpcMessages.getACKNotify());
+        }
+
+
+        /*else if (grpcMessages.getInfos() != null) {
             // TODO implement infos stream
             StreamObserver<IPC.Infos> clientStream = getInfosStreamObserver(stub);
             System.out.println("[Infos][Send] Infos to " + t.getId());
             clientStream.onNext(grpcMessages.getInfos());
         }*/
+    }
+
+    private StreamObserver<IPC.ACK> getACKNotifyStreamObserver(IPCServiceGrpc.IPCServiceStub stub) {
+        return stub.sendAckToWaitingTaxis(new StreamObserver<>() {
+            @Override
+            public void onNext(IPC.NULL value) {
+                // do nothing
+            }
+
+            @Override
+            public void onError(Throwable t) {
+
+            }
+
+            @Override
+            public void onCompleted() {
+
+            }
+        });
     }
 
     // Returns the StreamObserver for the recharge operation.
@@ -64,6 +91,10 @@ public class GrpcRunnable implements Runnable {
                 if (value.getVote()) {
                     ackRides.incrementAndGet();
                     System.out.println("[Recharge][Receive] ACK from " + t.getId());
+                    if (value.getId() != -9999) {
+                        RechargeThread.addWaitingTaxi(value.getId());
+                        System.out.println("Adding taxi " + value.getId() + " to the waiting list");
+                    }
                 } else {
                     System.out.println("[Recharge][Receive] NACK from " + t.getId());
                 }

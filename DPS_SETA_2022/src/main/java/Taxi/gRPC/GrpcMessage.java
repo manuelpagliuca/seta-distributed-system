@@ -11,6 +11,7 @@ public class GrpcMessage {
     private IPC.RideCharge rideCharge = null;
     private IPC.Infos infos = null;
     private IPC.RechargeProposal rechargeProposal = null;
+    private IPC.ACK ackNotify = null;
 
     public IPC.RideCharge getRideCharge() {
         return rideCharge;
@@ -34,5 +35,13 @@ public class GrpcMessage {
 
     public void setRechargeProposal(IPC.RechargeProposal rechargeProposal) {
         this.rechargeProposal = rechargeProposal;
+    }
+
+    public IPC.ACK getACKNotify() {
+        return ackNotify;
+    }
+
+    public void setAckNotify(IPC.ACK ackNotify) {
+        this.ackNotify = ackNotify;
     }
 }

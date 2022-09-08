@@ -23,7 +23,7 @@ import static Misc.Utility.genTaxiInitialPosition;
 /*
  * The administrator server class manages the taxis (clients)
  * ---------------------------------------------------------------------------------
- * The class is defined as a singleton so that it guarantees a easier and global
+ * The class is defined as a singleton so that it guarantees an easier and global
  * scope access to the same instance inside the project.
  *
  * It manages the taxis of the smartcity, implement the HTTP request from the

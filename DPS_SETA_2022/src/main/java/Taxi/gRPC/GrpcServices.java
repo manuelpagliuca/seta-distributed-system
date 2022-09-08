@@ -6,6 +6,7 @@ import Taxi.Structures.LogicalClock;
 import Taxi.Structures.TaxiInfo;
 import Taxi.Structures.TaxiSchema;
 
+import Taxi.Workers.RechargeThread;
 import io.grpc.stub.StreamObserver;
 
 import org.example.grpc.IPC;
@@ -24,11 +25,12 @@ import static Taxi.Taxi.CLOCK_OFFSET;
 public class GrpcServices extends IPCServiceGrpc.IPCServiceImplBase {
     private final TaxiInfo thisTaxi;
     private final ArrayList<TaxiInfo> otherTaxis;
-    private LogicalClock logicalClock;
+    private final LogicalClock logicalClock;
 
-    public GrpcServices(TaxiSchema taxiSchema) {
+    public GrpcServices(TaxiSchema taxiSchema, LogicalClock logicalClock) {
         this.thisTaxi = taxiSchema.getTaxiInfo();
         this.otherTaxis = taxiSchema.getTaxis();
+        this.logicalClock = logicalClock;
     }
 
     /*
@@ -93,7 +95,8 @@ public class GrpcServices extends IPCServiceGrpc.IPCServiceImplBase {
                 final boolean sameDistrict = thisTaxi.getDistrict() == request.getTaxi().getDistrict();
 
                 if (!sameDistrict) {
-                    sendACKAndCompleteStream(responseObserver, IPC.ACK.newBuilder());
+                    responseObserver.onNext(IPC.ACK.newBuilder().setId(-9999).setVote(true).build());
+                    responseObserver.onCompleted();
                     return;
                 }
 
@@ -106,7 +109,8 @@ public class GrpcServices extends IPCServiceGrpc.IPCServiceImplBase {
                 if (thisTaxi.wantsToRecharge()) {
                     if (!thisTaxi.isRecharging()) {
                         if (clientLogicalClock.getLogicalClock() < logicalClock.getLogicalClock()) {
-                            sendACKAndCompleteStream(responseObserver, IPC.ACK.newBuilder());
+                            responseObserver.onNext(IPC.ACK.newBuilder().setId(thisTaxi.getId()).setVote(true).build());
+                            responseObserver.onCompleted();
                             return;
                         } else if (clientLogicalClock.getLogicalClock() > logicalClock.getLogicalClock()) {
                             logicalClock.setLogicalClock(clientLogicalClock.getLogicalClock());
@@ -116,7 +120,8 @@ public class GrpcServices extends IPCServiceGrpc.IPCServiceImplBase {
                         } else {
                             // Enforce Total Order
                             if (request.getTaxi().getId() < thisTaxi.getId()) {
-                                sendACKAndCompleteStream(responseObserver, IPC.ACK.newBuilder());
+                                responseObserver.onNext(IPC.ACK.newBuilder().setId(thisTaxi.getId()).setVote(true).build());
+                                responseObserver.onCompleted();
                                 return;
                             } else {
                                 sendNACKAndCompleteStream(responseObserver, IPC.ACK.newBuilder());
@@ -126,13 +131,34 @@ public class GrpcServices extends IPCServiceGrpc.IPCServiceImplBase {
                     }
                 }
                 // This taxi is not interested in recharging
-                sendACKAndCompleteStream(responseObserver, IPC.ACK.newBuilder());
+                responseObserver.onNext(IPC.ACK.newBuilder().setId(-9999).setVote(true).build());
+                responseObserver.onCompleted();
             }
 
             private LogicalClock getLogicalClockFromRequest(IPC.RechargeProposal request) {
                 LogicalClock requestLogicalClock = new LogicalClock(CLOCK_OFFSET);
                 requestLogicalClock.setLogicalClock(request.getTaxi().getLogicalClock());
                 return requestLogicalClock;
+            }
+
+            @Override
+            public void onError(Throwable t) {
+
+            }
+
+            @Override
+            public void onCompleted() {
+
+            }
+        };
+    }
+
+    @Override
+    public StreamObserver<IPC.ACK> sendAckToWaitingTaxis(StreamObserver<IPC.NULL> responseObserver) {
+        return new StreamObserver<>() {
+            @Override
+            public void onNext(IPC.ACK value) {
+                RechargeThread.incrementAcks();
             }
 
             @Override
@@ -240,7 +266,4 @@ public class GrpcServices extends IPCServiceGrpc.IPCServiceImplBase {
         responseObserver.onCompleted();
     }
 
-    public void setClock(LogicalClock logicalClock) {
-        this.logicalClock = logicalClock;
-    }
 }

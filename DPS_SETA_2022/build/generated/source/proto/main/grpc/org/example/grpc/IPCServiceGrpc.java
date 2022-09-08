@@ -151,6 +151,37 @@ public final class IPCServiceGrpc {
     return getCoordinateRechargeStreamMethod;
   }
 
+  private static volatile io.grpc.MethodDescriptor<org.example.grpc.IPC.ACK,
+      org.example.grpc.IPC.NULL> getSendAckToWaitingTaxisMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "sendAckToWaitingTaxis",
+      requestType = org.example.grpc.IPC.ACK.class,
+      responseType = org.example.grpc.IPC.NULL.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.BIDI_STREAMING)
+  public static io.grpc.MethodDescriptor<org.example.grpc.IPC.ACK,
+      org.example.grpc.IPC.NULL> getSendAckToWaitingTaxisMethod() {
+    io.grpc.MethodDescriptor<org.example.grpc.IPC.ACK, org.example.grpc.IPC.NULL> getSendAckToWaitingTaxisMethod;
+    if ((getSendAckToWaitingTaxisMethod = IPCServiceGrpc.getSendAckToWaitingTaxisMethod) == null) {
+      synchronized (IPCServiceGrpc.class) {
+        if ((getSendAckToWaitingTaxisMethod = IPCServiceGrpc.getSendAckToWaitingTaxisMethod) == null) {
+          IPCServiceGrpc.getSendAckToWaitingTaxisMethod = getSendAckToWaitingTaxisMethod =
+              io.grpc.MethodDescriptor.<org.example.grpc.IPC.ACK, org.example.grpc.IPC.NULL>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.BIDI_STREAMING)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "sendAckToWaitingTaxis"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.example.grpc.IPC.ACK.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.example.grpc.IPC.NULL.getDefaultInstance()))
+              .setSchemaDescriptor(new IPCServiceMethodDescriptorSupplier("sendAckToWaitingTaxis"))
+              .build();
+        }
+      }
+    }
+    return getSendAckToWaitingTaxisMethod;
+  }
+
   /**
    * Creates a new async stub that supports all call types for the service
    */
@@ -206,6 +237,13 @@ public final class IPCServiceGrpc {
       return asyncUnimplementedStreamingCall(getCoordinateRechargeStreamMethod(), responseObserver);
     }
 
+    /**
+     */
+    public io.grpc.stub.StreamObserver<org.example.grpc.IPC.ACK> sendAckToWaitingTaxis(
+        io.grpc.stub.StreamObserver<org.example.grpc.IPC.NULL> responseObserver) {
+      return asyncUnimplementedStreamingCall(getSendAckToWaitingTaxisMethod(), responseObserver);
+    }
+
     @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
       return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
           .addMethod(
@@ -236,6 +274,13 @@ public final class IPCServiceGrpc {
                 org.example.grpc.IPC.RechargeProposal,
                 org.example.grpc.IPC.ACK>(
                   this, METHODID_COORDINATE_RECHARGE_STREAM)))
+          .addMethod(
+            getSendAckToWaitingTaxisMethod(),
+            asyncBidiStreamingCall(
+              new MethodHandlers<
+                org.example.grpc.IPC.ACK,
+                org.example.grpc.IPC.NULL>(
+                  this, METHODID_SEND_ACK_TO_WAITING_TAXIS)))
           .build();
     }
   }
@@ -288,6 +333,14 @@ public final class IPCServiceGrpc {
         io.grpc.stub.StreamObserver<org.example.grpc.IPC.ACK> responseObserver) {
       return asyncBidiStreamingCall(
           getChannel().newCall(getCoordinateRechargeStreamMethod(), getCallOptions()), responseObserver);
+    }
+
+    /**
+     */
+    public io.grpc.stub.StreamObserver<org.example.grpc.IPC.ACK> sendAckToWaitingTaxis(
+        io.grpc.stub.StreamObserver<org.example.grpc.IPC.NULL> responseObserver) {
+      return asyncBidiStreamingCall(
+          getChannel().newCall(getSendAckToWaitingTaxisMethod(), getCallOptions()), responseObserver);
     }
   }
 
@@ -363,6 +416,7 @@ public final class IPCServiceGrpc {
   private static final int METHODID_GOODBYE = 1;
   private static final int METHODID_COORDINATE_RIDE_STREAM = 2;
   private static final int METHODID_COORDINATE_RECHARGE_STREAM = 3;
+  private static final int METHODID_SEND_ACK_TO_WAITING_TAXIS = 4;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -405,6 +459,9 @@ public final class IPCServiceGrpc {
         case METHODID_COORDINATE_RECHARGE_STREAM:
           return (io.grpc.stub.StreamObserver<Req>) serviceImpl.coordinateRechargeStream(
               (io.grpc.stub.StreamObserver<org.example.grpc.IPC.ACK>) responseObserver);
+        case METHODID_SEND_ACK_TO_WAITING_TAXIS:
+          return (io.grpc.stub.StreamObserver<Req>) serviceImpl.sendAckToWaitingTaxis(
+              (io.grpc.stub.StreamObserver<org.example.grpc.IPC.NULL>) responseObserver);
         default:
           throw new AssertionError();
       }
@@ -460,6 +517,7 @@ public final class IPCServiceGrpc {
               .addMethod(getGoodbyeMethod())
               .addMethod(getCoordinateRideStreamMethod())
               .addMethod(getCoordinateRechargeStreamMethod())
+              .addMethod(getSendAckToWaitingTaxisMethod())
               .build();
         }
       }
