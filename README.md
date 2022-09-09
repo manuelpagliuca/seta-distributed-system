@@ -43,3 +43,49 @@ Once that a node has finished with the recharging operation, it will sends an AC
 ![ra3](diagrams/ricart_agrawala_3.png)
 </center>
 </p>
+
+## Ride election
+<p>
+<center>
+
+![re1](diagrams/ride_election_1.png)
+</center>
+</p>
+
+<p>
+<center>
+
+![re1](diagrams/ride_election_2.png)
+</center>
+</p>
+
+<p>
+<center>
+
+![re1](diagrams/ride_election_3.png)
+</center>
+</p>
+
+<p>
+<center>
+
+![re1](diagrams/ride_election_4.png)
+</center>
+</p>
+
+## Ride recycling
+There is a system that enforces the recycling of runs, each run that is generated on the topics is embedded within the relative queue of the district.
+
+The priority of the queues is based on the order (run ID) of run generation, so older runs will be preferred.347. -[  6]
+
+
+
+
+
+
+<p>
+<center>
+
+![re1](diagrams/ride_recycling.png)
+</center>
+</p>
