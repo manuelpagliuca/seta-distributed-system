@@ -30,7 +30,6 @@ public class CLIThread extends Thread {
     final Object checkRechargeCLI;
     private Thread t;
     private final TaxiInfo taxi;
-    private final ArrayList<TaxiInfo> otherTaxis;
     private final RechargeThread rechargeThreadRef;
 
     public CLIThread(TaxiInfo taxi, ArrayList<TaxiInfo> otherTaxis,
@@ -38,7 +37,6 @@ public class CLIThread extends Thread {
         this.availableCLI = availableCLI;
         this.checkRechargeCLI = checkRechargeCLI;
         this.taxi = taxi;
-        this.otherTaxis = otherTaxis;
         this.rechargeThreadRef = rechargeThread;
     }
 
