@@ -3,6 +3,7 @@
 ![Java](https://img.shields.io/badge/version-v1.0_alpha-blue)
 ![Java](https://img.shields.io/badge/language-Java-brightgreen)
 ![Java](https://img.shields.io/badge/license-MIT-yellow)
+[![Ask Me Anything !](https://img.shields.io/badge/Ask%20me-anything-1abc9c.svg)](mailto:pagliuca.manuel@gmail.com) 
 
 Project for the course of "Distributed and Pervasive Systems" A.A. 2021/2022 for M.Sc.'s in Computer Science.
 
@@ -10,16 +11,16 @@ The goal of the project is to develop SETA (SElf-driving TAxi service), a
 *peer-to-peer* system of self-driving taxis for the citizens of a smart city.
 
 ## Dev Tools & Languages
-Languages :
+### Languages
 * Java SDK 18.0.2
 
-Technologies :
+### Technologies
 * [gRPC](https://grpc.io/)
 * [MQTT](https://mqtt.org/)
 * REST API
 * [Protocol Buffers](https://developers.google.com/protocol-buffers)
 
-Tools :
+### Tools
 * IntelliJ IDEA
 * [draw.io](https://github.com/jgraph/drawio-desktop/releases) for drawing diagrams
 * Git & GitHub as versioning system
@@ -28,7 +29,7 @@ Within this README are different conceptual diagrams that broadly define the gen
 
 These diagrams do not rigidly follow any model as they are simple and extensively commented.
 
-Guidelines :
+### Guidelines
 * Rhombuses correspond to flow controls.
 * Rectangles to of operations/procedures.
 * Green circles are collection points.
