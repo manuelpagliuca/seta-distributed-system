@@ -7,21 +7,21 @@
 
 Project for the course of "Distributed and Pervasive Systems" A.A. 2021/2022 for M.Sc.'s in Computer Science.
 
-The goal of the project is to develop SETA (SElf-driving TAxi service), a
-*peer-to-peer* system of self-driving taxis for the citizens of a smart city.
+The objective of the project is to design and develop SETA (Self-driving TAxi service), a
+Self-driving *peer-to-peer* taxi system for citizens of a smart city. The systems run on a centralized MQTT server which manages the taxis, they are able to communicate with each other via gRPC to ensure access to the resource.
 
 ## Dev Tools & Languages
 ### Languages
-* Java SDK 18.0.2
+* [Java SDK 18.0.2](https://www.oracle.com/java/technologies/javase/jdk18-archive-downloads.html)
 
 ### Technologies
 * [gRPC](https://grpc.io/)
 * [MQTT](https://mqtt.org/)
-* REST API
+* [REST API](https://en.wikipedia.org/wiki/Representational_state_transfer)
 * [Protocol Buffers](https://developers.google.com/protocol-buffers)
 
 ### Tools
-* IntelliJ IDEA
+* [IntelliJ IDEA](https://www.jetbrains.com/idea/download/?section=mac)
 * [draw.io](https://github.com/jgraph/drawio-desktop/releases) for drawing diagrams
 * Git & GitHub as versioning system
 
