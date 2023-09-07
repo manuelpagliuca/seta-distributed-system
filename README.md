@@ -5,7 +5,7 @@
 ![Java](https://img.shields.io/badge/license-MIT-yellow)
 [![Ask Me Anything !](https://img.shields.io/badge/Ask%20me-anything-1abc9c.svg)](mailto:pagliuca.manuel@gmail.com) 
 
-Project for the course of "Distributed and Pervasive Systems" A.A. 2021/2022 for M.Sc.'s in Computer Science.
+Project for the course of "Distributed and Pervasive Systems", A.Y. 2021/2022, M.Sc.'s in Computer Science.
 
 The objective of the project is to design and develop SETA (Self-driving TAxi service), a
 Self-driving *peer-to-peer* taxi system for citizens of a smart city. The systems run on a centralized MQTT server which manages the taxis, they are able to communicate with each other via gRPC to ensure access to the resource.
@@ -149,23 +149,22 @@ The collection and submission of local statistics involves different agents :
 The reading of measurements is done by the Local Stats Thread, the latter though is governed by the operation of the Pollution Buffer's internal data structure.
 
 Once the array of measurements is read, its average is calculated. Then a data structure is created that will contain both this average of measurements and the other local statistics :
-* Total traveled kilometers
-* Battery levels
+* Total traveled ki Battery levels
 * Total accomplished runs
 
-Every fifteen seconds you will be able to send this data structure to the administrator server via POST, to ensure this you use a thread (Enable Data Thread) that sets a boolean (initialized to false) to true.
+Every fifteen seconds you will be able , to send this data structure to the administrator server via POST, to ensure this you use a thread (Enable Data Thread) that sets a boolean (initialized to false) to true.
 
 That boolean variable will be checked by the Local Stats Thread, if true, then the POST request will be executed.
 
 Then the flag will be set to false again, and you will have to wait 15 seconds again for it to be reactivated.
 
 #### Sliding window
-The Pollution Buffer presents a method that is constantly called at an unknown time by the PM10 simulator. The Pollution Buffer internal structure consists of a *sliding window* of 50% of size 8 (each element is a PM10 measurements).
+The Pollution Buffer presents a method that is constantly called at an unknown time by the PM10 simulator. The Pollution Buffer internal structure consists of a *sliding window* of 50% of size 8 (each element is a PM10 measurement).
 
-Once the maximum capacity of our internal data structure is reached, then I can guarantee that it will be read by the Local Stats Thread. The read operation involves a left shift of 50% of the elements (*i.e.,* 4 elements), henceforth the elements added by the PM10 simulator will be allocated starting from the fifth.
+Once the maximum capacity of our internal data structure is reached, then I can guarantee the that it will be read by the Local Stats Thread. The read operation involves a left shift of 50% of the elements (*i.e.,* 4 elements), henceforth the elements added by the PM10 simulator will be allocated starting from the fifth.
 When the last element (the eighth) is added again, then a new reading of the sliding window can be performed again.
 
-In this way the various sliding windows that are read will share four elements, *i.e.,* the sliding window of iteration `t-1` will have the last four elements equal to the first four elements of the sliding window at time `t`.
+In this way the various sliding windows that are read will share four elements, *i.e.,* the sliding window of iteration `t-1` will have the last four elements equal to the first four elements of the sliding window at a time `t`.
 
 <p align="center">
   <img src="diagrams/sliding_window.png">
